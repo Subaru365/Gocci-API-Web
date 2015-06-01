@@ -10,5 +10,6 @@ return array(
 			'username'   => 'root',
 			'password'   => '',
 		),
+		'charset'	=> 'utf8',
 	),
 );
