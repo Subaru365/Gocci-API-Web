@@ -33,4 +33,4 @@ desktop.ini
 /fuel/app/config/crypt.php
 
 # inase Custm
-/fuel/app/config/development/db.php
+/fuel/app/config/development/*
