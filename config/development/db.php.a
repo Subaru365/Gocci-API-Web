@@ -1,0 +1,17 @@
+<?php
+
+return array(
+'default' => array(
+'type' => 'pdo',
+'profiling' => 'true',//開発用設定なのでとりあえずtrue
+'table_prefix' => '',
+//　　　'charset' => 'utf8',
+'connection' => array( //DSNで指定しなくてもOK
+'database' =>'gocci',
+'hostname' => '153.121.43.49',//今回はローカルでやるのでこのままでOK
+'username' => 'root',
+'password' => '',
+),
+),
+);
+
