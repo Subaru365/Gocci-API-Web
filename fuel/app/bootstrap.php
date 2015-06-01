@@ -22,3 +22,11 @@ require COREPATH.'bootstrap.php';
 
 // Initialize the framework with the config file.
 \Fuel::init('config.php');
+/*
+ini_set('default_charset',            Config::get('default_charset'));
+ini_set('default_mimetype',           Config::get('default_mimetype'));
+ini_set('mbstring.language',          Config::get('mbstring.language'));
+ini_set('mbstring.internal_encoding', Config::get('mbstring.internal_encoding'));
+ini_set('mbstring.http_input',        Config::get('mbstring.http_input'));
+ini_set('mbstring.http_output',       Config::get('mbstring.http_output'));
+*/
