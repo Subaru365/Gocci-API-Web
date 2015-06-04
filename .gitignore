@@ -32,5 +32,6 @@ desktop.ini
 /fuel/app/cache/*/*
 /fuel/app/config/crypt.php
 
-#inase Custom
+
+#inase Custm
 /fuel/app/config/development/*
