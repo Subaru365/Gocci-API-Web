@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
 /**
  * rest api
