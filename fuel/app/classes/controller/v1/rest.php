@@ -7,10 +7,16 @@ error_reporting(-1);
  */
 class Controller_V1_Rest extends Controller_Rest
 {
-    // beforeメソッドでログイン認証チェック
-
     // privateにするとエラーになる
     protected $format = 'json';
+
+    // beforeメソッドでログイン認証チェック
+    public function before()
+    {
+	parent::before();
+	// Auth::check
+	// Response::redirect('v1/');
+    }
 
     public function action_index()
     {
