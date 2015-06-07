@@ -2,10 +2,10 @@
 header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
 /**
- * rest api
+ * restpage api
  * 
  */
-class Controller_V1_Rest extends Controller_Rest
+class Controller_V1_Restpage extends Controller_Rest
 {
     // privateにするとエラーになる
     protected $format = 'json';
