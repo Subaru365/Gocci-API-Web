@@ -1,8 +1,8 @@
 <?php
 error_reporting(-1);
 /**
- * restpage api
- *
+ * rest api
+ * 
  */
 class Controller_V1_Rest extends Controller_Rest
 {
