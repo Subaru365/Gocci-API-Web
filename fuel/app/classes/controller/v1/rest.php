@@ -17,7 +17,7 @@ class Controller_V1_Rest extends Controller_Rest
 		$limit = Input::get('limit');
 
 		if (empty($limit)) {
-	    	$limit = 30;
+		    $limit = 30;
 		}
 
         $rest_id = Input::get('rest_id');
@@ -193,8 +193,7 @@ class Controller_V1_Rest extends Controller_Rest
 			$rest_data = $query->execute()->as_array();
 
 			//--debug--//
-			//print_r($rest_data);
-
+			// print_r($rest_data[0]);
 
 			//--------------------------------------------//
 			//店舗に対するcheer数を返すメソッド
@@ -234,11 +233,10 @@ class Controller_V1_Rest extends Controller_Rest
 
 	    	$rest_data['0']['rest_cheer_num'] = $cheer_num;
 	    	$rest_data['0']['want_flag']  	  = $want_flag;
-
-	    	$rows = array("restaurants" => $rest_data);
+	    	$rows = array("restaurants" => $rest_data[0]);
 	    	$rest_data = json_encode($rows , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE );
 	    	echo "$rest_data";
-
+	
 	    	//---------------------------------------------//
 
 	    	for ($i=0; $i < $post_num; $i++) {
