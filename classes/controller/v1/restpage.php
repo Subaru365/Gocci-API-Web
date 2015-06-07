@@ -26,7 +26,6 @@ class Controller_V1_Restpage extends Controller_Rest
 		}
 
         $restname = Input::get('restname');
-=======
 	if (!empty($restname)) {	
 		//echo 'あいうえお';
 //exit();
@@ -85,7 +84,6 @@ exit();
 	    //$query = DB::query('SELECT * FROM users');
 	    //$result = $query->execute()->as_array();
 	    //$result = Model_Tag::find_all();	
->>>>>>> c70060a357ab5879692f1cd7fb3693cbc36ca5c9
             /* 今はサンプルとしてやっているが、本来は
 	       　$result = Model_Restpage::find_all();
 	       　のようにしてModelから取得してくるようにする
@@ -96,6 +94,5 @@ exit();
 	    //echo json_encode( array( 1=>array( 'a' => '6' ),  'a'=>'x'  ) );
 	    //ob_get_clean();
 	}
->>>>>>> c70060a357ab5879692f1cd7fb3693cbc36ca5c9
     }
 }
