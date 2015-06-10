@@ -159,25 +159,11 @@ class Controller_V1_Commentpage extends Controller_Rest
 	    	// "Comments_data"
 	    	//----------------------------------------------//
 
-	    	$query = DB::query(
-	    	"SELECT
-	    	 c.comment_user_id, u.username, u.profile_img,
-	    	 c.comment, c.comment_date
+	    	$data = Model_Comment::get_data($post_id);
 
-	    	 FROM comments as c
+			$comments_data = json_encode($data , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES );
 
-	    	 JOIN users as u
-	    	 ON c.comment_user_id = u.user_id
-
-	    	 WHERE c.comment_post_id = $post_id;"
-	    	);
-
-	    	$comments_data = $query->execute()->as_array();
-
-	    	$rows = array("comments" => $comments_data);
-	    	$comments_data = json_encode($rows , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES );
 	    	echo "$comments_data";
-
 
 	    }
 	}
