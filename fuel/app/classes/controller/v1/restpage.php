@@ -3,7 +3,7 @@ header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
 /**
  * restpage api
- * 
+ *
  */
 class Controller_V1_Restpage extends Controller_Rest
 {
@@ -131,8 +131,9 @@ class Controller_V1_Restpage extends Controller_Rest
 
 
 	    		//----------------------------------------------------//
-	    		//ここもクラス化するべき!?
-	    		//[$post_user_idと$user_idを渡すと、follow_flagが返る]
+	    		//フォローしてるかを判断するメソッド
+	    		//[$user_id,$post_user_id]->($follow_flag)
+	    		//0=フォローしてない。1=フォローなう。
 
 	    		$query = DB::query(
 	    		"SELECT follow_id
@@ -156,8 +157,9 @@ class Controller_V1_Restpage extends Controller_Rest
 
 
 	    		//-----------------------------------------------------//
-	    		//ここもクラス化するべき!?
-	    		//[$post_user_idと$user_idを渡すと、follow_flagが返る]
+	    		//いいねをしてるかを判断するメソッド
+	    		//[$post_user_id,$user_id]->($like_flag)
+				//0=いいねしてない。1=いいねしてる。
 
 	    		$query = DB::query(
 	    		"SELECT like_id
@@ -177,7 +179,7 @@ class Controller_V1_Restpage extends Controller_Rest
 				}
 
 				//--debug--//
-				//echo "$follow_flag[$i]";
+				//echo "$like_flag[$i]";
 	    	}
 
 
@@ -201,8 +203,10 @@ class Controller_V1_Restpage extends Controller_Rest
 			//--debug--//
 			// print_r($rest_data[0]);
 
+
 			//--------------------------------------------//
 			//店舗に対するcheer数を返すメソッド
+			//[rest_id]->($cheer_num)
 
 	    	$query = DB::query(
 	    	"SELECT cheer_flag
@@ -220,6 +224,7 @@ class Controller_V1_Restpage extends Controller_Rest
 
 	    	//---------------------------------------------//
 	    	//店舗に対する行きたいに登録してるかを返すメソッド
+	    	//[$user_id][$rest_id]->($want_flag)
 
 	    	$query = DB::query(
 	    	"SELECT want_flag
@@ -235,15 +240,19 @@ class Controller_V1_Restpage extends Controller_Rest
 	    	//--debug--//
 	    	//print_r($want_flag);
 
+
 	    	//---------------------------------------------//
+	    	//店舗情報吐き出し
 
 	    	$rest_data['0']['rest_cheer_num'] = $cheer_num;
 	    	$rest_data['0']['want_flag']  	  = $want_flag;
 	    	$rows = array("restaurants" => $rest_data[0]);
-	    	$rest_data = json_encode($rows , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE );
+	    	$rest_data = json_encode($rows , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES );
 	    	echo "$rest_data";
-	
+
+
 	    	//---------------------------------------------//
+	    	//投稿情報吐き出し
 
 	    	for ($i=0; $i < $post_num; $i++) {
 	    		$posts[$i]['like_num'] = $like_num[$i];
@@ -253,7 +262,7 @@ class Controller_V1_Restpage extends Controller_Rest
 	    	}
 
 	    	$rows = array("posts" => $posts);
-	    	$post_date = json_encode($rows , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE );
+	    	$post_date = json_encode($rows , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES );
 	    	echo "$post_date";
 	    }
 	}
