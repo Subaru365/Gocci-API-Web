@@ -3,7 +3,7 @@ header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
 /**
  * rest api
- * 
+ *
  */
 class Controller_V1_Rest extends Controller_Rest
 {
@@ -242,7 +242,7 @@ class Controller_V1_Rest extends Controller_Rest
 	    	$rows = array("restaurants" => $rest_data[0]);
 	    	$rest_data = json_encode($rows , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE );
 	    	echo "$rest_data";
-	
+
 	    	//---------------------------------------------//
 
 	    	for ($i=0; $i < $post_num; $i++) {
