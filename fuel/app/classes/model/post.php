@@ -1,6 +1,8 @@
 <?php
 class Model_Post extends Model
 {
+
+
 	public static function get_all()
 	{
 		$query = DB::select(
