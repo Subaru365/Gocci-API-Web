@@ -33,6 +33,7 @@ class Controller_V1_Timeline extends Controller
 
 				$post_id	  = $post_data[$i]['post_id'];
 				$post_user_id = $post_data[$i]['post_user_id'];
+				$post_rest_id = $post_data[$i]['post_rest_id'];
 
 
 	    		$like_num 	  = Model_Like::get_num($post_id);
@@ -40,6 +41,9 @@ class Controller_V1_Timeline extends Controller
 
 	    		$comment_num  = Model_Comment::get_num($post_id);
 	    		$post_data[$i]['comment_num'] = $comment_num;
+
+	    		$want_flag	  = Model_Want::get_flag($user_id, $post_rest_id);
+	    		$post_data[$i]['want_flag']	  = $want_flag;
 
 	    		$follow_flag  = Model_Follow::get_flag($user_id, $post_user_id);
 	    		$post_data[$i]['follow_flag'] = $follow_flag;
