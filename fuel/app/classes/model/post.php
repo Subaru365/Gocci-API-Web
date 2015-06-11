@@ -43,7 +43,7 @@ class Model_Post extends Model
 
 
 
-	public static function get_data($sort_key, $post_id)
+	public static function get_data($sort_key, $sort_id)
 	{
 		if ($sort_key == 'post') {
 			$where_key = 'posts.post_id';
@@ -64,7 +64,7 @@ class Model_Post extends Model
 			'posts.value', 'posts.memo', 'posts.post_date', 'posts.cheer_flag'
 		)->from('posts');
 
-		$query->where("$where_key", "$post_id");
+		$query->where("$where_key", "$sort_id");
 
 		$query->join('restaurants', 'INNER');
 		$query->on('posts.post_rest_id', '=', 'restaurants.rest_id');
