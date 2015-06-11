@@ -13,14 +13,13 @@ class Model_Comment extends Model
 
 
 		//配列[comments]に格納
-		$result = $query->execute()->as_array();
-		$data = array("comments" => $result);
+		$comment_data = $query->execute()->as_array();
 
 
 		//--debug--//
-		//echo "$data";
+		//echo "$comment_data";
 
-		return $data;
+		return $comment_data;
 	}
 
 

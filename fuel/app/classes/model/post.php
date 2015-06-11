@@ -28,14 +28,13 @@ class Model_Post extends Model
 
 
 		//配列[comments]に格納
-		$result = $query->execute()->as_array();
-		$data = array("post" => $result[0]);
+		$post_data = $query->execute()->as_array();
 
 
 		//--debug--//
 		//echo "$data";
 
-		return $data;
+		return $post_data;
 	}
 
 }
