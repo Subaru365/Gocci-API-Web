@@ -6,13 +6,12 @@ error_reporting(-1);
  *
  */
 
-class Controller_V1_Commentpage extends Controller
+class Controller_V1_Timeline extends Controller
 {
 
     public function action_index()
     {
 
-        $post_id = Input::get('post_id');
         $user_id = Input::get('user_id');
 
 
@@ -23,7 +22,7 @@ class Controller_V1_Commentpage extends Controller
 			//--------------------------------------------//
 
 			$sort_key	  = 'post';
-			$post_data 	  = Model_Post::get_data($sort_key, $post_id);
+			$post_data 	  = Model_Post::get_all();
 
 
 	    	$post_user_id = $post_data[0]['post_user_id'];
