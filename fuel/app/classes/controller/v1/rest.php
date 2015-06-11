@@ -5,29 +5,20 @@ error_reporting(-1);
  * rest api
  *
  */
+
 class Controller_V1_Rest extends Controller_Rest
 {
-    // privateにするとエラーになる
-    protected $format = 'json';
-
-    // beforeメソッドでログイン認証チェック
-    public function before()
-    {
-	parent::before();
-	// Auth::check
-	// Response::redirect('v1/');
-    }
 
     public function action_index()
     {
-		$limit = Input::get('limit');
+    	$rest_id = Input::get('rest_id');
+        $user_id = Input::get('user_id');
+		$limit   = Input::get('limit');
 
 		if (empty($limit)) {
 		    $limit = 30;
 		}
 
-        $rest_id = Input::get('rest_id');
-        $user_id = Input::get('user_id');
 
 		if (!empty($rest_id)) {
 

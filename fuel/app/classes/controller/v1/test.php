@@ -1,5 +1,5 @@
 <?php
-header('Content-Type: application/json; charset=UTF-8');
+//header('Content-Type: application/json; charset=UTF-8');
 
 
 class Controller_V1_Test extends Controller
@@ -10,10 +10,15 @@ class Controller_V1_Test extends Controller
 		$post_id = Input::get('post_id');
         $user_id = Input::get('user_id');
 
-		$data = Model_Post::get_data($post_id);
+        $sort_key = 'post';
+		$data     = Model_Test::get_data($sort_key, $post_id);
 
+		echo "$data";
+
+		/*
 		$post_data = json_encode($data , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES );
 	    echo "$post_data";
+	    */
 	}
 
 }
