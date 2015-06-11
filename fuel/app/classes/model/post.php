@@ -2,7 +2,7 @@
 class Model_Post extends Model
 {
 
-	public static function get_all()
+	public static function get_all($limit)
 	{
 		$query = DB::select(
 			'posts.post_id', 'posts.post_user_id', 'users.username',
@@ -24,6 +24,8 @@ class Model_Post extends Model
 
 		$query->join('tags', 'LEFT OUTER');
 		$query->on('posts.post_tag_id', '=', 'tags.tag_id');
+
+		$query->order_by('posts.post_date','desc');
 
 
 		//配列[comments]に格納
@@ -75,6 +77,9 @@ class Model_Post extends Model
 
 		$query->join('tags', 'LEFT OUTER');
 		$query->on('posts.post_tag_id', '=', 'tags.tag_id');
+
+		$query->order_by('posts.post_date','desc');
+
 
 
 		//配列[comments]に格納

@@ -31,21 +31,21 @@ class Controller_V1_Timeline extends Controller
 
 			for ($i=0; $i < $limit; $i++) {
 
-			$post_id	  = $post_data[$i]['post_id'];
-			$post_user_id = $post_data[$i]['post_user_id'];
+				$post_id	  = $post_data[$i]['post_id'];
+				$post_user_id = $post_data[$i]['post_user_id'];
 
 
-	    	$like_num 	  = Model_Like::get_num($post_id);
-	    	$post_data[$i]['like_num']    = $like_num;
+	    		$like_num 	  = Model_Like::get_num($post_id);
+	    		$post_data[$i]['like_num']    = $like_num;
 
-	    	$comment_num  = Model_Comment::get_num($post_id);
-	    	$post_data[$i]['comment_num'] = $comment_num;
+	    		$comment_num  = Model_Comment::get_num($post_id);
+	    		$post_data[$i]['comment_num'] = $comment_num;
 
-	    	$follow_flag  = Model_Follow::get_flag($user_id, $post_user_id);
-	    	$post_data[$i]['follow_flag'] = $follow_flag;
+	    		$follow_flag  = Model_Follow::get_flag($user_id, $post_user_id);
+	    		$post_data[$i]['follow_flag'] = $follow_flag;
 
-	    	$like_flag	  = Model_Like::get_flag($user_id, $post_id);
-	    	$post_data[$i]['like_flag']   = $like_flag;
+	    		$like_flag	  = Model_Like::get_flag($user_id, $post_id);
+	    		$post_data[$i]['like_flag']   = $like_flag;
 
 			}
 
