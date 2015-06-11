@@ -10,10 +10,10 @@ class Controller_V1_Test extends Controller
 		$post_id = Input::get('post_id');
         $user_id = Input::get('user_id');
 
-		$data = Model_Comment::get_data($post_id);
+		$data = Model_Post::get_data($post_id);
 
-		$comments_data = json_encode($data , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES );
-	    echo "$comments_data";
+		$post_data = json_encode($data , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES );
+	    echo "$post_data";
 	}
 
 }

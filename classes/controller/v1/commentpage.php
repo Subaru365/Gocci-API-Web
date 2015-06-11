@@ -8,7 +8,6 @@ error_reporting(-1);
 
 class Controller_V1_Commentpage extends Controller_Rest
 {
-	protected $format = 'json';
 
     public function action_index()
     {
@@ -23,70 +22,19 @@ class Controller_V1_Commentpage extends Controller_Rest
 			//"POST_Data"
 			//--------------------------------------------//
 
-			//[post_id]->($post_data)
-
-	    	$query = DB::query(
-	    	"SELECT
-	    	 p.post_id, p.post_user_id, u.username,
-	    	 u.profile_img, u.cover_img, p.post_rest_id, r.restname,
-			 p.movie, p.thumbnail, p.cheer_flag, p.post_date,
-			 c.category, t.tag, p.value, p.memo
-
-			 FROM posts as p
-
-			 JOIN restaurants as r
-			 ON p.post_rest_id = r.rest_id
-
-			 JOIN users as u
-			 ON p.post_user_id = u.user_id
-
-			 LEFT JOIN categories as c
-			 ON p.post_category_id = c.category_id
-
-			 LEFT JOIN tags as t
-			 ON p.post_tag_id = t.tag_id
-
-			 WHERE p.post_id = $post_id;"
-			);
-
-	    	$post_data = $query->execute()->as_array();
-
-	    	//--debug--//
-		    //print_r($post_data);
+			$data = Model_Post::get_data($post_id);
 
 
 			//-------------------------------------------//
-	    	$post_user_id = $post_data[0]['post_user_id'];
+	    	$post_user_id = $data['post']['post_user_id'];
 	    	//-------------------------------------------//
 
 
-
-	    	//$like_numに各like数を格納
-	    	$query = DB::query(
-	    	"SELECT like_id
-	   		 FROM   likes
-	   		 WHERE  like_post_id = $post_id;"
-	   		);
-
-	    	$num = $query->execute()->as_array();
-	   		$like_num = count($num);
-
-	   		//--debug--//
-	   		//echo "イイね数" . "$like_num[$i]" . "\n";
+	    	$like_num 	  = Model_Like::get_num($post_id);
+	    	$comments_num = Model_Comment::get_num($post_id);
 
 
-	    	//$comment_numに各comment数を格納
-	    	$query = DB::query(
-	    	"SELECT comment_id
-	   		 FROM   comments
-	   		 WHERE  comment_post_id = $post_id;"
-	   		);
 
-	   		$num = $query->execute()->as_array();
-	   		$comment_num = count($num);
-
-	   		//--debug--//
-	   		//echo "コメント数" . "$comment_num[$i]" . "\n";
 
 
 
@@ -143,13 +91,12 @@ class Controller_V1_Commentpage extends Controller_Rest
 			//---------------------------------------------//
 	    	//投稿情報吐き出し
 
-	    	$post_data[0]['like_num']    = $like_num;
-	    	$post_data[0]['comment_num'] = $comment_num;
-	    	$post_data[0]['follow_flag'] = $follow_flag;
-	    	$post_data[0]['like_flag']   = $like_flag;
+	    	$data['post']['like_num']    = $like_num;
+	    	$data['post']['comment_num'] = $comment_num;
+	    	$data['post']['follow_flag'] = $follow_flag;
+	    	$data['post']['like_flag']   = $like_flag;
 
-	    	$rows = array("post" => $post_data[0]);
-	    	$post_data = json_encode($rows , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES );
+	    	$post_data = json_encode($data , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES );
 	    	echo "$post_data";
 
 

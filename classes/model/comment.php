@@ -19,4 +19,19 @@ class Model_Comment extends Model
 		return $data;
 	}
 
+
+
+	public static function get_num($post_id)
+	{
+		//クエリ文
+		$query = DB::select('comment_id')->from('comments');
+		$query->where('comment_post_id', "$post_id");
+
+
+		$result = $query->execute()->as_array();
+	   	$comments_num = count($result);
+
+		return $commenrts_num;
+	}
+
 }
