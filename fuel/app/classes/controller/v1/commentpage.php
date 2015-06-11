@@ -31,35 +31,12 @@ class Controller_V1_Commentpage extends Controller_Rest
 
 
 	    	$like_num 	  = Model_Like::get_num($post_id);
+
 	    	$comments_num = Model_Comment::get_num($post_id);
 
+	    	$follow_flag  = Model_Follow::get_flag($user_id, $post_user_id);
 
 
-
-
-
-	    	//----------------------------------------------------//
-	    	//フォローしてるかを判断するメソッド
-	   		//[$user_id,$post_user_id]->($follow_flag)
-	   		//0=フォローしてない。1=フォローなう。
-
-	    	$query = DB::query(
-	    	"SELECT follow_id
-	    	 FROM   follows
-	   		 WHERE  follow_a_user_id = $user_id
-	   		 AND    follow_p_user_id = $post_user_id;"
-	   		);
-
-			$num = $query->execute()->as_array();
-
-			if ($num == true) {
-				$follow_flag = 1;
-			}else{
-				$follow_flag = 0;
-			}
-
-			//--debug--//
-			//echo "$follow_flag";
 
 
 			//-----------------------------------------------------//
