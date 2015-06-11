@@ -31,6 +31,10 @@ class Model_Post extends Model
 		$result = $query->execute()->as_array();
 		$data = array("post" => $result[0]);
 
+
+		//--debug--//
+		//echo "$data";
+
 		return $data;
 	}
 

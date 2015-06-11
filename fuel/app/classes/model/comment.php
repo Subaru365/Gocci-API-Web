@@ -16,6 +16,10 @@ class Model_Comment extends Model
 		$result = $query->execute()->as_array();
 		$data = array("comments" => $result);
 
+
+		//--debug--//
+		//echo "$data";
+
 		return $data;
 	}
 
@@ -29,9 +33,13 @@ class Model_Comment extends Model
 
 
 		$result = $query->execute()->as_array();
-	   	$comments_num = count($result);
+	   	$comment_num = count($result);
 
-		return $commenrts_num;
+
+	   	//--debug--//
+	   	//echo "$comment_num";
+
+		return $comment_num;
 	}
 
 }

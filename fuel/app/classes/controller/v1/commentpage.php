@@ -32,37 +32,11 @@ class Controller_V1_Commentpage extends Controller_Rest
 
 	    	$like_num 	  = Model_Like::get_num($post_id);
 
-	    	$comments_num = Model_Comment::get_num($post_id);
+	    	$comment_num  = Model_Comment::get_num($post_id);
 
 	    	$follow_flag  = Model_Follow::get_flag($user_id, $post_user_id);
 
-
-
-
-			//-----------------------------------------------------//
-	    	//いいねをしてるかを判断するメソッド
-	    	//[$post_user_id,$user_id]->($like_flag)
-			//0=いいねしてない。1=いいねしてる。
-
-	    	$query = DB::query(
-	    	"SELECT like_id
-	    	 FROM   likes
-	   		 WHERE  like_user_id = $user_id
-	   		 AND    like_post_id = $post_id;"
-	   		);
-
-			$num = $query->execute()->as_array();
-
-			//print_r($num);
-
-			if ($num == true) {
-				$like_flag = 1;
-			}else{
-				$like_flag = 0;
-			}
-
-			//--debug--//
-			//echo "$like_flag[$i]";
+	    	$like_flag	  = Model_Like::get_flag($user_id, $post_id);
 
 
 			//---------------------------------------------//
