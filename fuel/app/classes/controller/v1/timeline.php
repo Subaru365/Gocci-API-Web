@@ -2,7 +2,7 @@
 header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
 /**
- * commentpage api
+ * timeline api
  *
  */
 
@@ -13,51 +13,45 @@ class Controller_V1_Timeline extends Controller
     {
 
         $user_id = Input::get('user_id');
+        $limit 	 = Input::get('limit');
+
+		if (empty($limit)) {
+		    $limit = 30;
+		}
 
 
-		if (!empty($post_id)) {
+		if (!empty($user_id)) {
 
 			//--------------------------------------------//
 			//"POST_Data"
 			//--------------------------------------------//
 
-			$sort_key	  = 'post';
-			$post_data 	  = Model_Post::get_all();
+			$post_data 	  = Model_Post::get_all($limit);
 
 
-	    	$post_user_id = $post_data[0]['post_user_id'];
+			for ($i=0; $i < $limit; $i++) {
+
+			$post_id	  = $post_data[$i]['post_id'];
+			$post_user_id = $post_data[$i]['post_user_id'];
 
 
 	    	$like_num 	  = Model_Like::get_num($post_id);
-	    	$post_data['0']['like_num']    = $like_num;
+	    	$post_data[$i]['like_num']    = $like_num;
 
 	    	$comment_num  = Model_Comment::get_num($post_id);
-	    	$post_data['0']['comment_num'] = $comment_num;
+	    	$post_data[$i]['comment_num'] = $comment_num;
 
 	    	$follow_flag  = Model_Follow::get_flag($user_id, $post_user_id);
-	    	$post_data['0']['follow_flag'] = $follow_flag;
+	    	$post_data[$i]['follow_flag'] = $follow_flag;
 
 	    	$like_flag	  = Model_Like::get_flag($user_id, $post_id);
-	    	$post_data['0']['like_flag']   = $like_flag;
+	    	$post_data[$i]['like_flag']   = $like_flag;
 
+			}
 
-	    	//----------------------------------------------//
-	    	// "Comments_data"
-	    	//----------------------------------------------//
+	    	$timelinepage = json_encode($post_data , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES );
 
-	    	$comment_data = Model_Comment::get_data($post_id);
-
-
-	    	$data = array(
-	    		"post" 		=> $post_data[0],
-	    		"comments" 	=> $comment_data
-	    	);
-
-
-	    	$commentpage = json_encode($data , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES );
-
-	    	echo "$commentpage";
-
+	    	echo "$timelinepage";
 
 	    }
 	}
