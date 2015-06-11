@@ -14,10 +14,10 @@ class Model_Like extends Model
 	   	$like_num = count($result);
 
 	   	//--debug--//
-	   	//echo "$like_num";
+	   	//echo "$likes_num";
 
 
-		return $likes_num;
+		return $like_num;
 	}
 
 
