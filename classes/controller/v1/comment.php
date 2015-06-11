@@ -6,7 +6,7 @@ error_reporting(-1);
  *
  */
 
-class Controller_V1_Commentpage extends Controller
+class Controller_V1_Comment extends Controller
 {
 
     public function action_index()
