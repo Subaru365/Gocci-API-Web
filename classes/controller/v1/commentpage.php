@@ -28,6 +28,11 @@ class Controller_V1_Commentpage extends Controller
 
 	    	$post_user_id = $post_data[0]['post_user_id'];
 
+	    	$follow_flag  = Model_Follow::get_flag($user_id, $post_user_id);
+	    	$post_data['0']['follow_flag'] = $follow_flag;
+
+	    	$like_flag	  = Model_Like::get_flag($user_id, $post_id);
+	    	$post_data['0']['like_flag']   = $like_flag;
 
 	    	$like_num 	  = Model_Like::get_num($post_id);
 	    	$post_data['0']['like_num']    = $like_num;
@@ -35,11 +40,7 @@ class Controller_V1_Commentpage extends Controller
 	    	$comment_num  = Model_Comment::get_num($post_id);
 	    	$post_data['0']['comment_num'] = $comment_num;
 
-	    	$follow_flag  = Model_Follow::get_flag($user_id, $post_user_id);
-	    	$post_data['0']['follow_flag'] = $follow_flag;
 
-	    	$like_flag	  = Model_Like::get_flag($user_id, $post_id);
-	    	$post_data['0']['like_flag']   = $like_flag;
 
 
 	    	//----------------------------------------------//

@@ -2,15 +2,13 @@
 class Model_Post extends Model
 {
 
-
 	public static function get_all()
 	{
 		$query = DB::select(
 			'posts.post_id', 'posts.post_user_id', 'users.username',
-			'users.profile_img', 'users.cover_img', 'posts.post_rest_id',
-			'restaurants.restname', 'posts.movie', 'posts.thumbnail',
-			'posts.cheer_flag', 'posts.post_date', 'categories.category',
-			'tags.tag', 'posts.value', 'posts.memo'
+			'users.profile_img', 'posts.post_rest_id', 'restaurants.restname',
+			'posts.movie', 'posts.thumbnail', 'categories.category', 'tags.tag',
+			'posts.value', 'posts.memo', 'posts.post_date', 'posts.cheer_flag'
 		)->from('posts');
 
 		$query->limit("$limit");
@@ -36,7 +34,6 @@ class Model_Post extends Model
 		//echo "$data";
 
 		return $post_data;
-
 	}
 
 
@@ -60,10 +57,9 @@ class Model_Post extends Model
 		//クエリ文
 		$query = DB::select(
 			'posts.post_id', 'posts.post_user_id', 'users.username',
-			'users.profile_img', 'users.cover_img', 'posts.post_rest_id',
-			'restaurants.restname', 'posts.movie', 'posts.thumbnail',
-			'posts.cheer_flag', 'posts.post_date', 'categories.category',
-			'tags.tag', 'posts.value', 'posts.memo'
+			'users.profile_img', 'posts.post_rest_id', 'restaurants.restname',
+			'posts.movie', 'posts.thumbnail', 'categories.category', 'tags.tag',
+			'posts.value', 'posts.memo', 'posts.post_date', 'posts.cheer_flag'
 		)->from('posts');
 
 		$query->where("$where_key", "$post_id");
@@ -90,5 +86,6 @@ class Model_Post extends Model
 
 		return $post_data;
 	}
+
 
 }
