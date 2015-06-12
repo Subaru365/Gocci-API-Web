@@ -45,6 +45,7 @@ class Model_Post extends Model
 
 		}else{
 			error_log('Model_Post:$sort_keyが不正です。');
+			exit;
 		}
 
 
