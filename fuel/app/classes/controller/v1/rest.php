@@ -43,7 +43,7 @@ class Controller_V1_Rest extends Controller
 			//--------------------------------------------//
 
 			$sort_key  = 'rest';
-			$post_data = Model_Post::get_data($sort_key, $rest_id);
+			$post_data = Model_Post::get_data($sort_key, $rest_id, $limit);
 			$post_num  = count($post_data);
 
 

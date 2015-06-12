@@ -14,6 +14,11 @@ class Controller_V1_Comment extends Controller
 
         $post_id = Input::get('post_id');
         $user_id = Input::get('user_id');
+        $limit   = Input::get('limit');
+
+		if (empty($limit)) {
+		    $limit = 30;
+		}
 
 
 		if (!empty($post_id)) {
@@ -23,7 +28,7 @@ class Controller_V1_Comment extends Controller
 			//--------------------------------------------//
 
 			$sort_key	  = 'post';
-			$post_data 	  = Model_Post::get_data($sort_key, $post_id);
+			$post_data 	  = Model_Post::get_data($sort_key, $post_id, $limit);
 
 
 	    	$post_user_id = $post_data[0]['post_user_id'];
