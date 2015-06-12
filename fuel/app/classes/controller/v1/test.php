@@ -18,13 +18,17 @@ class Controller_V1_Test extends Controller
 			$datetime1 = new DateTime("$post_date[$i]");
 			$datetime2 = new DateTime(date('Y-m-d H:i:s'));
 
-
-
 			$interval = $datetime1->diff($datetime2);
 
 
 			print_r("$post_date[$i]" . "\n");
 			echo $interval->format('%y, %m, %d, %h, %i, %s');
+
+
+			$datetime1 = new DateTime("$post_date[$i]");
+			$datetime2 = new DateTime(date('Y-m-d H:i:s'));
+
+			$interval = $datetime1->diff($datetime2);
 
 			if ($interval->format('%y') > 0) {
 				$date_diff = $interval->format('%y') . '年前';
