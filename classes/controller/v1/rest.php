@@ -83,8 +83,6 @@ class Controller_V1_Rest extends Controller
 
 	    	echo "$restaurantpage";
 
-	    	//echo "$_SERVER['REQUEST_TIME']"
-
 	    }
 	}
 }
