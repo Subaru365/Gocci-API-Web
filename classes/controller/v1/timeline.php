@@ -16,7 +16,7 @@ class Controller_V1_Timeline extends Controller
         $limit 	 = Input::get('limit');
 
 		if (empty($limit)) {
-		    $limit = 30;
+		    $limit = 10;
 		}
 
 
@@ -26,7 +26,8 @@ class Controller_V1_Timeline extends Controller
 			//"POST_Data"
 			//--------------------------------------------//
 
-			$post_data 	  = Model_Post::get_all($limit);
+			$sort_key  = 'all';
+			$post_data = Model_Post::get_data($sort_key, $sort_key, $limit);
 
 
 			for ($i=0; $i < $limit; $i++) {
@@ -54,6 +55,7 @@ class Controller_V1_Timeline extends Controller
 			}
 
 	    	$timelinepage = json_encode($post_data , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES );
+
 
 	    	echo "$timelinepage";
 
