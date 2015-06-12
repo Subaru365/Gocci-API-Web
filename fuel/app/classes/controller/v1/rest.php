@@ -38,6 +38,7 @@ class Controller_V1_Rest extends Controller
 			$rest_data['0']['want_flag']= $want_flag;
 
 
+
 			//--------------------------------------------//
 			//"POST_Data"
 			//--------------------------------------------//
@@ -81,6 +82,8 @@ class Controller_V1_Rest extends Controller
 
 
 	    	echo "$restaurantpage";
+
+	    	//echo "$_SERVER['REQUEST_TIME']"
 
 	    }
 	}
