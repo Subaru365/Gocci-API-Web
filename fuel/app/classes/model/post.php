@@ -2,7 +2,7 @@
 class Model_Post extends Model
 {
 
-	public static function get_data($sort_key, $sort_id, $limit)
+	public static function get_data($user_id, $sort_key, $sort_id, $limit)
 	{
 
 		//クエリ文
@@ -49,16 +49,140 @@ class Model_Post extends Model
 		}
 
 
-
 		//配列[comments]に格納
+
 		$post_data = $query->execute()->as_array();
 
 
-		//--debug--//
-		//echo "$data";
+		$post_num  = count($post_data);
+
+
+		for ($i=0; $i < $post_num; $i++) {
+
+			$post_id	  = $post_data[$i]['post_id'];
+			$post_user_id = $post_data[$i]['post_user_id'];
+			$post_rest_id = $post_data[$i]['post_rest_id'];
+			$post_date 	  = $post_data[$i]['post_date'];
+
+
+	   		$like_num 	  = Model_Like::get_num($post_id);
+	   		$post_data[$i]['like_num']    = $like_num;
+
+	    	$comment_num  = Model_Comment::get_num($post_id);
+	   		$post_data[$i]['comment_num'] = $comment_num;
+
+	    	$want_flag	  = Model_Want::get_flag($user_id, $post_rest_id);
+	    	$post_data[$i]['want_flag']	  = $want_flag;
+
+	    	$follow_flag  = Model_Follow::get_flag($user_id, $post_user_id);
+	    	$post_data[$i]['follow_flag'] = $follow_flag;
+
+	    	$like_flag	  = Model_Like::get_flag($user_id, $post_id);
+	    	$post_data[$i]['like_flag']   = $like_flag;
+
+
+	    	$datetime1 = new DateTime("$post_date");
+			$datetime2 = new DateTime(date('Y-m-d H:i:s'));
+
+			$interval = $datetime1->diff($datetime2);
+
+			if ($interval->format('%y') > 0) {
+				$date_diff = $interval->format('%y') . '年前';
+
+			}elseif ($interval->format('%m') > 0) {
+				$date_diff = $interval->format('%m') . 'ヶ月前';
+
+			}elseif ($interval->format('%d') > 0) {
+				$date_diff = $interval->format('%d') . '日前';
+
+			}elseif ($interval->format('%h') > 0) {
+				$date_diff = $interval->format('%h') . '時間前';
+
+			}elseif ($interval->format('%i') > 0) {
+					$date_diff = $interval->format('%i') . '分前';
+
+			}elseif ($interval->format('%s') > 0) {
+					$date_diff = $interval->format('%s') . '秒前';
+
+			}else{
+				$date_diff = '未来から';
+				error_log('$post_dateの時刻エラー');
+			}
+
+			$post_data[$i]['post_date'] = $date_diff;
+
+		}
 
 		return $post_data;
 	}
+
+	/*
+
+	public static function after($post_data)
+	{
+
+		$post_num  = count($post_data);
+
+
+		for ($i=0; $i < $post_num; $i++) {
+
+			$post_id	  = $post_data[$i]['post_id'];
+			$post_user_id = $post_data[$i]['post_user_id'];
+			$post_rest_id = $post_data[$i]['post_rest_id'];
+			$post_date 	  = $post_data[$i]['post_date'];
+
+
+	   		$like_num 	  = Model_Like::get_num($post_id);
+	   		$post_data[$i]['like_num']    = $like_num;
+
+	    	$comment_num  = Model_Comment::get_num($post_id);
+	   		$post_data[$i]['comment_num'] = $comment_num;
+
+	    	$want_flag	  = Model_Want::get_flag($user_id, $post_rest_id);
+	    	$post_data[$i]['want_flag']	  = $want_flag;
+
+	    	$follow_flag  = Model_Follow::get_flag($user_id, $post_user_id);
+	    	$post_data[$i]['follow_flag'] = $follow_flag;
+
+	    	$like_flag	  = Model_Like::get_flag($user_id, $post_id);
+	    	$post_data[$i]['like_flag']   = $like_flag;
+
+
+	    	$datetime1 = new DateTime("$post_date");
+			$datetime2 = new DateTime(date('Y-m-d H:i:s'));
+
+			$interval = $datetime1->diff($datetime2);
+
+			if ($interval->format('%y') > 0) {
+				$date_diff = $interval->format('%y') . '年前';
+
+			}elseif ($interval->format('%m') > 0) {
+				$date_diff = $interval->format('%m') . 'ヶ月前';
+
+			}elseif ($interval->format('%d') > 0) {
+				$date_diff = $interval->format('%d') . '日前';
+
+			}elseif ($interval->format('%h') > 0) {
+				$date_diff = $interval->format('%h') . '時間前';
+
+			}elseif ($interval->format('%i') > 0) {
+					$date_diff = $interval->format('%i') . '分前';
+
+			}elseif ($interval->format('%s') > 0) {
+					$date_diff = $interval->format('%s') . '秒前';
+
+			}else{
+				$date_diff = '未来から';
+				error_log('$post_dateの時刻エラー');
+			}
+
+			$post_data[$i]['post_date'] = $date_diff;
+
+			return $post_data;
+		}
+
+	}
+	*/
 
 
 }
