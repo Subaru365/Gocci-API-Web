@@ -24,7 +24,5 @@ class Controller_V1_Test extends Controller
 
 	    echo "$restaurantpage";
 
-
-
 	}
 }

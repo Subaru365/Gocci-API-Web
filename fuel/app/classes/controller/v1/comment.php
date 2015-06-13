@@ -12,66 +12,35 @@ class Controller_V1_Comment extends Controller
     public function action_index()
     {
 
+    	$user_id = Input::get('user_id');
         $post_id = Input::get('post_id');
-        $user_id = Input::get('user_id');
-        $limit   = Input::get('limit');
-
-		if (empty($limit)) {
-		    $limit = 30;
-		}
+        $limit   = 1;
 
 
-		if (!empty($post_id)) {
+		//--------------------------------------------//
+		//"POST_Data"
 
-			//--------------------------------------------//
-			//"POST_Data"
-			//--------------------------------------------//
-
-			$sort_key	  = 'post';
-			$post_data 	  = Model_Post::get_data($sort_key, $post_id, $limit);
+		$sort_key  = 'post';
+		$post_data = Model_Post::get_data($user_id, $sort_key, $post_id, $limit);
 
 
-	    	$post_user_id = $post_data[0]['post_user_id'];
-	    	$post_rest_id = $post_data[0]['post_rest_id'];
+	    //----------------------------------------------//
+	    // "Comments_data"
+
+	   	$comment_data = Model_Comment::get_data($post_id);
 
 
-	    	$like_num 	  = Model_Like::get_num($post_id);
-	    	$post_data['0']['like_num']    = $like_num;
-
-	    	$comment_num  = Model_Comment::get_num($post_id);
-	    	$post_data['0']['comment_num'] = $comment_num;
-
-	    	$follow_flag  = Model_Follow::get_flag($user_id, $post_user_id);
-	    	$post_data['0']['follow_flag'] = $follow_flag;
-
-	    	$like_flag	  = Model_Like::get_flag($user_id, $post_id);
-	    	$post_data['0']['like_flag']   = $like_flag;
-
-	    	$want_flag	  = Model_Want::get_flag($user_id, $post_rest_id);
-	    	$post_data['0']['want_flag']	  = $want_flag;
+	   	$data = array(
+	   		"post" 		=> $post_data[0],
+	   		"comments" 	=> $comment_data
+	   	);
 
 
+	   	$commentpage = json_encode($data , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES );
+
+	   	echo "$commentpage";
 
 
-	    	//----------------------------------------------//
-	    	// "Comments_data"
-	    	//----------------------------------------------//
-
-	    	$comment_data = Model_Comment::get_data($post_id);
-
-
-	    	$data = array(
-	    		"post" 		=> $post_data[0],
-	    		"comments" 	=> $comment_data
-	    	);
-
-
-	    	$commentpage = json_encode($data , JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES );
-
-	    	echo "$commentpage";
-
-
-	    }
 	}
 }
 
