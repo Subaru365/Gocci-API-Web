@@ -21,7 +21,6 @@ class Model_Like extends Model
 	}
 
 
-
 	public static function get_flag($user_id, $post_id)
 	{
 		//クエリ文
@@ -44,5 +43,31 @@ class Model_Like extends Model
 
 
 		return $like_flag;
+	}
+
+
+	public static function get_rank($limit)
+	{
+
+		$now_date = date("Y-m-d");
+		$interval = date("Y-m-d",strtotime("-1 month"));
+
+		$query = DB::select('like_post_id')->from('likes');
+		$query->where	('like_date', 'BETWEEN', array("$interval", "$now_date"));
+		$query->group_by('like_post_id');
+		$query->order_by(DB::expr('COUNT(like_id)'), 'desc');
+		$query->limit   ("$limit");
+
+		/*
+		select like_post_id, count(*) as cnt, like_date from likes
+		WHERE like_date BETWEEN '2015-05-13' AND now()
+		group by like_post_id
+		order by count(*) desc
+		limit 10
+		*/
+
+		$result = $query->execute()->as_array();
+		return $result;
+
 	}
 }
