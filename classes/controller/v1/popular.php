@@ -16,11 +16,6 @@ class Controller_V1_Popular extends Controller
         $user_id = Input::get('user_id');
         $limit 	 = Input::get('limit');
 
-		if (empty($limit)) {
-		    $limit = 20;
-		}
-
-
 		//--------------------------------------------//
 		//"POST_Data"
 
