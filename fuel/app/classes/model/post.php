@@ -81,6 +81,11 @@ class Model_Post extends Model
 	    	$like_flag	  = Model_Like::get_flag($user_id, $post_id);
 	    	$post_data[$i]['like_flag']   = $like_flag;
 
+	    	$date_diff 	  = Model_Date::get_data($post_date);
+			$post_data[$i]['post_date']   = $date_diff;
+
+
+	    	/*
 
 	    	//post_date表示形式 変換
 
@@ -111,8 +116,7 @@ class Model_Post extends Model
 				$date_diff = '未来から';
 				error_log('$post_dateの時刻エラー');
 			}
-
-			$post_data[$i]['post_date'] = $date_diff;
+			*/
 
 		}
 
