@@ -30,7 +30,7 @@ class Model_Comment extends Model
 
 			$comment_date = $comment_data[$i]['comment_date'];
 
-			$date_diff 	　= Model_Date::get_data($comment_date);
+			$date_diff    = Model_Date::get_data($comment_date);
 			$comment_data[$i]['comment_date'] = $date_diff;
 
 		}
@@ -46,8 +46,8 @@ class Model_Comment extends Model
 	public static function get_num($post_id)
 	{
 		//クエリ文
-		$query = DB::select('comment_id')->from('comments');
-		$query->where('comment_post_id', "$post_id");
+		$query = DB::select('comment_id')->from('comments')
+		->where('comment_post_id', "$post_id");
 
 
 		$result = $query->execute()->as_array();
