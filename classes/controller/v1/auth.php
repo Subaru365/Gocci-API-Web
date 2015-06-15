@@ -26,16 +26,16 @@ class Controller_V1_Auth extends Controller
     {
 
         $username = Input::get('username');
-        $password = Input::get('pass');
+        $password = Input::get('password');
         $email    = Input::get('email');
         $group    = Input::get('group');
+        $token_id = Input::get('token_id');
 
 
         if (empty($group)) {
             $group = 1;
         }
 
-        //$user_id = Auth::create_user($username, $password, $email, $group);
 
         try
         {
@@ -47,7 +47,15 @@ class Controller_V1_Auth extends Controller
                 {
                     // inform the user
                     //\Messages::success(__('login.new-account-created'));
-                    $status_ary = array('code'=>'200','message' => 'OK');
+
+                    $status_ary = array(
+                        'username'  => "$username",
+                        'picture'   => 'OK',
+                        'background'=> '',
+                        'badge_num' => '0',
+                        'message'   => '作成完了！Gocciへようこそ！'
+                        );
+
                     echo json_encode($status_ary);
 
                     // and go back to the previous page, or show the
@@ -116,6 +124,7 @@ class Controller_V1_Auth extends Controller
 
     public function action_signout()
     {
+        //Model_put_active
         Auth::logout();
     }
 
