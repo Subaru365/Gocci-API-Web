@@ -53,12 +53,14 @@ class Model_Post extends Model
 		$post_data = $query->execute()->as_array();
 		$post_num  = count($post_data);
 
+
+
 		//---------------------------------------------------------------------//
+
+		//付加情報格納(like_num, comment_num, want_flag, follow_flag, like_flag)
 
 
 		for ($i=0; $i < $post_num; $i++) {
-
-			//付加情報格納(like_num, comment_num, want_flag, follow_flag, like_flag)
 
 			$post_id	  = $post_data[$i]['post_id'];
 			$post_user_id = $post_data[$i]['post_user_id'];
