@@ -4,7 +4,7 @@ class Model_Date extends Model
 {
 
 	public static function get_data($date)
-	//TIMESTAMPから現在までの差分を求め格納する
+	//TIMESTAMPから現在までの差分を求める
 	{
 
 		$datetime1 = new DateTime("$date");

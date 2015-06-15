@@ -1,5 +1,5 @@
 <?php
-class Model_Notice extends Model_Crud
+class Model_Notice extends Model
 {
      protected static $_table_name = 'notices';
 
@@ -22,6 +22,21 @@ class Model_Notice extends Model_Crud
 		->where('notices.notice_p_user_id', "$user_id");
 
 		$notice_data = $query->execute()->as_array();
+
+
+
+		$num = count($notice_data);
+
+		for ($i=0; $i < $num; $i++) {
+
+			//日付情報を現在との差分に書き換え
+
+			$notice_date  = $notice_data[$i]['notice_date'];
+
+			$date_diff 	  = Model_Date::get_data($notice_date);
+			$notice_data[$i]['notice_date'] = $date_diff;
+
+		}
 
 		return $notice_data;
      }
