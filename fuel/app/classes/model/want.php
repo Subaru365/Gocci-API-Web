@@ -4,9 +4,9 @@ class Model_Want extends Model
 	public static function get_flag($user_id, $post_rest_id)
 	{
 		//クエリ文
-		$query = DB::select('want_id')->from('wants');
-		$query->where 	  ('want_user_id', "$user_id");
-		$query->and_where ('want_rest_id', "$post_rest_id");
+		$query = DB::select('want_id')->from('wants')
+		->where 	('want_user_id', "$user_id")
+		->and_where ('want_rest_id', "$post_rest_id");
 
 
 		$result = $query->execute()->as_array();
@@ -22,5 +22,18 @@ class Model_Want extends Model
 		//echo "$follow_flag";
 
 		return $want_flag;
+	}
+
+
+	public static function want_num($user_id)
+	{
+		$query = DB::select('want_id')->from('wants')
+		->where('want_user_id', "$user_id");
+
+		$result = $query->execute()->as_array();
+
+
+		$want_num = count($result);
+		return $want_num;
 	}
 }
