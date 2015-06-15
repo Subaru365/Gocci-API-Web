@@ -40,4 +40,15 @@ class Model_Notice extends Model
 
 		return $notice_data;
      }
+
+     public static function reset($user_id)
+     {
+     	$query = DB::update('users')
+
+     	->value('notice_num', '0')
+
+     	->where('user_id', "$user_id");
+
+     	$result = $query->execute();
+     }
 }
