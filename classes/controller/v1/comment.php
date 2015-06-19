@@ -40,7 +40,6 @@ class Controller_V1_Comment extends Controller
 
 	   	echo "$commentpage";
 
-
 	}
 }
 
