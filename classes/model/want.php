@@ -48,14 +48,18 @@ class Model_Want extends Model
 
 		$result = $query->execute()->as_array();
 
+
 		if (!empty($result)) {
+
 			$want_id = $result['want_id'];
 
 			$query = DB::update('wants')
 			->value('want_flag', '1')
-			->where('want_id', '=', "$want_id");
+			->where('want_id', "$want_id");
+
 
 		}else{
+
 			$query = DB::insert('wants')
 			->set(array(
 				'want_user_id' => "$user_id",
@@ -69,14 +73,13 @@ class Model_Want extends Model
 	}
 
 
-
 	//行きたい解除
 	public function post_unwant($user_id, $want_rest_id)
 	{
 		$query = DB::update('wants')
 		->value     ('want_flag', '0')
-		->where     ('want_user_id', '=', "user_id")
-		->and_where ('want_rest_id', '=', "$want_rest_id");
+		->where     ('want_user_id', "$user_id")
+		->and_where ('want_rest_id', "$want_rest_id");
 
 		$result = $query->execute();
 

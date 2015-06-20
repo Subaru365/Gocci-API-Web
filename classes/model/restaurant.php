@@ -20,4 +20,19 @@ class Model_Restaurant extends Model
 		return $rest_data;
 	}
 
+
+	//店舗追加
+	public static function post_add($rest_name, $lat, $lon)
+	{
+		$query = DB::insert('wants')
+			->set(array(
+				'restname' => "$rest_name",
+				'lat' 	   => "$lat",
+				'lon' 	   => "lon"
+			));
+
+		$result = $query->execute();
+
+		return $result;
+	}
 }
