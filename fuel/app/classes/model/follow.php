@@ -3,13 +3,13 @@
 class Model_Follow extends Model
 {
 
-	//フォローしてるかを判断する
-	public static function get_flag($user_id, $post_user_id)
+	//相手のユーザーに対してフォローしてるかフラグで返す
+	public static function get_flag($user_id, $target_user_id)
 	{
 		$query = DB::select('follow_id')->from('follows')
 
 		->where 	('follow_a_user_id', "$user_id")
-		->and_where ('follow_p_user_id', "$post_user_id");
+		->and_where ('follow_p_user_id', "$target_user_id");
 
 		$result = $query->execute()->as_array();
 
@@ -68,7 +68,6 @@ class Model_Follow extends Model
 
 		return $result;
 	}
-
 
 
 	//フォロー解除

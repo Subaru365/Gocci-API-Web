@@ -3,21 +3,27 @@
 class Controller_V1_Post extends Controller
 {
 
-	public function cast($key, $result)
+	public function success($keyword)
 	{
-		if($result){
-			$result = array(
-				'code' 	  => 200,
-				'message' => "$key" . 'しました。'
-			);
-		}else{
-			$result = array(
-				'code'	  => 401,
-				'message' => "$key" . 'できませんでした。'
-			);
-			error_log('Controller_Post_gochi: '
-				. "$post_id" . ' / ' . "$user_id" . "$key" .'に失敗');
-		}
+		$result = array(
+			'code' 	  => 200,
+			'message' => "$keyword" . 'しました。'
+		);
+
+		$status = json_encode(
+			$result,
+			JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+		);
+
+		return $status;
+	}
+
+	public function failed($keyword)
+	{
+		$result = array(
+			'code' 	  => 401,
+			'message' => "$keyword" . 'できませんでした。'
+		);
 
 		$status = json_encode(
 			$result,
@@ -29,19 +35,24 @@ class Controller_V1_Post extends Controller
 
 
 
-
 	public function action_gochi()
 	{
-		$user_id 	   = Input::get('user_id');
-		$gochi_post_id = Input::get('post_id');
+		$user_id = Input::get('user_id');
+		$post_id = Input::get('post_id');
 
-		$result = Model_Like::post_gochi($user_id, $post_id);
+		$keyword = 'gochi!';
 
-		//$status = Response::forge($result);
+		try
+		{
+			$result = Model_Like::post_gochi($user_id, $post_id);
+			$status = Controller_V1_Post::success($keyword);
+		}
 
-		$key = 'gochi!';
-
-		$status = Controller_V1_Post::cast($key, $result);
+		catch(\Database_Exception $e)
+		{
+			$status = Controller_V1_Post::failed($keyword);
+			error_log($e);
+		}
 
 	   	echo "$status";
 	}
@@ -52,11 +63,19 @@ class Controller_V1_Post extends Controller
 		$user_id 		= Input::get('user_id');
 		$follow_user_id = Input::get('target_user_id');
 
-		$result = Model_Follow::post_follow($user_id, $follow_user_id);
+		$keyword = 'フォロー';
 
-		$key = 'フォロー';
+		try
+		{
+			$result = Model_Follow::post_follow($user_id, $follow_user_id);
+			$status = Controller_V1_Post::success($keyword);
+		}
 
-		$status = Controller_V1_Post::cast($key, $result);
+		catch(\Database_Exception $e)
+		{
+			$status = Controller_V1_Post::failed($keyword);
+			error_log($e);
+		}
 
 	   	echo "$status";
 
@@ -67,9 +86,19 @@ class Controller_V1_Post extends Controller
 		$user_id   		  = Input::get('user_id');
 		$unfollow_user_id = Input::get('target_user_id');
 
-		$result = Model_Follow::post_unfollow($user_id, $unfollow_user_id);
+		$keyword = 'フォローを解除';
 
-		$key = 'フォローを解除';
+		try
+		{
+			$result = Model_Follow::post_unfollow($user_id, $unfollow_user_id);
+			$status = Controller_V1_Post::success($keyword);
+		}
+
+		catch(\Database_Exception $e)
+		{
+			$status = Controller_V1_Post::failed($keyword);
+			error_log($e);
+		}
 
 		$status = Controller_V1_Post::cast($key, $result);
 
@@ -79,12 +108,22 @@ class Controller_V1_Post extends Controller
 
 	public function action_want()
 	{
-		$user_id 		= Input::get('user_id');
-		$want_rest_id   = Input::get('rest_id');
+		$user_id = Input::get('user_id');
+		$rest_id = Input::get('rest_id');
 
-		$result = Model_Want::post_want($user_id, $want_rest_id);
+		$keyword = '行きたい店リストに追加';
 
-		$key = '行きたい店リストに追加';
+		try
+		{
+			$result = Model_Want::post_want($user_id, $rest_id);
+			$status = Controller_V1_Post::success($keyword);
+		}
+
+		catch(\Database_Exception $e)
+		{
+			$status = Controller_V1_Post::failed($keyword);
+			error_log($e);
+		}
 
 		$status = Controller_V1_Post::cast($key, $result);
 
@@ -94,12 +133,22 @@ class Controller_V1_Post extends Controller
 
 	public function action_unwant()
 	{
-		$user_id 		= Input::get('user_id');
-		$unwant_rest_id = Input::get('rest_id');
+		$user_id = Input::get('user_id');
+		$rest_id = Input::get('rest_id');
 
-		$result = Model_Want::post_unwant($user_id, $unwant_rest_id);
+		$keyword = '行きたい店リストから解除';
 
-		$key = '行きたい店リストから解除';
+		try
+		{
+			$result = Model_Want::post_unwant($user_id, $rest_id);
+			$status = Controller_V1_Post::success($keyword);
+		}
+
+		catch(\Database_Exception $e)
+		{
+			$status = Controller_V1_Post::failed($keyword);
+			error_log($e);
+		}
 
 		$status = Controller_V1_Post::cast($key, $result);
 
@@ -109,12 +158,22 @@ class Controller_V1_Post extends Controller
 
 	public function action_postblock()
 	{
-		$user_id	   = Input::get('user_id');
-		$block_post_id = Input::get('post_id');
+		$user_id = Input::get('user_id');
+		$post_id = Input::get('post_id');
 
-		$result = Model_Block::post_block($user_id, $block_post_id);
+		$keyword = '投稿を違反報告';
 
-		$key = '投稿を違反報告';
+		try
+		{
+			$result = Model_Block::post_block($user_id, $post_id);
+			$status = Controller_V1_Post::success($keyword);
+		}
+
+		catch(\Database_Exception $e)
+		{
+			$status = Controller_V1_Post::failed($keyword);
+			error_log($e);
+		}
 
 		$status = Controller_V1_Post::cast($key, $result);
 
@@ -124,15 +183,23 @@ class Controller_V1_Post extends Controller
 
 	public function action_restadd()
 	{
-		$user_id	   = Input::get('user_id');
-		$add_rest_name = Input::get('rest_name');
-		$add_lat 	   = Input::get('lat');
-		$add_lon	   = Input::get('lon');
+		$rest_name = Input::get('rest_name');
+		$lat 	   = Input::get('lat');
+		$lon	   = Input::get('lon');
 
-		$result = Model_Rest::post_add(
-			$user_id, $add_rest_name, $add_lat, $add_lon);
+		$keyword = '店舗を追加';
 
-		$key = '店舗を追加';
+		try
+		{
+			$result = Model_Restaurant::post_add($rest_name, $lat, $lon);
+			$status = Controller_V1_Post::success($keyword);
+		}
+
+		catch(\Database_Exception $e)
+		{
+			$status = Controller_V1_Post::failed($keyword);
+			error_log($e);
+		}
 
 		$status = Controller_V1_Post::cast($key, $result);
 
@@ -142,12 +209,22 @@ class Controller_V1_Post extends Controller
 
 	public function action_postdel()
 	{
-		$user_id   	    = Input::get('user_id');
-		$delete_post_id = Input::get('post_id');
+		$user_id = Input::get('user_id');
+		$post_id = Input::get('post_id');
 
-		$result = Model_Post::post_delete($user_id, $delete_post_id);
+		$keyword = '投稿を消去';
 
-		$key = '投稿を消去';
+		try
+		{
+			$result = Model_Post::post_delete($user_id, $post_id);
+			$status = Controller_V1_Post::success($keyword);
+		}
+
+		catch(\Database_Exception $e)
+		{
+			$status = Controller_V1_Post::failed($keyword);
+			error_log($e);
+		}
 
 		$status = Controller_V1_Post::cast($key, $result);
 

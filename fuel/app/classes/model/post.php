@@ -96,6 +96,7 @@ class Model_Post extends Model
 	}
 
 
+	//ユーザーに対する応援数取得
 	public static function cheer_num($user_id)
 	{
 		$query = DB::select('post_id')->from('posts')
@@ -109,6 +110,22 @@ class Model_Post extends Model
 		$cheer_num = count($result);
 		return $cheer_num;
 	}
+
+
+	//投稿を消去
+	public static function post_delete($user_id, $post_id)
+	{
+		$query = DB::update('posts')
+		->set  ('public_flag', '0')
+		->where('post_id', "$post_id");
+
+		$result = $query->execute();
+
+		return $result;
+	}
+
+
+
 
 
 }
