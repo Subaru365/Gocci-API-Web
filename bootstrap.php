@@ -10,6 +10,9 @@ require COREPATH.'bootstrap.php';
 // Register the autoloader
 \Autoloader::register();
 
+// AWS autoloader
+Autoloader::add_namespace('Aws', APPPATH.'vendor/aws/aws-sdk-php/src/Aws', true);
+
 /**
  * Your environment.  Can be set to any of the following:
  *
