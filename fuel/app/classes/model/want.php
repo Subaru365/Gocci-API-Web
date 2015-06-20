@@ -36,4 +36,50 @@ class Model_Want extends Model
 		$want_num = count($result);
 		return $want_num;
 	}
+
+
+	//行きたい登録
+	public function post_want($user_id, $want_rest_id)
+	{
+		$query = DB::select('want_id')->from('wants')
+		->where    ('want_flag', '0')
+		->and_where('want_user_id', "$user_id"),
+		->and_where('want_rest_id', "$want_rest_id");
+
+		$result = $query->execute()->as_array();
+
+		if (!empty($result)) {
+			$want_id = $result['want_id'];
+
+			$query = DB::update('wants')
+			->value('want_flag', '1')
+			->where('want_id', '=', "$want_id");
+
+		}else{
+			$query = DB::insert('wants')
+			->set(array(
+				'want_user_id' => "$user_id",
+				'want_rest_id' => "$want_rest_id"
+			));
+		}
+
+		$result = $query->execute();
+
+		return $result;
+	}
+
+
+
+	//行きたい解除
+	public function post_unwant($user_id, $want_rest_id)
+	{
+		$query = DB::update('wants')
+		->value     ('want_flag', '0')
+		->where     ('want_user_id', '=', "user_id")
+		->and_where ('want_rest_id', '=', "$want_rest_id");
+
+		$result = $query->execute();
+
+		return $result;
+	}
 }
