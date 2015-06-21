@@ -1,39 +1,12 @@
 <?php
+/*
+* POST API
+*　投稿に関するAPIです。
+*　関数名の内容をPOSTします。
+*/
 
 class Controller_V1_Post extends Controller
 {
-
-	public function success($keyword)
-	{
-		$result = array(
-			'code' 	  => 200,
-			'message' => "$keyword" . 'しました。'
-		);
-
-		$status = json_encode(
-			$result,
-			JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
-		);
-
-		return $status;
-	}
-
-	public function failed($keyword)
-	{
-		$result = array(
-			'code' 	  => 401,
-			'message' => "$keyword" . 'できませんでした。'
-		);
-
-		$status = json_encode(
-			$result,
-			JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
-		);
-
-		return $status;
-	}
-
-
 
 	public function action_gochi()
 	{
@@ -55,6 +28,30 @@ class Controller_V1_Post extends Controller
 		}
 
 	   	echo "$status";
+	}
+
+	public function action_comment()
+	{
+		$user_id = Input::get('user_id');
+		$post_id = Input::get('post_id');
+		$comment = Input::get('comment');
+
+		$keyword = 'コメント';
+
+		try
+		{
+			$result = Model_Comment::post_comment($user_id, $post_id, $comment);
+			$status = Controller_V1_Post::success($keyword);
+		}
+
+		catch(\Database_Exception $e)
+		{
+			$status = Controller_V1_Post::failed($keyword);
+			error_log($e);
+		}
+
+	   	echo "$status";
+
 	}
 
 
@@ -100,8 +97,6 @@ class Controller_V1_Post extends Controller
 			error_log($e);
 		}
 
-		$status = Controller_V1_Post::cast($key, $result);
-
 	   	echo "$status";
 
 	}
@@ -124,8 +119,6 @@ class Controller_V1_Post extends Controller
 			$status = Controller_V1_Post::failed($keyword);
 			error_log($e);
 		}
-
-		$status = Controller_V1_Post::cast($key, $result);
 
 	   	echo "$status";
 
@@ -150,8 +143,6 @@ class Controller_V1_Post extends Controller
 			error_log($e);
 		}
 
-		$status = Controller_V1_Post::cast($key, $result);
-
 	   	echo "$status";
 
 	}
@@ -174,8 +165,6 @@ class Controller_V1_Post extends Controller
 			$status = Controller_V1_Post::failed($keyword);
 			error_log($e);
 		}
-
-		$status = Controller_V1_Post::cast($key, $result);
 
 	   	echo "$status";
 
@@ -201,22 +190,19 @@ class Controller_V1_Post extends Controller
 			error_log($e);
 		}
 
-		$status = Controller_V1_Post::cast($key, $result);
-
 	   	echo "$status";
 
 	}
 
 	public function action_postdel()
 	{
-		$user_id = Input::get('user_id');
 		$post_id = Input::get('post_id');
 
 		$keyword = '投稿を消去';
 
 		try
 		{
-			$result = Model_Post::post_delete($user_id, $post_id);
+			$result = Model_Post::post_delete($post_id);
 			$status = Controller_V1_Post::success($keyword);
 		}
 
@@ -226,14 +212,41 @@ class Controller_V1_Post extends Controller
 			error_log($e);
 		}
 
-		$status = Controller_V1_Post::cast($key, $result);
-
 	   	echo "$status";
 
 	}
 
+	//DBデータ入力成功関数
+	public function success($keyword)
+	{
+		$result = array(
+			'code' 	  => 200,
+			'message' => "$keyword" . 'しました。'
+		);
 
+		$status = json_encode(
+			$result,
+			JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+		);
 
+		return $status;
+	}
+
+	//DBデータ入力エラー関数
+	public function failed($keyword)
+	{
+		$result = array(
+			'code' 	  => 401,
+			'message' => "$keyword" . 'できませんでした。'
+		);
+
+		$status = json_encode(
+			$result,
+			JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+		);
+
+		return $status;
+	}
 
 
 }
