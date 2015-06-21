@@ -39,11 +39,11 @@ class Model_Want extends Model
 
 
 	//行きたい登録
-	public function post_want($user_id, $want_rest_id)
+	public static function post_want($user_id, $want_rest_id)
 	{
 		$query = DB::select('want_id')->from('wants')
 		->where    ('want_flag', '0')
-		->and_where('want_user_id', "$user_id"),
+		->and_where('want_user_id', "$user_id")
 		->and_where('want_rest_id', "$want_rest_id");
 
 		$result = $query->execute()->as_array();
@@ -51,7 +51,7 @@ class Model_Want extends Model
 
 		if (!empty($result)) {
 
-			$want_id = $result['want_id'];
+			$want_id = $result[0]['want_id'];
 
 			$query = DB::update('wants')
 			->value('want_flag', '1')
@@ -74,7 +74,7 @@ class Model_Want extends Model
 
 
 	//行きたい解除
-	public function post_unwant($user_id, $want_rest_id)
+	public static function post_unwant($user_id, $want_rest_id)
 	{
 		$query = DB::update('wants')
 		->value     ('want_flag', '0')

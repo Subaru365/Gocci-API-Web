@@ -113,10 +113,10 @@ class Model_Post extends Model
 
 
 	//投稿を消去
-	public static function post_delete($user_id, $post_id)
+	public static function post_delete($post_id)
 	{
 		$query = DB::update('posts')
-		->set  ('public_flag', '0')
+		->set  (array('public_flag' => '0'))
 		->where('post_id', "$post_id");
 
 		$result = $query->execute();

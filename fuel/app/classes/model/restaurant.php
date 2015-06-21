@@ -24,11 +24,11 @@ class Model_Restaurant extends Model
 	//店舗追加
 	public static function post_add($rest_name, $lat, $lon)
 	{
-		$query = DB::insert('wants')
+		$query = DB::insert('restaurants')
 			->set(array(
 				'restname' => "$rest_name",
 				'lat' 	   => "$lat",
-				'lon' 	   => "lon"
+				'lon' 	   => "$lon"
 			));
 
 		$result = $query->execute();

@@ -60,4 +60,19 @@ class Model_Comment extends Model
 		return $comment_num;
 	}
 
+
+	public static function post_comment($user_id, $post_id, $comment)
+	{
+		$query = DB::insert('comments')
+		->set(array(
+			'comment_user_id' => "$user_id",
+			'comment_post_id' => "$post_id",
+			'comment' 	      => "$comment"
+		));
+
+		$result = $query->execute();
+
+		return $result;
+	}
+
 }

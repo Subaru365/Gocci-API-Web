@@ -56,7 +56,7 @@ class Model_Follow extends Model
 
 
 	//フォロー登録
-	public function post_follow($user_id, $target_user_id)
+	public static function post_follow($user_id, $target_user_id)
 	{
 		$query = DB::insert('follows')
 		->set(array(
@@ -71,11 +71,11 @@ class Model_Follow extends Model
 
 
 	//フォロー解除
-	public function post_unfollow($user_id, $target_user_id)
+	public static function post_unfollow($user_id, $target_user_id)
 	{
 		$query = DB::delete('follows')
-		->whwre     ('follow_a_user_id', '=', "$user_id")
-		->and_where ('follow_p_user_id', '=', "$target_user_id");
+		->where     ('follow_a_user_id', "$user_id")
+		->and_where ('follow_p_user_id', "$target_user_id");
 
 		$result = $query->execute();
 
