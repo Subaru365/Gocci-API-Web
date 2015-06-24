@@ -2,6 +2,11 @@
 // Bootstrap the framework DO NOT edit this
 require COREPATH.'bootstrap.php';
 
+Autoloader::add_namespace(
+	'Aws', APPPATH.'vendor/aws/aws-sdk-php/src/Aws', true
+);
+
+
 \Autoloader::add_classes(array(
 	// Add classes you want to override here
 	// Example: 'View' => APPPATH.'classes/view.php',
@@ -30,3 +35,4 @@ ini_set('mbstring.internal_encoding', Config::get('mbstring.internal_encoding'))
 ini_set('mbstring.http_input',        Config::get('mbstring.http_input'));
 ini_set('mbstring.http_output',       Config::get('mbstring.http_output'));
 */
+

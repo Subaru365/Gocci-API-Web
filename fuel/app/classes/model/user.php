@@ -2,8 +2,6 @@
 
 class Model_User extends Model
 {
-    protected static $_table_name = 'users';
-
 
     public static function get_data($user_id, $target_user_id)
     {
@@ -41,17 +39,43 @@ class Model_User extends Model
     }
 
 
-
-    public static function put_data()
+    public static function post_guest($username, $os, $model, $token)
     {
+
+        $query = DB::insert('users')
+        ->set(array(
+            'username'    => "$username",
+            'profile_img' => 'https://s3-ap-northeast-1.amazonaws.com/gocci.master/imgs/tosty_1.png'
+        ))
+        ->execute();
+
+
+        $query = DB::select('user_id')->from('users')
+        ->order_by('user_id', 'desc')
+        ->limit   ('1');
+
+        $user_id = $query->execute()->as_array();
+
+
+        $query = DB::insert('devices')
+        ->set(array(
+            'device_user_id' => "$user_id"
+            'os'             => "$os",
+            'model'          => "$model",
+            'register_id'    => "$token"
+        ));
+
+
+
 
     }
 
 
 
+/*
     public static function get_auth($username)
     {
-    	$status_ary = array(
+        $status_ary = array(
                         'username'  => "$username",
                         'picture'   => 'OK',
                         'background'=> '',
@@ -59,4 +83,22 @@ class Model_User extends Model
                         'message'   => '作成完了！Gocciへようこそ！'
                         );
     }
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
