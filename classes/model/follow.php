@@ -3,13 +3,13 @@
 class Model_Follow extends Model
 {
 
-	public static function get_flag($user_id, $post_user_id)
-	//フォローしてるかを判断する
+	//相手のユーザーに対してフォローしてるかフラグで返す
+	public static function get_flag($user_id, $target_user_id)
 	{
 		$query = DB::select('follow_id')->from('follows')
 
 		->where 	('follow_a_user_id', "$user_id")
-		->and_where ('follow_p_user_id', "$post_user_id");
+		->and_where ('follow_p_user_id', "$target_user_id");
 
 		$result = $query->execute()->as_array();
 
@@ -20,7 +20,6 @@ class Model_Follow extends Model
 			$follow_flag = 0;
 		}
 
-
 		//--debug--//
 		//echo "$follow_flag";
 
@@ -28,8 +27,8 @@ class Model_Follow extends Model
 	}
 
 
-	public static function follow_num($user_id)
 	//フォロー数を返す
+	public static function follow_num($user_id)
 	{
 		$query = DB::select('follow_id')->from('follows')
 		->where	('follow_a_user_id', "$user_id");
@@ -42,8 +41,8 @@ class Model_Follow extends Model
 	}
 
 
-	public static function follower_num($user_id)
 	//フォロワー数を返す
+	public static function follower_num($user_id)
 	{
 		$query = DB::select('follow_id')->from('follows')
 		->where ('follow_p_user_id', "$user_id");
@@ -54,4 +53,44 @@ class Model_Follow extends Model
 		$follower_num = count($result);
 		return $follower_num;
 	}
+
+
+	//フォロー登録
+	public static function post_follow($user_id, $target_user_id)
+	{
+		$query = DB::insert('follows')
+		->set(array(
+			'follow_a_user_id' => "$user_id",
+			'follow_p_user_id' => "$target_user_id"
+		));
+
+		$result = $query->execute();
+
+		return $result;
+	}
+
+
+	//フォロー解除
+	public static function post_unfollow($user_id, $target_user_id)
+	{
+		$query = DB::delete('follows')
+		->where     ('follow_a_user_id', "$user_id")
+		->and_where ('follow_p_user_id', "$target_user_id");
+
+		$result = $query->execute();
+
+		return $result;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
 }

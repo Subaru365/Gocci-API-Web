@@ -57,17 +57,13 @@ class Controller_V1_Auth extends Controller
                         );
 
                     echo json_encode($status_ary);
-
-                    // and go back to the previous page, or show the
-                    // application dashboard if we don't have any
-                    // \Response::redirect_back('dashboard');
                 }
                 else
                 {
                     // oops, creating a new user failed?
                     \Messages::error(__('login.account-creation-failed'));
                 }
-            }
+        }
 
             // catch exceptions from the create_user() call
             catch (\SimpleUserUpdateException $e)
@@ -86,25 +82,25 @@ class Controller_V1_Auth extends Controller
                 {
                     //\Messages::error(__('login.username-already-exists'));
                     $status_ary = array('code'=>'403','message' => 'username exists');
-                    echo json_encode($status_ary);
-                }
-
-                // this can't happen, but you'll never know...
-                else
-                {
-                    //\Messages::error($e->getMessage());
-                    echo "データ形式おかしいんじゃないの!？";
-                }
+                echo json_encode($status_ary);
             }
 
-
-        /*if(Auth::create_user($username, $password, $email, $group) == false){
-
-            echo "登録失敗";
+            // this can't happen, but you'll never know...
+            else
+            {
+                //\Messages::error($e->getMessage());
+                echo "データ形式おかしいんじゃないの!？";
+            }
         }
-*/
 
     }
+
+
+    public function action_sns()
+    {
+        $identity_id = Input::get('id');
+    }
+
 
 
     public function action_signin()
