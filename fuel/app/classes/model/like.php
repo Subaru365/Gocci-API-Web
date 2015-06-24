@@ -3,31 +3,28 @@
 class Model_Like extends Model
 {
 
+	//１投稿対するgochi数を求める
 	public static function get_num($post_id)
 	{
-		//クエリ文
-		$query = DB::select('like_id')->from('likes');
-		$query->where('like_post_id', "$post_id");
 
+		$query = DB::select('like_id')->from('likes')
+		->where　('like_post_id', "$post_id");
 
-		$result = $query->execute()->as_array();
+		$result   = $query->execute()->as_array();
 	   	$like_num = count($result);
-
-	   	//--debug--//
-	   	//echo "$likes_num";
-
 
 		return $like_num;
 	}
 
 
+
+	//１投稿に対し自分がgochiしているかを求める
 	public static function get_flag($user_id, $post_id)
 	{
-		//クエリ文
-		$query = DB::select('like_id')->from('likes');
-		$query->where	 ('like_user_id', "$user_id");
-		$query->and_where('like_post_id', "$post_id");
 
+		$query = DB::select('like_id')->from('likes')
+		->where 	 ('like_user_id', "$user_id")
+		->and_where　('like_post_id', "$post_id");
 
 		$result = $query->execute()->as_array();
 
@@ -38,36 +35,62 @@ class Model_Like extends Model
 			$like_flag = 0;
 		}
 
-		//--debug--//
-		//echo "$like_flag";
-
-
 		return $like_flag;
 	}
 
 
+
+	//gochi順に投稿を格納する
 	public static function get_rank($limit)
 	{
-
+		//対象となる投稿の期間($interval)
 		$now_date = date("Y-m-d");
 		$interval = date("Y-m-d",strtotime("-1 month"));
 
-		$query = DB::select('like_post_id')->from('likes');
-		$query->where	('like_date', 'BETWEEN', array("$interval", "$now_date"));
-		$query->group_by('like_post_id');
-		$query->order_by(DB::expr('COUNT(like_id)'), 'desc');
-		$query->limit   ("$limit");
 
-		/*
-		select like_post_id, count(*) as cnt, like_date from likes
-		WHERE like_date BETWEEN '2015-05-13' AND now()
-		group by like_post_id
-		order by count(*) desc
-		limit 10
-		*/
+		$query = DB::select('like_post_id')->from('likes')
+		->where	   ('like_date', 'BETWEEN', array("$interval", "$now_date"))
+		->group_by ('like_post_id')
+		->order_by (DB::expr('COUNT(like_id)'), 'desc')
+		->limit    ("$limit");
 
 		$result = $query->execute()->as_array();
+
 		return $result;
 
 	}
+
+
+
+
+	public static function post_gochi($user_id, $post_id)
+	{
+
+		$query = DB::insert('likes')
+		->set(array(
+			'like_user_id' => "$user_id",
+			'like_post_id' => "$post_id"
+		));
+
+		$result = $query->execute();
+
+		return $result;
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
