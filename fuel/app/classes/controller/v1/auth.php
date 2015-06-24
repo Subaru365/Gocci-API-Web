@@ -57,10 +57,6 @@ class Controller_V1_Auth extends Controller
                         );
 
                     echo json_encode($status_ary);
-
-                    // and go back to the previous page, or show the
-                    // application dashboard if we don't have any
-                    // \Response::redirect_back('dashboard');
                 }
                 else
                 {
@@ -99,6 +95,11 @@ class Controller_V1_Auth extends Controller
 
     }
 
+
+    public function action_sns()
+    {
+        $identity_id = Input::get('id');
+    }
 
 
 
