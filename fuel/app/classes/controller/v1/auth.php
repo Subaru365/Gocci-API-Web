@@ -102,14 +102,14 @@ class Controller_V1_Auth extends Controller
     {
         $keyword     = 'SNS';
         $user_id     = Model_User::get_id();
+        $identity_id = Input::get('identity_id');
+        $profile_img = Input::get('profile_img');
 
         $user_data   = Model_Cognito::get_data($identity_id);
-        $username    = $user_data[0];
+        $model       = $user_data[0];
         $os          = $user_data[1];
-        $model       = $user_data[2];
-        $register_id = $user_data[3];
-
-        $identity_id = Input::get('identity_id');
+        $register_id = $user_data[2];
+        $username    = $user_data[3];
 
 
         $status = Controller_V1_Auth::first_dataset(
@@ -126,7 +126,6 @@ class Controller_V1_Auth extends Controller
     {
         $keyword     = "Guest";
         $user_id     = Model_User::get_id();
-        //$user_id     = '1001';
 
         $username    = Input::get('username');
         $profile_img = 'none';
