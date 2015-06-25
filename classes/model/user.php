@@ -13,8 +13,9 @@ class Model_User extends Model
         $result = $query->execute()->as_array();
 
         $user_id = $result[0]['user_id'];
+        $user_id++;
 
-        return $user_id++;
+        return $user_id;
     }
 
 
@@ -79,7 +80,8 @@ class Model_User extends Model
             'os'             => "$os",
             'model'          => "$model",
             'register_id'    => "$register_id"
-        ));
+        ))
+        ->execute();
 
         return $profile_img;
 
