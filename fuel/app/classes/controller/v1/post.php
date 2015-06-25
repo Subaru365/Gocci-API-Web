@@ -7,7 +7,6 @@
 
 class Controller_V1_Post extends Controller
 {
-
 	public function action_gochi()
 	{
 		$user_id = Input::get('user_id');

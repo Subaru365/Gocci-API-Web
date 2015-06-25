@@ -3,6 +3,22 @@
 class Model_User extends Model
 {
 
+    //最新レコードの次のuser_idを取得
+    public static function get_id()
+    {
+        $query = DB::select('user_id')->from('users')
+        ->order_by('user_id', 'desc')
+        ->limit   ('1');
+
+        $result = $query->execute()->as_array();
+
+        $user_id = $result[0]['user_id'];
+
+        return $user_id++;
+    }
+
+
+
     public static function get_data($user_id, $target_user_id)
     {
         //クエリ文
@@ -39,66 +55,34 @@ class Model_User extends Model
     }
 
 
-    public static function post_guest($username, $os, $model, $token)
+    //ユーザー登録
+    public static function post_data(
+        $user_id, $username, $profile_img, $os, $model, $register_id, $identity_id)
     {
+
+        if ($profile_img == 'none') {
+        $profile_img = 'https://s3-us-west-2.amazonaws.com/gocci.img.provider/tosty_' . mt_rand(1, 7) . '.png';
+        }
 
         $query = DB::insert('users')
         ->set(array(
             'username'    => "$username",
-            'profile_img' => 'https://s3-ap-northeast-1.amazonaws.com/gocci.master/imgs/tosty_1.png'
+            'profile_img' => "$profile_img",
+            'identity_id' => "$identity_id"
         ))
         ->execute();
 
 
-        $query = DB::select('user_id')->from('users')
-        ->order_by('user_id', 'desc')
-        ->limit   ('1');
-
-        $user_id = $query->execute()->as_array();
-
-
         $query = DB::insert('devices')
         ->set(array(
-            'device_user_id' => "$user_id"
+            'device_user_id' => "$user_id",
             'os'             => "$os",
             'model'          => "$model",
-            'register_id'    => "$token"
+            'register_id'    => "$register_id"
         ));
 
-
-
+        return $profile_img;
 
     }
-
-
-
-/*
-    public static function get_auth($username)
-    {
-        $status_ary = array(
-                        'username'  => "$username",
-                        'picture'   => 'OK',
-                        'background'=> '',
-                        'badge_num' => '0',
-                        'message'   => '作成完了！Gocciへようこそ！'
-                        );
-    }
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }

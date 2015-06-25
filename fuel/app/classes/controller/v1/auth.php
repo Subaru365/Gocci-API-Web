@@ -10,8 +10,8 @@ error_reporting(-1);
 
 class Controller_V1_Auth extends Controller
 {
-    /*
 
+/*
     public function action_before()
     {
         if(!Auth::check())
@@ -19,9 +19,9 @@ class Controller_V1_Auth extends Controller
             echo "ログインしましょうね〜(*^^)v";
         }
     }
+*/
 
-    */
-
+    /*
     public function action_signup()
     {
 
@@ -95,33 +95,166 @@ class Controller_V1_Auth extends Controller
 
     }
 
+    */
 
+    //SNSサインイン
     public function action_sns()
     {
-        $identity_id = Input::get('id');
+        $keyword     = 'SNS';
+        $user_id     = Model_User::get_id();
+
+        $user_data   = Model_Cognito::get_data($identity_id);
+        $username    = $user_data[0];
+        $os          = $user_data[1];
+        $model       = $user_data[2];
+        $register_id = $user_data[3];
+
+        $identity_id = Input::get('identity_id');
+
+
+        $status = Controller_V1_Auth::first_dataset(
+            $keyword, $user_id, $username, $profile_img,
+            $os, $model, $register_id, $identity_id);
+
+
+        echo "$status";
     }
 
 
-
-    public function action_signin()
+    //Guestサインイン
+    public function action_guest()
     {
-        $username = Input::get('username');
-        $password = Input::get('pass');
+        $keyword     = "Guest";
+        $user_id     = Model_User::get_id();
+        //$user_id     = '1001';
 
-        if (Auth::login($username, $password)) {
-            echo "Success!";
-            //$user_id = Model_Post::get_data($username);
+        $username    = Input::get('username');
+        $profile_img = 'none';
+        $os          = Input::get('os');
+        $model       = Input::get('model');
+        $register_id = Input::get('register_id');
 
-        }else{
-            echo "ログインできません。";
-        }
+        $identity_id = Model_Cognito::post_data(
+            $user_id, $username, $os, $model, $register_id);
+
+
+        $status = Controller_V1_Auth::first_dataset(
+            $keyword, $user_id, $username, $profile_img,
+            $os, $model, $register_id, $identity_id);
+
+
+        echo "$status";
     }
 
 
-    public function action_signout()
+    public function action_login()
+    {
+        $identity_id = Input::get('identity_id');
+
+
+    }
+
+
+    public function action_logout()
     {
         //Model_put_active
-        Auth::logout();
+    }
+
+
+    //初回データ格納関数 (RDS, SNS)
+    private static function first_dataset(
+        $keyword, $user_id, $username, $profile_img,
+        $os, $model, $register_id, $identity_id)
+    {
+
+        $badge_num = 0;
+
+        try
+        {
+            //データベースにユーザー情報を登録
+            $profile_img = Model_User::post_data(
+                $user_id, $username, $profile_img,
+                $os, $model, $register_id, $identity_id);
+
+
+            //AWS SNSに端末を登録
+            $os = explode('_', $os);
+
+            if ($os[0] == 'android') {
+                $sns = Model_Sns::post_android(
+                    $user_id, $identity_id, $register_id);
+            }
+            elseif ($os[0] == 'iOS') {
+                $sns = Model_Sns::post_iOS(
+                    $user_id, $identity_id, $register_id);
+            }
+            else{
+                //Webかな？ 何もしない。
+            }
+
+            //success出力へ
+            $status = Controller_V1_Auth::success($keyword,
+                $user_id, $username, $profile_img, $identity_id, $badge_num);
+        }
+
+
+        //データベース登録エラー
+        catch(\Database_Exception $e)
+        {
+            //failed出力へ
+            $status = Controller_V1_Auth::failed(
+                $keyword, $username, $profile_img, $identity_id, $badge_num);
+
+            error_log($e);
+        }
+
+        return $status;
+    }
+
+
+    //DBデータ入力成功
+    private static function success($keyword,
+        $user_id, $username, $profile_img, $identity_id, $badge_num)
+    {
+        $result = array(
+            'code'        => 200,
+            'username'    => "$username",
+            'profile_img' => "$profile_img",
+            'identity_id' => "$identity_id",
+            'badge_num'   => "$badge_num",
+            'message'     => "$keyword" . 'でログインしました。'
+        );
+
+        $status = json_encode(
+            $result,
+            JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+        );
+
+        session::set('user_id', $user_id);
+
+        return $status;
+    }
+
+
+    //DBデータ入力エラー
+    private static function failed(
+        $keyword, $username, $profile_img, $identity_id, $badge_num)
+    {
+        $result = array(
+            'code'        => 401,
+            'username'    => "$username",
+            'profile_img' => "$profile_img",
+            'identity_id' => "$identity_id",
+            'badge_num'   => "$badge_num",
+            'message'     => "$keyword" . 'でログインできませんでした。'
+        );
+
+        $status = json_encode(
+            $result,
+            JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+        );
+
+        return $status;
     }
 
 }

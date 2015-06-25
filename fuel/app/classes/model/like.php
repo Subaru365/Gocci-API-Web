@@ -8,7 +8,7 @@ class Model_Like extends Model
 	{
 
 		$query = DB::select('like_id')->from('likes')
-		->where　('like_post_id', "$post_id");
+		->where('like_post_id', "$post_id");
 
 		$result   = $query->execute()->as_array();
 	   	$like_num = count($result);
@@ -23,8 +23,8 @@ class Model_Like extends Model
 	{
 
 		$query = DB::select('like_id')->from('likes')
-		->where 	 ('like_user_id', "$user_id")
-		->and_where　('like_post_id', "$post_id");
+		->where 	('like_user_id', "$user_id")
+		->and_where ('like_post_id', "$post_id");
 
 		$result = $query->execute()->as_array();
 
