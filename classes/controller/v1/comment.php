@@ -1,5 +1,5 @@
 <?php
-//header('Content-Type: application/json; charset=UTF-8');
+header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
 /**
  * commentpage api
@@ -9,11 +9,14 @@ error_reporting(-1);
 class Controller_V1_Comment extends Controller
 {
 
-    public function action_index()
+	$post_id = Input::get('post_id');
+
+
+    public function action_index($post_id)
     {
 
     	$user_id = Input::get('user_id');
-        $post_id = Input::get('post_id');
+        //$post_id = Input::get('post_id');
         $limit   = 1;
 
 
