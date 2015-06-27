@@ -1,121 +1,48 @@
 <?php
 
-//header('Content-Type: application/json; charset=UTF-8');
+header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
 /**
  * Auth api
  *
  */
 
-
 class Controller_V1_Auth extends Controller
 {
 
-/*
-    public function action_before()
-    {
-        if(!Auth::check())
-        {
-            echo "ログインしましょうね〜(*^^)v";
-        }
-    }
-*/
-
-    /*
-    public function action_signup()
-    {
-
-        $username = Input::get('username');
-        $password = Input::get('password');
-        $email    = Input::get('email');
-        $group    = Input::get('group');
-        $token_id = Input::get('token_id');
-
-
-        if (empty($group)) {
-            $group = 1;
-        }
-
-
-        try
-        {
-            // call Auth to create this user
-            $created = \Auth::create_user($username, $password, $email, $group);
-
-                // if a user was created succesfully
-                if ($created)
-                {
-                    // inform the user
-                    //\Messages::success(__('login.new-account-created'));
-
-                    $status_ary = array(
-                        'username'  => "$username",
-                        'picture'   => 'OK',
-                        'background'=> '',
-                        'badge_num' => '0',
-                        'message'   => '作成完了！Gocciへようこそ！'
-                        );
-
-                    echo json_encode($status_ary);
-                }
-                else
-                {
-                    // oops, creating a new user failed?
-                    \Messages::error(__('login.account-creation-failed'));
-                }
-        }
-
-            // catch exceptions from the create_user() call
-            catch (\SimpleUserUpdateException $e)
-            {
-                // duplicate email address
-                if ($e->getCode() == 2)
-                {
-                    //\Messages::error(__('login.email-already-exists'));
-                    echo "登録されたメールアドレスです。";
-                    $status_ary = array('code'=>'403','message' => 'email exists');
-                    echo json_encode($status_ary);
-                }
-
-                // duplicate username
-                elseif ($e->getCode() == 3)
-                {
-                    //\Messages::error(__('login.username-already-exists'));
-                    $status_ary = array('code'=>'403','message' => 'username exists');
-                echo json_encode($status_ary);
-            }
-
-            // this can't happen, but you'll never know...
-            else
-            {
-                //\Messages::error($e->getMessage());
-                echo "データ形式おかしいんじゃないの!？";
-            }
-        }
-
-    }
-
-    */
 
     //SNSサインイン
     public function action_sns()
     {
+        //debug
+        $time_start = microtime(true);
+        //
+
         $keyword     = 'SNS';
         $user_id     = Model_User::get_id();
+
         $identity_id = Input::get('identity_id');
         $profile_img = Input::get('profile_img');
 
         $user_data   = Model_Cognito::get_data($identity_id);
-        $model       = $user_data[0];
-        $os          = $user_data[1];
-        $register_id = $user_data[2];
-        $username    = $user_data[3];
+        $model       = $user_data['Records'][0]['Value'];
+        $os          = $user_data['Records'][1]['Value'];
+        $register_id = $user_data['Records'][2]['Value'];
+        $username    = $user_data['Records'][3]['Value'];
+
+        //debug
+        $timelimit = microtime(true) - $time_start;
+        echo '格納完了：' . $timelimit . ' seconds\r\n';
+        //
 
 
         $status = Controller_V1_Auth::first_dataset(
             $keyword, $user_id, $username, $profile_img,
             $os, $model, $register_id, $identity_id);
 
+        //debug
+        $timelimit = microtime(true) - $time_start;
+        echo '完了：' . $timelimit . ' seconds\r\n';
 
         echo "$status";
     }
@@ -124,23 +51,40 @@ class Controller_V1_Auth extends Controller
     //Guestサインイン
     public function action_guest()
     {
+        //debug
+        $time_start = microtime(true);
+
         $keyword     = "Guest";
+        $profile_img = 'none';
         $user_id     = Model_User::get_id();
 
         $username    = Input::get('username');
-        $profile_img = 'none';
         $os          = Input::get('os');
         $model       = Input::get('model');
         $register_id = Input::get('register_id');
 
+
         $identity_id = Model_Cognito::post_data(
             $user_id, $username, $os, $model, $register_id);
+
+
+/*
+        //Cognito_Sync外部処理
+        exec("nohup php '" . getcwd() . "/cognito/first_sync.php' " . "'" . "$identity_id" . "' '" . "$username" . "' '" . "$os" . "' '" . "$model" . "' '" . "$register_id" . "' > /dev/null &");
+*/
+
+        //debug
+        $timelimit = microtime(true) - $time_start;
+        echo '格納完了：' . $timelimit . ' seconds\r\n';
 
 
         $status = Controller_V1_Auth::first_dataset(
             $keyword, $user_id, $username, $profile_img,
             $os, $model, $register_id, $identity_id);
 
+        //debug
+        $timelimit = microtime(true) - $time_start;
+        echo '完了：' . $timelimit . ' seconds\r\n';
 
         echo "$status";
     }
@@ -149,6 +93,8 @@ class Controller_V1_Auth extends Controller
     public function action_login()
     {
         $identity_id = Input::get('identity_id');
+
+
 
 
     }
@@ -170,26 +116,32 @@ class Controller_V1_Auth extends Controller
 
         try
         {
-            //データベースにユーザー情報を登録
+            //User情報を登録
             $profile_img = Model_User::post_data(
-                $user_id, $username, $profile_img,
-                $os, $model, $register_id, $identity_id);
+                $username, $profile_img, $identity_id);
 
 
             //AWS SNSに端末を登録
             $os = explode('_', $os);
 
             if ($os[0] == 'android') {
-                $sns = Model_Sns::post_android(
+                $endpoint_arn = Model_Sns::post_android(
                     $user_id, $identity_id, $register_id);
             }
             elseif ($os[0] == 'iOS') {
-                $sns = Model_Sns::post_iOS(
+                $endpoint_arn = Model_Sns::post_iOS(
                     $user_id, $identity_id, $register_id);
             }
             else{
                 //Webかな？ 何もしない。
             }
+
+            $os = implode('_', $os);
+
+
+            //Device情報を登録
+            $device = Model_Device::post_data(
+                $user_id, $os, $model, $register_id, $endpoint_arn);
 
             //success出力へ
             $status = Controller_V1_Auth::success($keyword,

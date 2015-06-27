@@ -20,9 +20,6 @@ class Model_Follow extends Model
 			$follow_flag = 0;
 		}
 
-		//--debug--//
-		//echo "$follow_flag";
-
 		return $follow_flag;
 	}
 
@@ -81,16 +78,5 @@ class Model_Follow extends Model
 
 		return $result;
 	}
-
-
-
-
-
-
-
-
-
-
-
 
 }

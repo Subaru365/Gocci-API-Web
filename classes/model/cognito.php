@@ -3,7 +3,6 @@
 use Aws\CognitoIdentity\CognitoIdentityClient;
 use Aws\CognitoSync\CognitoSyncClient;
 
-//header('Content-Type: application/json; charset=UTF-8');
 /**
 *
 */
@@ -32,6 +31,8 @@ class Model_Cognito extends Model
 
 		//----------------------------------------------------------//
 
+        /*
+
 		$client = new CognitoSyncClient([
 			'region'  => 'us-east-1',
     		'version' => 'latest'
@@ -50,35 +51,29 @@ class Model_Cognito extends Model
 
 		//DataSet
 		$result = $client->updateRecords([
-    		//'ClientContext' => '<string>',
-    		//'DeviceId' 	 => '<string>',
     		'DatasetName' 	 => 'user_info',
     		'IdentityId'     => "$identity_id",
     		'IdentityPoolId' => "$IdentityPoolId",
     		'RecordPatches'  => [
         		[
-            		//'DeviceLastModifiedDate' => 'YYYY-mm-dd HH:ii:ss',
             		'Key' => 'username',
             		'Op' => 'replace',
             		'SyncCount' => 0,
             		'Value' => "$username",
         		],
         		[
-        			//'DeviceLastModifiedDate' => 'YYYY-mm-dd HH:ii:ss',
             		'Key' => 'os',
             		'Op' => 'replace',
             		'SyncCount' => 0,
             		'Value' => "$os",
         		],
         		[
-        			//'DeviceLastModifiedDate' => 'q',
             		'Key' => 'model',
             		'Op' => 'replace',
             		'SyncCount' => 0,
             		'Value' => "$model",
         		],
         		[
-        			//'DeviceLastModifiedDate' => '2015',
             		'Key' => 'register_id',
             		'Op' => 'replace',
             		'SyncCount' => 0,
@@ -88,6 +83,7 @@ class Model_Cognito extends Model
     		'SyncSessionToken' => "$sync_session_token",
 		]);
 
+*/
 
 		return $identity_id;
 	}
@@ -109,20 +105,8 @@ class Model_Cognito extends Model
     		'IdentityPoolId' => 'us-east-1:a8cc1fdb-92b1-4586-ba97-9e6994a43195'
 		]);
 
-		for ($i=0; $i < 4; $i++) {
-			$user_data[$i] = $result['Records']["$i"]['Value'];
-		}
-
-		return $user_data;
-
+		return $result;
 	}
-
-
-	public function action_index()
-	{
-		phpinfo();
-	}
-
 
 }
 
