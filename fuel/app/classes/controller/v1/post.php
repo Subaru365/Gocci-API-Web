@@ -16,8 +16,12 @@ class Controller_V1_Post extends Controller
 
 		try
 		{
-			$result = Model_Like::post_gochi($user_id, $post_id);
-			$status = Controller_V1_Post::success($keyword);
+			$target_user_id = Model_Like::post_gochi($user_id, $post_id);
+			/*
+			exec("nohup php '" . dirname(__FILE__) . "/sns_push.php' " . "'" . "$keyword" . "' '" . "$user_id" . "' '" . "$target_user_id" . "' > /dev/null &");
+			*/
+			$sns_push = Model_Sns::post_message($keyword, $user_id, $target_user_id);
+			$status   = Controller_V1_Post::success($keyword);
 		}
 
 		catch(\Database_Exception $e)
@@ -39,7 +43,11 @@ class Controller_V1_Post extends Controller
 
 		try
 		{
-			$result = Model_Comment::post_comment($user_id, $post_id, $comment);
+			$target_user_id = Model_Comment::post_comment($user_id, $post_id, $comment);
+			/*
+			exec("nohup php '" . dirname(__FILE__) . "/sns_push.php' " . "'" . "$keyword" . "' '" . "$user_id" . "' '" . "$target_user_id" . "' > /dev/null &");
+			*/
+			$sns_push = Model_Sns::post_message($keyword, $user_id, $target_user_id);
 			$status = Controller_V1_Post::success($keyword);
 		}
 
@@ -50,9 +58,7 @@ class Controller_V1_Post extends Controller
 		}
 
 	   	echo "$status";
-
 	}
-
 
 	public function action_follow()
 	{
@@ -64,6 +70,10 @@ class Controller_V1_Post extends Controller
 		try
 		{
 			$result = Model_Follow::post_follow($user_id, $follow_user_id);
+			/*
+			exec("nohup php '" . dirname(__FILE__) . "/sns_push.php' " . "'" . "$keyword" . "' '" . "$user_id" . "' '" . "$target_user_id" . "' > /dev/null &");
+			*/
+			$sns_push = Model_Sns::post_message($keyword, $user_id, $follow_user_id);
 			$status = Controller_V1_Post::success($keyword);
 		}
 
@@ -74,7 +84,6 @@ class Controller_V1_Post extends Controller
 		}
 
 	   	echo "$status";
-
 	}
 
 	public function action_unfollow()
@@ -97,7 +106,6 @@ class Controller_V1_Post extends Controller
 		}
 
 	   	echo "$status";
-
 	}
 
 	public function action_want()
@@ -120,7 +128,6 @@ class Controller_V1_Post extends Controller
 		}
 
 	   	echo "$status";
-
 	}
 
 	public function action_unwant()
@@ -143,7 +150,6 @@ class Controller_V1_Post extends Controller
 		}
 
 	   	echo "$status";
-
 	}
 
 	public function action_postblock()
@@ -166,7 +172,6 @@ class Controller_V1_Post extends Controller
 		}
 
 	   	echo "$status";
-
 	}
 
 	public function action_restadd()
@@ -190,7 +195,6 @@ class Controller_V1_Post extends Controller
 		}
 
 	   	echo "$status";
-
 	}
 
 	public function action_postdel()
@@ -212,7 +216,6 @@ class Controller_V1_Post extends Controller
 		}
 
 	   	echo "$status";
-
 	}
 
 	//DBデータ入力成功関数

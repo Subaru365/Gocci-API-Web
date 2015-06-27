@@ -19,10 +19,30 @@ class Model_User extends Model
     }
 
 
+    //ユーザー名を取得
+    public static function get_name($user_id)
+    {
+        $query = DB::select('username')->from('users')
+        ->where('user_id', "$user_id");
+
+        $username = $query->execute()->as_array();
+        return $username[0];
+    }
+
+/*    //register_id取得
+    public static function get_register($target_user_id)
+    {
+        $query = DB::select('register_id')->from('devices')
+        ->where('device_user_id', "$target_user_id");
+
+        $register_id = $query->execute()->as_array();
+
+        return $register_id[0]['register_id'];
+    }
+*/
 
     public static function get_data($user_id, $target_user_id)
     {
-        //クエリ文
         $query = DB::select(
             'user_id', 'username',
             'profile_img', 'cover_img')
@@ -57,8 +77,7 @@ class Model_User extends Model
 
 
     //ユーザー登録
-    public static function post_data(
-        $user_id, $username, $profile_img, $os, $model, $register_id, $identity_id)
+    public static function post_data($username, $profile_img, $identity_id)
     {
 
         if ($profile_img == 'none') {
@@ -73,18 +92,7 @@ class Model_User extends Model
         ))
         ->execute();
 
-
-        $query = DB::insert('devices')
-        ->set(array(
-            'device_user_id' => "$user_id",
-            'os'             => "$os",
-            'model'          => "$model",
-            'register_id'    => "$register_id"
-        ))
-        ->execute();
-
         return $profile_img;
-
     }
 
 }

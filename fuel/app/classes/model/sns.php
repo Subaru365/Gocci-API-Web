@@ -6,6 +6,7 @@ use Aws\Sns\SnsClient;
 */
 class Model_Sns extends Model
 {
+
 	public static function post_android($user_id, $identity_id, $register_id)
 	{
 		$client = new SnsClient([
@@ -19,7 +20,35 @@ class Model_Sns extends Model
     		'Token' => "$register_id",
     	]);
 
-    	return $result;
+    	return $result['EndpointArn'];
+	}
+
+
+	public static function post_message($keyword, $user_id, $target_user_id)
+	{
+
+        $user_name  = Model_User::get_name($target_user_id);
+        $target_arn = Model_Device::get_arn($target_user_id);
+
+
+		$client = new SnsClient([
+			'region'  => 'ap-northeast-1',
+    		'version' => '2010-03-31'
+		]);
+
+		$result = $client->publish([
+    		'Message' => "$username" . 'さんから' . "$keyword" . 'されました。',
+    		'MessageAttributes' => [
+        		'<String>' => [
+            		//'BinaryValue' => <Psr\Http\Message\StreamableInterface>,
+            		'DataType' => '<string>', // REQUIRED
+            		'StringValue' => '<string>',
+        		],
+		    ],
+    		'MessageStructure' => '<string>',
+    		'Subject' => '<string>',
+    		'TargetArn' => "$target_arn",
+		]);
 	}
 
 

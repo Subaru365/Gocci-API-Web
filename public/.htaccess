@@ -40,6 +40,7 @@
 	# Send request via index.php if not a real file or directory
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteCond $1 !^(favicon\.ico)
 
 	# deal with php5-cgi first
 	<IfModule mod_fcgid.c>

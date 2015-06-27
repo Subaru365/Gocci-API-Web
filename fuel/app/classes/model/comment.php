@@ -68,11 +68,15 @@ class Model_Comment extends Model
 			'comment_user_id' => "$user_id",
 			'comment_post_id' => "$post_id",
 			'comment' 	      => "$comment"
-		));
+		))
+		->execute();
 
-		$result = $query->execute();
+		$query = DB::select('post_user_id')->from('posts')
+		->where('post_id', "$post_id");
 
-		return $result;
+		$post_user_id = $query->$execute()->$as_array();
+
+		return $post_user_id[0]['post_user_id'];
 	}
 
 }
