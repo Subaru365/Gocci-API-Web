@@ -16,7 +16,7 @@ class Controller_V1_Auth extends Controller
     {
         //debug
         $time_start = microtime(true);
-        //
+
 
         $keyword     = 'SNS';
         $identity_id = Input::get('identity_id');
@@ -31,18 +31,17 @@ class Controller_V1_Auth extends Controller
         $username    = $user_data['Records'][3]['Value'];
 
         //debug
-        $timelimit = microtime(true) - $time_start;
-        echo '格納完了：' . $timelimit . ' seconds\r\n';
-        //
+        //$timelimit = microtime(true) - $time_start;
+        //echo '格納完了：' . $timelimit . ' seconds\r\n';
 
 
-        $status = Controller_V1_Auth::first_dataset(
+        $status = Controller_V1_Auth::signup(
             $keyword, $user_id, $username, $profile_img,
             $os, $model, $register_id, $identity_id);
 
         //debug
-        $timelimit = microtime(true) - $time_start;
-        echo '完了：' . $timelimit . ' seconds\r\n';
+        //$timelimit = microtime(true) - $time_start;
+        //echo '完了：' . $timelimit . ' seconds\r\n';
 
         echo "$status";
     }
@@ -54,6 +53,7 @@ class Controller_V1_Auth extends Controller
         //debug
         $time_start = microtime(true);
 
+
         $keyword     = 'Guest';
         $profile_img = 'none';
         $user_id     = Model_User::get_id();
@@ -64,38 +64,35 @@ class Controller_V1_Auth extends Controller
         $register_id = Input::get('register_id');
 
 
+        //IdentityID取得
         $identity_id = Model_Cognito::post_data(
             $user_id, $username, $os, $model, $register_id);
 
 
-/*
-        //Cognito_Sync外部処理
-        exec("nohup php '" . getcwd() . "/cognito/first_sync.php' " . "'" . "$identity_id" . "' '" . "$username" . "' '" . "$os" . "' '" . "$model" . "' '" . "$register_id" . "' > /dev/null &");
-*/
-
         //debug
-        $timelimit = microtime(true) - $time_start;
-        echo '格納完了：' . $timelimit . ' seconds\r\n';
+        //$timelimit = microtime(true) - $time_start;
+        //echo '格納完了：' . $timelimit . ' seconds\r\n';
 
 
-        $status = Controller_V1_Auth::first_dataset(
+        $status = Controller_V1_Auth::signup(
             $keyword, $user_id, $username, $profile_img,
             $os, $model, $register_id, $identity_id);
 
         //debug
-        $timelimit = microtime(true) - $time_start;
-        echo '完了：' . $timelimit . ' seconds\r\n';
+        //$timelimit = microtime(true) - $time_start;
+        //echo '完了：' . $timelimit . ' seconds\r\n';
 
         echo "$status";
     }
 
 
+    //ログイン
     public function action_login()
     {
         $keyword     = 'セッション';
         $identity_id = Input::get('identity_id');
 
-        $user_data = Model_User::get_auth($identity_id);
+        $user_data   = Model_User::get_auth($identity_id);
 
         $user_id     = $user_data['user_id'];
         $username    = $user_data['username'];
@@ -119,7 +116,7 @@ class Controller_V1_Auth extends Controller
 
 
     //初回データ格納関数 (RDS, SNS)
-    private static function first_dataset(
+    private static function signup(
         $keyword, $user_id, $username, $profile_img,
         $os, $model, $register_id, $identity_id)
     {
@@ -128,9 +125,23 @@ class Controller_V1_Auth extends Controller
 
         try
         {
-            //User情報を登録
-            $profile_img = Model_User::post_data(
-                $username, $profile_img, $identity_id);
+            $device_check = Model_Device::check_id($register_id);
+
+            if (empty($device_check)) {
+                //初回登録
+
+                //User情報を登録
+                $profile_img = Model_User::post_data(
+                    $username, $profile_img, $identity_id);
+
+
+            }else{
+                //前回登録あり
+
+
+            }
+
+            //$device_check = Model::device
 
 
             //AWS SNSに端末を登録
@@ -147,9 +158,6 @@ class Controller_V1_Auth extends Controller
             else{
                 //Webかな？ 何もしない。
             }
-
-            //$os = implode('_', $os);
-
 
             //Device情報を登録
             $device = Model_Device::post_data(

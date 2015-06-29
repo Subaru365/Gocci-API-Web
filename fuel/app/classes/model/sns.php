@@ -37,16 +37,7 @@ class Model_Sns extends Model
 		]);
 
 		$result = $client->publish([
-    		'Message' => "$username" . 'さんから' . "$keyword" . 'されました。',
-    		'MessageAttributes' => [
-        		'<String>' => [
-            		//'BinaryValue' => <Psr\Http\Message\StreamableInterface>,
-            		'DataType' => '<string>', // REQUIRED
-            		'StringValue' => '<string>',
-        		],
-		    ],
-    		'MessageStructure' => '<string>',
-    		'Subject' => '<string>',
+    		'Message'   => "$username" . 'さんから' . "$keyword" . 'されました。',
     		'TargetArn' => "$target_arn",
 		]);
 	}
