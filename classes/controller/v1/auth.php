@@ -19,10 +19,10 @@ class Controller_V1_Auth extends Controller
         //
 
         $keyword     = 'SNS';
-        $user_id     = Model_User::get_id();
-
         $identity_id = Input::get('identity_id');
         $profile_img = Input::get('profile_img');
+
+        $user_id     = Model_User::get_id();
 
         $user_data   = Model_Cognito::get_data($identity_id);
         $model       = $user_data['Records'][0]['Value'];
@@ -54,7 +54,7 @@ class Controller_V1_Auth extends Controller
         //debug
         $time_start = microtime(true);
 
-        $keyword     = "Guest";
+        $keyword     = 'Guest';
         $profile_img = 'none';
         $user_id     = Model_User::get_id();
 
@@ -92,17 +92,29 @@ class Controller_V1_Auth extends Controller
 
     public function action_login()
     {
+        $keyword     = 'セッション';
         $identity_id = Input::get('identity_id');
 
+        $user_data = Model_User::get_auth($identity_id);
+
+        $user_id     = $user_data['user_id'];
+        $username    = $user_data['username'];
+        $profile_img = $user_data['profile_img'];
+        $badge_num   = $user_data['badge_num'];
 
 
+        $login_flag = Model_User::flag_login($user_id);
 
+        $status = Controller_V1_Auth::success($keyword,
+            $user_id, $username, $profile_img, $identity_id, $badge_num);
+
+        echo "$status";
     }
 
 
     public function action_logout()
     {
-        //Model_put_active
+        $logout_flag = Model_User::flag_logout($user_id);
     }
 
 
@@ -122,13 +134,13 @@ class Controller_V1_Auth extends Controller
 
 
             //AWS SNSに端末を登録
-            $os = explode('_', $os);
+            $brand = explode('_', $os);
 
-            if ($os[0] == 'android') {
+            if ($brand[0] == 'android') {
                 $endpoint_arn = Model_Sns::post_android(
                     $user_id, $identity_id, $register_id);
             }
-            elseif ($os[0] == 'iOS') {
+            elseif ($brand[0] == 'iOS') {
                 $endpoint_arn = Model_Sns::post_iOS(
                     $user_id, $identity_id, $register_id);
             }
@@ -136,7 +148,7 @@ class Controller_V1_Auth extends Controller
                 //Webかな？ 何もしない。
             }
 
-            $os = implode('_', $os);
+            //$os = implode('_', $os);
 
 
             //Device情報を登録

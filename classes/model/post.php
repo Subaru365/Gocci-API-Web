@@ -2,10 +2,9 @@
 class Model_Post extends Model
 {
 
-	public static function get_data($user_id, $sort_key, $sort_id, $limit)
+	//"POST"取得
+	public static function get_data($user_id, $sort_key, $sort_id, $limit = 15)
 	{
-
-		//クエリ文
 
 		$query = DB::select(
 			'posts.post_id', 'posts.post_user_id', 'users.username',
@@ -123,9 +122,5 @@ class Model_Post extends Model
 
 		return $result;
 	}
-
-
-
-
 
 }

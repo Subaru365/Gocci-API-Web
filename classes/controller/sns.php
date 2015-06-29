@@ -1,4 +1,5 @@
 <?php
+error_reporting(-1);
 
 use Aws\Sns\SnsClient;
 /**
@@ -31,6 +32,57 @@ class Controller_Sns extends Controller
 	*/
 	}
 
+	public function action_remote()
+	{
+
+		// 新しい cURL リソースを作成します
+		$ch = curl_init();
+
+		// URL や他の適当なオプションを設定します
+		curl_setopt($ch, CURLOPT_URL, "http://localhost/sns/push");
+		curl_setopt($ch, CURLOPT_HEADER, 0);
+
+		// URL を取得し、ブラウザに渡します
+		curl_exec($ch);
+
+		echo "start!";
+
+		// cURL リソースを閉じ、システムリソースを解放します
+		curl_close($ch);
+
+	}
+
+	public function action_push()
+	{
+
+		//$keyword    = $argv[1];
+		//$user_name  = Model_User::get_name($argv[2]);
+		$target_arn = 'arn:aws:sns:ap-northeast-1:318228258127:endpoint/GCM/gocci-android/d75c9dd6-0241-3b4b-9da8-f7f95fcf539d';
+
+
+		$client = new SnsClient([
+			'region'  => 'ap-northeast-1',
+   			'version' => '2010-03-31'
+		]);
+
+		$result = $client->publish([
+    		'Message' => '{"message":"コメント","badge":"4"}',
+    		/*
+    		'MessageAttributes' => [
+        		'<String>' => [
+            		//'BinaryValue' => <Psr\Http\Message\StreamableInterface>,
+            		'DataType' => 'raw', // REQUIRED
+            		//'StringValue' => '<string>',
+    			],
+			],
+    		*/
+    		//'MessageStructure' => '<string>',
+   			//'Subject' => '<string>',
+   			'TargetArn' => "$target_arn",
+   			//'TopicArn' => '<string>',
+		]);
+
+	}
 
 }
 

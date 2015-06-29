@@ -6,14 +6,13 @@ error_reporting(-1);
  *
  */
 
-class Controller_V1_Get extends Controller_Base
+class Controller_V1_Get extends Controller_V1_Base
 {
 
 	//Timeline Page
 	public function action_timeline()
     {
-
-        $user_id = Input::get('user_id');
+        $user_id = session::get('user_id');
         $limit 	 = Input::get('limit');
 
 
@@ -37,21 +36,25 @@ class Controller_V1_Get extends Controller_Base
 	//Popular Page
 	public function action_popular()
     {
-
         $user_id = session::get('user_id');
         $limit 	 = Input::get('limit');
-
+        $limit = 10;
 
 		//"POST_Data"
-		$limit = 10;
 		$sort_key  = 'post';
 
 		$post_id = Model_Like::get_rank($limit);
 
-		for ($i=0; $i < $limit; $i++) {
+		$num = count($post_id);
+
+		//--debug
+		//print_r($post_id);
+
+		for ($i=0; $i < $num; $i++) {
 
 			$post_data[$i] = Model_Post::get_data(
 				$user_id, $sort_key, $post_id[$i]['like_post_id'], $limit);
+
 		}
 
 
@@ -67,15 +70,16 @@ class Controller_V1_Get extends Controller_Base
 	//Comment Page
     public function action_comment()
     {
-
-    	$user_id = session::get('user_id');
-        $post_id = Input::get('post_id');
-        $limit   = 1;
+    	$user_id  = session::get('user_id');
+        $post_id  = Input::get('post_id');
+        $limit = 1;
+        $sort_key = 'post';
 
 
 		//"POST_Data"
-		$sort_key  = 'post';
 		$post_data = Model_Post::get_data($user_id, $sort_key, $post_id, $limit);
+
+		//print_r($post_data);
 
 	    //"Comments_data"
 	   	$comment_data = Model_Comment::get_data($post_id);
@@ -96,7 +100,6 @@ class Controller_V1_Get extends Controller_Base
 	//Restaurant Page
 	public function action_rest()
     {
-
     	$user_id = session::get('user_id');
     	$rest_id = Input::get('rest_id');
 		$limit   = Input::get('limit');
@@ -108,10 +111,6 @@ class Controller_V1_Get extends Controller_Base
 
 		//"Rest_Data"
 		$rest_data = Model_Restaurant::get_data($rest_id);
-
-		//後に実装
-		//$cheer_num = Model_Cheer::get_flag($rest_id);
-		//$rest_data['0']['rest_cheer_num'] = $cheer_num;
 
 		$want_flag = Model_Want::get_flag($user_id, $rest_id);
 		$rest_data['0']['want_flag']= $want_flag;
@@ -137,7 +136,6 @@ class Controller_V1_Get extends Controller_Base
 	//User Page
 	public static function action_user()
 	{
-
 		$user_id 		= session::get('user_id');
 		$target_user_id = Input::get('target_user_id');
 
@@ -179,7 +177,7 @@ class Controller_V1_Get extends Controller_Base
 	   	echo "$notice";
 
 
-	   	$result = Model_Notice::reset($user_id);
+	   	$result = Model_User::reset_badge($user_id);
 	}
 
 

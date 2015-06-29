@@ -45,7 +45,7 @@ class Model_Like extends Model
 	{
 		//対象となる投稿の期間($interval)
 		$now_date = date("Y-m-d");
-		$interval = date("Y-m-d",strtotime("-1 month"));
+		$interval = date("Y-m-d",strtotime("-2 month"));
 
 
 		$query = DB::select('like_post_id')->from('likes')

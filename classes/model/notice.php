@@ -1,8 +1,6 @@
 <?php
 class Model_Notice extends Model
 {
-     protected static $_table_name = 'notices';
-
      public static function get_data($user_id)
      {
      	$query = DB::select(
@@ -24,7 +22,6 @@ class Model_Notice extends Model
 		$notice_data = $query->execute()->as_array();
 
 
-
 		$num = count($notice_data);
 
 		for ($i=0; $i < $num; $i++) {
@@ -33,22 +30,36 @@ class Model_Notice extends Model
 
 			$notice_date  = $notice_data[$i]['notice_date'];
 
-			$date_diff 	  = Model_Date::get_data($notice_date);
+			$date_diff = Model_Date::get_data($notice_date);
 			$notice_data[$i]['notice_date'] = $date_diff;
-
 		}
 
 		return $notice_data;
      }
 
-     public static function reset($user_id)
+
+     //Notice登録
+     public static function post_data(
+     	$keyword, $a_user_id, $p_user_id, $post_id = 0)
      {
-     	$query = DB::update('users')
+     	if ($keyword == 'gochi!') {
+     		$category = 'like';
 
-     	->value('notice_num', '0')
+     	}elseif ($keyword == 'コメント') {
+     		$category = 'comment';
 
-     	->where('user_id', "$user_id");
+     	}else{
+     		$category = 'announce';
+     	}
 
-     	$result = $query->execute();
+
+     	$query = DB::insert('notices')
+     	->set(array(
+     		'notice_a_user_id' => "$user_id",
+     		'notice_p_user_id' => "$p_user_id",
+     		'notice'           => "$notice",
+     		'notice_post_id '  => "$post_id"
+     	))
+     	->execute();
      }
 }
