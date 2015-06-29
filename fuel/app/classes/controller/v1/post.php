@@ -5,14 +5,15 @@
 *　関数名の内容をPOSTします。
 */
 
-class Controller_V1_Post extends Controller
+class Controller_V1_Post extends Controller_V1_Base
 {
+	//Gochi!
 	public function action_gochi()
 	{
-		$user_id = Input::get('user_id');
-		$post_id = Input::get('post_id');
-
 		$keyword = 'gochi!';
+
+		$user_id = session::get('user_id');
+		$post_id = Input::get('post_id');
 
 		try
 		{
@@ -20,7 +21,11 @@ class Controller_V1_Post extends Controller
 			/*
 			exec("nohup php '" . dirname(__FILE__) . "/sns_push.php' " . "'" . "$keyword" . "' '" . "$user_id" . "' '" . "$target_user_id" . "' > /dev/null &");
 			*/
-			$sns_push = Model_Sns::post_message($keyword, $user_id, $target_user_id);
+			$sns_push = Model_Sns::post_message(
+				$keyword, $user_id, $target_user_id);
+			$record = Model_Notice::post_data(
+				$keyword, $user_id, $target_user_id, $post_id);
+
 			$status   = Controller_V1_Post::success($keyword);
 		}
 
@@ -33,6 +38,8 @@ class Controller_V1_Post extends Controller
 	   	echo "$status";
 	}
 
+
+	//Comment
 	public function action_comment()
 	{
 		$user_id = Input::get('user_id');
@@ -43,11 +50,16 @@ class Controller_V1_Post extends Controller
 
 		try
 		{
-			$target_user_id = Model_Comment::post_comment($user_id, $post_id, $comment);
+			$target_user_id = Model_Comment::post_comment(
+				$user_id, $post_id, $comment);
 			/*
 			exec("nohup php '" . dirname(__FILE__) . "/sns_push.php' " . "'" . "$keyword" . "' '" . "$user_id" . "' '" . "$target_user_id" . "' > /dev/null &");
 			*/
-			$sns_push = Model_Sns::post_message($keyword, $user_id, $target_user_id);
+			$sns_push = Model_Sns::post_message(
+				$keyword, $user_id, $target_user_id);
+			$record = Model_Notice::post_data(
+				$keyword, $user_id, $target_user_id, $post_id);
+
 			$status = Controller_V1_Post::success($keyword);
 		}
 
@@ -60,12 +72,14 @@ class Controller_V1_Post extends Controller
 	   	echo "$status";
 	}
 
+
+	//Follow
 	public function action_follow()
 	{
+		$keyword = 'フォロー';
+
 		$user_id 		= Input::get('user_id');
 		$follow_user_id = Input::get('target_user_id');
-
-		$keyword = 'フォロー';
 
 		try
 		{
@@ -73,7 +87,9 @@ class Controller_V1_Post extends Controller
 			/*
 			exec("nohup php '" . dirname(__FILE__) . "/sns_push.php' " . "'" . "$keyword" . "' '" . "$user_id" . "' '" . "$target_user_id" . "' > /dev/null &");
 			*/
-			$sns_push = Model_Sns::post_message($keyword, $user_id, $follow_user_id);
+			$sns_push = Model_Sns::post_message(
+				$keyword, $user_id, $follow_user_id);
+
 			$status = Controller_V1_Post::success($keyword);
 		}
 
@@ -86,12 +102,14 @@ class Controller_V1_Post extends Controller
 	   	echo "$status";
 	}
 
+
+	//Unfollow
 	public function action_unfollow()
 	{
+		$keyword = 'フォローを解除';
+
 		$user_id   		  = Input::get('user_id');
 		$unfollow_user_id = Input::get('target_user_id');
-
-		$keyword = 'フォローを解除';
 
 		try
 		{
@@ -108,12 +126,14 @@ class Controller_V1_Post extends Controller
 	   	echo "$status";
 	}
 
+
+	//Want
 	public function action_want()
 	{
+		$keyword = '行きたい店リストに追加';
+
 		$user_id = Input::get('user_id');
 		$rest_id = Input::get('rest_id');
-
-		$keyword = '行きたい店リストに追加';
 
 		try
 		{
@@ -130,12 +150,14 @@ class Controller_V1_Post extends Controller
 	   	echo "$status";
 	}
 
+
+	//UnWant
 	public function action_unwant()
 	{
+		$keyword = '行きたい店リストから解除';
+
 		$user_id = Input::get('user_id');
 		$rest_id = Input::get('rest_id');
-
-		$keyword = '行きたい店リストから解除';
 
 		try
 		{
@@ -152,12 +174,14 @@ class Controller_V1_Post extends Controller
 	   	echo "$status";
 	}
 
+
+	//PostBlock
 	public function action_postblock()
 	{
-		$user_id = Input::get('user_id');
-		$post_id = Input::get('post_id');
-
 		$keyword = '投稿を違反報告';
+
+		$user_id = session::get('user_id');
+		$post_id = Input::get('post_id');
 
 		try
 		{
@@ -174,13 +198,15 @@ class Controller_V1_Post extends Controller
 	   	echo "$status";
 	}
 
+
+	//RestAdd
 	public function action_restadd()
 	{
+		$keyword = '店舗を追加';
+
 		$rest_name = Input::get('rest_name');
 		$lat 	   = Input::get('lat');
 		$lon	   = Input::get('lon');
-
-		$keyword = '店舗を追加';
 
 		try
 		{
@@ -197,11 +223,13 @@ class Controller_V1_Post extends Controller
 	   	echo "$status";
 	}
 
+
+	//PostDelete
 	public function action_postdel()
 	{
-		$post_id = Input::get('post_id');
-
 		$keyword = '投稿を消去';
+
+		$post_id = Input::get('post_id');
 
 		try
 		{
@@ -217,6 +245,7 @@ class Controller_V1_Post extends Controller
 
 	   	echo "$status";
 	}
+
 
 	//DBデータ入力成功関数
 	public function success($keyword)

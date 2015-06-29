@@ -3,7 +3,7 @@
 class Model_User extends Model
 {
 
-    //最新レコードの次のuser_idを取得
+    //最新レコードの次のuser_id取得
     public static function get_id()
     {
         $query = DB::select('user_id')->from('users')
@@ -19,7 +19,7 @@ class Model_User extends Model
     }
 
 
-    //ユーザー名を取得
+    //ユーザー名取得
     public static function get_name($user_id)
     {
         $query = DB::select('username')->from('users')
@@ -29,23 +29,25 @@ class Model_User extends Model
         return $username[0];
     }
 
-/*    //register_id取得
-    public static function get_register($target_user_id)
+
+    //ログイン情報取得
+    public static function get_auth($identity_id)
     {
-        $query = DB::select('register_id')->from('devices')
-        ->where('device_user_id', "$target_user_id");
+        $query = DB::select(
+            'user_id', 'username', 'profile_img', 'badge_num')
+        ->from ('users')
+        ->where('identity_id', "$identity_id");
 
-        $register_id = $query->execute()->as_array();
-
-        return $register_id[0]['register_id'];
+        $user_data = $query->execute()->as_array();
+        return $user_data[0];
     }
-*/
 
+
+    //ユーザーページ情報取得
     public static function get_data($user_id, $target_user_id)
     {
         $query = DB::select(
-            'user_id', 'username',
-            'profile_img', 'cover_img')
+            'user_id', 'username', 'profile_img')
 
         ->from('users')
         ->where('user_id', "$target_user_id");
@@ -76,10 +78,45 @@ class Model_User extends Model
     }
 
 
+    //Notice Reset
+    public static function reset_badge($user_id)
+    {
+        $query = DB::update('users')
+        ->value('badge_num', '0')
+        ->where('user_id', "$user_id")
+        ->execute();
+
+        return $query;
+    }
+
+
+    //ログイン
+    public static function flag_login($user_id)
+    {
+        $query = DB::update('users')
+        ->value('login_flag', '1')
+        ->where('user_id', "$user_id")
+        ->execute();
+
+        return $query;
+    }
+
+
+    //ログアウト
+    public static function flag_logout($user_id)
+    {
+        $query = DB::update('users')
+        ->value('login_flag', '0')
+        ->where('user_id', "$user_id")
+        ->execute();
+
+        return $query;
+    }
+
+
     //ユーザー登録
     public static function post_data($username, $profile_img, $identity_id)
     {
-
         if ($profile_img == 'none') {
         $profile_img = 'https://s3-us-west-2.amazonaws.com/gocci.img.provider/tosty_' . mt_rand(1, 7) . '.png';
         }

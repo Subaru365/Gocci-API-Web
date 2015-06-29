@@ -4,7 +4,6 @@
 */
 class Controller_V1_Base extends Controller
 {
-	//public $user_id = session::get('user_id');
 
 	public function before()
 	{
@@ -13,22 +12,22 @@ class Controller_V1_Base extends Controller
 		if(empty($user_id))
 		{
 			$unauth = $this->unauth();
-		}else{
-			echo "signin!$user_id";
+			error_log('UnAuthorized Accsess..');
+			exit;
 		}
 	}
-
-	public static function action_index()
-	{
-		echo 'Hello!';
-	}
-
 
 
 	protected function unauth()
 	{
 		$status = array(
+			'code'   => '401',
 			'status' => 'UnAuthorized');
+
+		$status = json_encode(
+        	$status,
+            JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+        );
 
 		echo "$status";
 	}
