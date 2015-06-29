@@ -39,8 +39,8 @@ class Controller_Sns extends Controller
 		$ch = curl_init();
 
 		// URL や他の適当なオプションを設定します
-		curl_setopt($ch, CURLOPT_URL, "http://localhost/sns/push");
-		curl_setopt($ch, CURLOPT_HEADER, 0);
+		curl_setopt($ch, CURLOPT_URL, 'http://localhost/sns/push');
+		//curl_setopt($ch, CURLOPT_HEADER, 0);
 
 		// URL を取得し、ブラウザに渡します
 		curl_exec($ch);

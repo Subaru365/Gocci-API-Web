@@ -43,19 +43,19 @@ class Model_Notice extends Model
      	$keyword, $a_user_id, $p_user_id, $post_id = 0)
      {
      	if ($keyword == 'gochi!') {
-     		$category = 'like';
+     		$notice = 'like';
 
      	}elseif ($keyword == 'コメント') {
-     		$category = 'comment';
+     		$notice = 'comment';
 
      	}else{
-     		$category = 'announce';
+     		$notice = 'announce';
      	}
 
 
      	$query = DB::insert('notices')
      	->set(array(
-     		'notice_a_user_id' => "$user_id",
+     		'notice_a_user_id' => "$a_user_id",
      		'notice_p_user_id' => "$p_user_id",
      		'notice'           => "$notice",
      		'notice_post_id '  => "$post_id"

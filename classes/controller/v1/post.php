@@ -15,15 +15,16 @@ class Controller_V1_Post extends Controller_V1_Base
 		$user_id = session::get('user_id');
 		$post_id = Input::get('post_id');
 
+
 		try
 		{
-			$target_user_id = Model_Like::post_gochi($user_id, $post_id);
-			/*
-			exec("nohup php '" . dirname(__FILE__) . "/sns_push.php' " . "'" . "$keyword" . "' '" . "$user_id" . "' '" . "$target_user_id" . "' > /dev/null &");
-			*/
-			$sns_push = Model_Sns::post_message(
-				$keyword, $user_id, $target_user_id);
+			$target_user_id = Model_Like::post_gochi(
+				$user_id, $post_id);
+
 			$record = Model_Notice::post_data(
+				$keyword, $user_id, $target_user_id, $post_id);
+
+			$sns_push = $this->publish(
 				$keyword, $user_id, $target_user_id, $post_id);
 
 			$status   = Controller_V1_Post::success($keyword);
@@ -36,6 +37,7 @@ class Controller_V1_Post extends Controller_V1_Base
 		}
 
 	   	echo "$status";
+	   	curl_close($ch);
 	}
 
 
@@ -52,12 +54,11 @@ class Controller_V1_Post extends Controller_V1_Base
 		{
 			$target_user_id = Model_Comment::post_comment(
 				$user_id, $post_id, $comment);
-			/*
-			exec("nohup php '" . dirname(__FILE__) . "/sns_push.php' " . "'" . "$keyword" . "' '" . "$user_id" . "' '" . "$target_user_id" . "' > /dev/null &");
-			*/
-			$sns_push = Model_Sns::post_message(
-				$keyword, $user_id, $target_user_id);
+
 			$record = Model_Notice::post_data(
+				$keyword, $user_id, $target_user_id, $post_id);
+
+			$sns_push = $this->publish(
 				$keyword, $user_id, $target_user_id, $post_id);
 
 			$status = Controller_V1_Post::success($keyword);
@@ -70,6 +71,7 @@ class Controller_V1_Post extends Controller_V1_Base
 		}
 
 	   	echo "$status";
+	   	curl_close($ch);
 	}
 
 
@@ -77,18 +79,15 @@ class Controller_V1_Post extends Controller_V1_Base
 	public function action_follow()
 	{
 		$keyword = 'フォロー';
-
 		$user_id 		= Input::get('user_id');
 		$follow_user_id = Input::get('target_user_id');
 
 		try
 		{
 			$result = Model_Follow::post_follow($user_id, $follow_user_id);
-			/*
-			exec("nohup php '" . dirname(__FILE__) . "/sns_push.php' " . "'" . "$keyword" . "' '" . "$user_id" . "' '" . "$target_user_id" . "' > /dev/null &");
-			*/
-			$sns_push = Model_Sns::post_message(
-				$keyword, $user_id, $follow_user_id);
+
+			$sns_push = $this->publish(
+				$keyword, $user_id, $target_user_id, $post_id);
 
 			$status = Controller_V1_Post::success($keyword);
 		}
@@ -100,6 +99,7 @@ class Controller_V1_Post extends Controller_V1_Base
 		}
 
 	   	echo "$status";
+	   	curl_close($ch);
 	}
 
 
@@ -247,6 +247,38 @@ class Controller_V1_Post extends Controller_V1_Base
 	}
 
 
+	//----------------------------------------------------------------//
+
+
+	private function publish($keyword, $user_id, $target_user_id)
+	{
+		try
+		{
+			$login_flag = Model_User::get_login($target_user_id);
+
+			if ($check_login == '1') {
+				//ログイン中
+
+				//SNS Push 外部処理
+        		$ch = curl_init();
+
+        		curl_setopt($ch, CURLOPT_URL,
+            		'http://localhost/v1/background/sns/push/?' .
+                		'keyword='   . "$keyword"         . '&' .
+                		'a_user_id=' . "$username"        . '&' .
+                		'p_user_id=' . "$target_user_id"
+        		);
+
+        		curl_exec($ch);
+        		//curl_close($ch);
+
+			}else{
+				//ログアウト中
+			}
+		}
+	}
+
+
 	//DBデータ入力成功関数
 	public function success($keyword)
 	{
@@ -262,6 +294,7 @@ class Controller_V1_Post extends Controller_V1_Base
 
 		return $status;
 	}
+
 
 	//DBデータ入力エラー関数
 	public function failed($keyword)

@@ -3,6 +3,18 @@
 class Model_User extends Model
 {
 
+    //ログインフラグ取得
+    public static function get_login($user_id)
+    {
+        $query = DB::select('login_flag')->from('users')
+        ->where('user_id', "$user_id")
+
+        $login_flag = $query->execute()->as_array();
+
+        return $login_flag[0];
+    }
+
+
     //最新レコードの次のuser_id取得
     public static function get_id()
     {
@@ -30,7 +42,7 @@ class Model_User extends Model
     }
 
 
-    //ログイン情報取得
+    //ログインユーザー情報取得
     public static function get_auth($identity_id)
     {
         $query = DB::select(
