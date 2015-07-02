@@ -1,19 +1,19 @@
 <?php
 
-class Model_Like extends Model
+class Model_Gochi extends Model
 {
 
 	//１投稿対するgochi数を求める
 	public static function get_num($post_id)
 	{
 
-		$query = DB::select('like_id')->from('likes')
-		->where('like_post_id', "$post_id");
+		$query = DB::select('gochi_id')->from('gochis')
+		->where('gochi_post_id', "$post_id");
 
 		$result   = $query->execute()->as_array();
-	   	$like_num = count($result);
+	   	$gochi_num = count($result);
 
-		return $like_num;
+		return $gochi_num;
 	}
 
 
@@ -22,20 +22,20 @@ class Model_Like extends Model
 	public static function get_flag($user_id, $post_id)
 	{
 
-		$query = DB::select('like_id')->from('likes')
-		->where 	('like_user_id', "$user_id")
-		->and_where ('like_post_id', "$post_id");
+		$query = DB::select('gochi_id')->from('gochis')
+		->where 	('gochi_user_id', "$user_id")
+		->and_where ('gochi_post_id', "$post_id");
 
 		$result = $query->execute()->as_array();
 
 
 		if ($result == true) {
-			$like_flag = 1;
+			$gochi_flag = 1;
 		}else{
-			$like_flag = 0;
+			$gochi_flag = 0;
 		}
 
-		return $like_flag;
+		return $gochi_flag;
 	}
 
 
@@ -48,10 +48,10 @@ class Model_Like extends Model
 		$interval = date("Y-m-d",strtotime("-2 month"));
 
 
-		$query = DB::select('like_post_id')->from('likes')
-		->where	   ('like_date', 'BETWEEN', array("$interval", "$now_date"))
-		->group_by ('like_post_id')
-		->order_by (DB::expr('COUNT(like_id)'), 'desc')
+		$query = DB::select('gochi_post_id')->from('gochis')
+		->where	   ('gochi_date', 'BETWEEN', array("$interval", "$now_date"))
+		->group_by ('gochi_post_id')
+		->order_by (DB::expr('COUNT(gochi_id)'), 'desc')
 		->limit    ("$limit");
 
 		$result = $query->execute()->as_array();
@@ -65,10 +65,10 @@ class Model_Like extends Model
 	public static function post_gochi($user_id, $post_id)
 	{
 
-		$query = DB::insert('likes')
+		$query = DB::insert('gochis')
 		->set(array(
-			'like_user_id' => "$user_id",
-			'like_post_id' => "$post_id"
+			'gochi_user_id' => "$user_id",
+			'gochi_post_id' => "$post_id"
 		))
 		->execute();
 

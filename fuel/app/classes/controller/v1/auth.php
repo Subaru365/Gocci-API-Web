@@ -15,7 +15,7 @@ class Controller_V1_Auth extends Controller
     public function action_sns()
     {
         //debug
-        $time_start = microtime(true);
+        //$time_start = microtime(true);
 
 
         $keyword     = 'SNS';
@@ -51,7 +51,7 @@ class Controller_V1_Auth extends Controller
     public function action_guest()
     {
         //debug
-        $time_start = microtime(true);
+        //$time_start = microtime(true);
 
 
         $keyword     = 'Guest';
@@ -109,12 +109,6 @@ class Controller_V1_Auth extends Controller
     }
 
 
-    public function action_logout()
-    {
-        $logout_flag = Model_User::flag_logout($user_id);
-    }
-
-
     //初回データ格納関数 (RDS, SNS)
     private static function signup(
         $keyword, $user_id, $username, $profile_img,
@@ -125,23 +119,10 @@ class Controller_V1_Auth extends Controller
 
         try
         {
-            $device_check = Model_Device::check_id($register_id);
+            $profile_img = Model_User::post_data(
+                $username, $profile_img, $identity_id);
 
-            if (empty($device_check)) {
-                //初回登録
-
-                //User情報を登録
-                $profile_img = Model_User::post_data(
-                    $username, $profile_img, $identity_id);
-
-
-            }else{
-                //前回登録あり
-
-
-            }
-
-            //$device_check = Model::device
+            //$device_check = Model_Device::check_id($register_id);
 
 
             //AWS SNSに端末を登録

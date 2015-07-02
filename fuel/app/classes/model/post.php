@@ -71,8 +71,8 @@ class Model_Post extends Model
 			$post_date 	  = $post_data[$i]['post_date'];
 
 
-	   		$like_num 	  = Model_Like::get_num($post_id);
-	   		$post_data[$i]['like_num']    = $like_num;
+	   		$gochi_num 	  = Model_Gochi::get_num($post_id);
+	   		$post_data[$i]['gochi_num']   = $gochi_num;
 
 	    	$comment_num  = Model_Comment::get_num($post_id);
 	   		$post_data[$i]['comment_num'] = $comment_num;
@@ -83,8 +83,8 @@ class Model_Post extends Model
 	    	$follow_flag  = Model_Follow::get_flag($user_id, $post_user_id);
 	    	$post_data[$i]['follow_flag'] = $follow_flag;
 
-	    	$like_flag	  = Model_Like::get_flag($user_id, $post_id);
-	    	$post_data[$i]['like_flag']   = $like_flag;
+	    	$gochi_flag	  = Model_Gochi::get_flag($user_id, $post_id);
+	    	$post_data[$i]['gochi_flag']  = $gochi_flag;
 
 	    	$date_diff 	  = Model_Date::get_data($post_date);
 			$post_data[$i]['post_date']   = $date_diff;
