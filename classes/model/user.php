@@ -7,7 +7,7 @@ class Model_User extends Model
     public static function get_login($user_id)
     {
         $query = DB::select('login_flag')->from('users')
-        ->where('user_id', "$user_id")
+        ->where('user_id', "$user_id");
 
         $login_flag = $query->execute()->as_array();
 
@@ -114,18 +114,6 @@ class Model_User extends Model
     }
 
 
-    //ログアウト
-    public static function flag_logout($user_id)
-    {
-        $query = DB::update('users')
-        ->value('login_flag', '0')
-        ->where('user_id', "$user_id")
-        ->execute();
-
-        return $query;
-    }
-
-
     //ユーザー登録
     public static function post_data($username, $profile_img, $identity_id)
     {
@@ -143,5 +131,39 @@ class Model_User extends Model
 
         return $profile_img;
     }
+
+
+
+    //Conversion
+    //===========================================================================//
+
+
+    //Conversion
+    public static function check_conversion($username)
+    {
+        $query = DB::select('user_id')->from('users')
+        ->where('username', "$username")
+        ->execute()->as_array();
+
+        return $query[0];
+    }
+
+
+    //更新
+    public static function update_data(
+        $user_id, $username, $profile_img, $identity_id)
+    {
+        $query = DB::update('users')
+        ->set(array(
+            'username'    => "$username",
+            'profile_img' => "$profile_img",
+            'identity_id' => "$identity_id"
+        ))
+        ->where('user_id', "$user_id")
+        ->execute();
+
+        return $query;
+    }
+
 
 }

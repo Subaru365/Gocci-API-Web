@@ -27,6 +27,25 @@ class Model_Device extends Model
      }
 
 
+     //Conversion
+     //==================================================================//
+
+
+     public static function update_data(
+        $user_id, $os, $model, $register_id, $endpoint_arn)
+     {
+        $query = DB::update('devices')
+        ->set(array(
+            'os'             => "$os",
+            'model'          => "$model",
+            'register_id'    => "$register_id",
+            'endpoint_arn'   => "$endpoint_arn"
+        ))
+        ->where('device_user_id', "$user_id")
+        ->execute();
+
+     }
+
 }
 
 
