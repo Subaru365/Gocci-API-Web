@@ -1,6 +1,7 @@
 <?php
 
 use Aws\CognitoIdentity\CognitoIdentityClient;
+use Aws\CognitoSync\CognitoSyncClient;
 
 /**
 * CognitoIdentity Model
@@ -25,8 +26,9 @@ class Model_Cognito extends Model
    			'Logins' => ['login.inase.gocci'=> "$user_id",],
 		]);
 
-		$identity_id = $result['IdentityId'];
-
+		//$identity_id = $result['IdentityId'];
+		$cognito_data = $result;
+		$identity_id = $cognito_data['IdentityId'];
 
 		//CognitoSync Dataset 外部処理
         $ch = curl_init();
@@ -44,7 +46,8 @@ class Model_Cognito extends Model
         //curl_close($ch);
 
 
-		return $identity_id;
+		//return $identity_id;
+		return $cognito_data;
 	}
 
 

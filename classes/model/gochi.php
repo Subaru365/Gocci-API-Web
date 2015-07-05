@@ -45,7 +45,7 @@ class Model_Gochi extends Model
 	{
 		//対象となる投稿の期間($interval)
 		$now_date = date("Y-m-d");
-		$interval = date("Y-m-d",strtotime("-2 month"));
+		$interval = date("Y-m-d",strtotime("-3 month"));
 
 
 		$query = DB::select('gochi_post_id')->from('gochis')
