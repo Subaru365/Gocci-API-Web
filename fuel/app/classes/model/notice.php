@@ -48,6 +48,10 @@ class Model_Notice extends Model
      	}elseif ($keyword == 'コメント') {
      		$notice = 'comment';
 
+          }elseif ($keyword == 'フォロー') {
+               $notice = 'follow';
+          }
+
      	}else{
      		$notice = 'announce';
      	}
@@ -61,5 +65,20 @@ class Model_Notice extends Model
      		'notice_post_id '  => "$post_id"
      	))
      	->execute();
+
+
+          //SNS Publish 外部処理
+          $ch = curl_init();
+
+          curl_setopt($ch, CURLOPT_URL,
+            'http://localhost/v1/background/sns/publish/?' .
+                'keyword='   . "$keyword"   . '&' .
+                'a_user_id=' . "$a_user_id" . '&' .
+                'p_user_id=' . "$p_user_id"
+          );
+
+          curl_exec($ch);
+          //curl_close($ch);
+
      }
 }

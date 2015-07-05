@@ -23,10 +23,10 @@ class Controller_V1_Post extends Controller_V1_Base
 
 			$record = Model_Notice::post_data(
 				$keyword, $user_id, $target_user_id, $post_id);
-
+/*
 			$sns_push = $this->publish(
 				$keyword, $user_id, $target_user_id, $post_id);
-
+*/
 			$status   = Controller_V1_Post::success($keyword);
 		}
 
@@ -57,10 +57,10 @@ class Controller_V1_Post extends Controller_V1_Base
 
 			$record = Model_Notice::post_data(
 				$keyword, $user_id, $target_user_id, $post_id);
-
+/*
 			$sns_push = $this->publish(
 				$keyword, $user_id, $target_user_id, $post_id);
-
+*/
 			$status = Controller_V1_Post::success($keyword);
 		}
 
@@ -86,9 +86,12 @@ class Controller_V1_Post extends Controller_V1_Base
 		{
 			$result = Model_Follow::post_follow($user_id, $follow_user_id);
 
+			$record = Model_Notice::post_data(
+				$keyword, $user_id, $target_user_id, $post_id);
+/*
 			$sns_push = $this->publish(
 				$keyword, $user_id, $target_user_id, $post_id);
-
+*/
 			$status = Controller_V1_Post::success($keyword);
 		}
 
