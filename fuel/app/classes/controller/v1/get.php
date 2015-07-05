@@ -43,7 +43,7 @@ class Controller_V1_Get extends Controller_V1_Base
 		//"POST_Data"
 		$sort_key  = 'post';
 
-		$post_id = Model_Like::get_rank($limit);
+		$post_id = Model_Gochi::get_rank($limit);
 
 		$num = count($post_id);
 
@@ -53,7 +53,7 @@ class Controller_V1_Get extends Controller_V1_Base
 		for ($i=0; $i < $num; $i++) {
 
 			$post_data[$i] = Model_Post::get_data(
-				$user_id, $sort_key, $post_id[$i]['like_post_id'], $limit);
+				$user_id, $sort_key, $post_id[$i]['gochi_post_id'], $limit);
 
 		}
 
