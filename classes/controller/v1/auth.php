@@ -77,14 +77,13 @@ class Controller_V1_Auth extends Controller
 
         $status = Controller_V1_Auth::signup(
             $keyword, $user_id, $username, $profile_img,
-            $os, $model, $register_id, $identity_id);
+            $os, $model, $register_id, $identity_id, $token);
 
         //debug
         //$timelimit = microtime(true) - $time_start;
         //echo '完了：' . $timelimit . ' seconds\r\n';
 
         echo "$status";
-        echo "$token";
     }
 
 
@@ -92,6 +91,7 @@ class Controller_V1_Auth extends Controller
     public function action_welcome()
     {
         $keyword     = 'セッション';
+        //$token       = 'none';
         $identity_id = Input::get('identity_id');
 
         $user_data   = Model_User::get_auth($identity_id);
@@ -101,11 +101,12 @@ class Controller_V1_Auth extends Controller
         $profile_img = $user_data['profile_img'];
         $badge_num   = $user_data['badge_num'];
 
+        $token       = Model_Cognito::get_token($user_id, $identity_id);
 
         $login = Model_Login::post_login($user_id);
 
-        $status = Controller_V1_Auth::success($keyword,
-            $user_id, $username, $profile_img, $identity_id, $badge_num);
+        $status = Controller_V1_Auth::success($keyword, $user_id,
+            $username, $profile_img, $identity_id, $badge_num, $token);
 
         echo "$status";
     }
@@ -114,7 +115,7 @@ class Controller_V1_Auth extends Controller
     //初回データ格納関数 (RDS, SNS)
     private static function signup(
         $keyword, $user_id, $username, $profile_img,
-        $os, $model, $register_id, $identity_id)
+        $os, $model, $register_id, $identity_id, $token = 'none')
     {
 
         $badge_num = 0;
@@ -147,8 +148,8 @@ class Controller_V1_Auth extends Controller
                 $user_id, $os, $model, $register_id, $endpoint_arn);
 
             //success出力へ
-            $status = Controller_V1_Auth::success($keyword,
-                $user_id, $username, $profile_img, $identity_id, $badge_num);
+            $status = Controller_V1_Auth::success($keyword, $user_id,
+                $username, $profile_img, $identity_id, $badge_num, $token);
         }
 
 
@@ -156,8 +157,8 @@ class Controller_V1_Auth extends Controller
         catch(\Database_Exception $e)
         {
             //failed出力へ
-            $status = Controller_V1_Auth::failed(
-                $keyword, $username, $profile_img, $identity_id, $badge_num);
+            $status = Controller_V1_Auth::failed($keyword, $user_id,
+                $username, $profile_img, $identity_id, $badge_num, $token);
 
             error_log($e);
         }
@@ -167,16 +168,18 @@ class Controller_V1_Auth extends Controller
 
 
     //DBデータ入力成功
-    private static function success($keyword,
-        $user_id, $username, $profile_img, $identity_id, $badge_num)
+    private static function success($keyword, $user_id,
+        $username, $profile_img, $identity_id, $badge_num, $token)
     {
         $result = array(
             'code'        => 200,
+            'user_id'     => "$user_id",
             'username'    => "$username",
             'profile_img' => "$profile_img",
             'identity_id' => "$identity_id",
             'badge_num'   => "$badge_num",
-            'message'     => "$keyword" . 'でログインしました。'
+            'message'     => "$keyword" . 'でログインしました。',
+            'token'       => "$token"
         );
 
         $status = json_encode(
@@ -191,8 +194,8 @@ class Controller_V1_Auth extends Controller
 
 
     //DBデータ入力エラー
-    private static function failed(
-        $keyword, $username, $profile_img, $identity_id, $badge_num)
+    private static function failed($keyword, $user_id,
+        $username, $profile_img, $identity_id, $badge_num, $token)
     {
         $result = array(
             'code'        => 401,
@@ -200,7 +203,8 @@ class Controller_V1_Auth extends Controller
             'profile_img' => "$profile_img",
             'identity_id' => "$identity_id",
             'badge_num'   => "$badge_num",
-            'message'     => "$keyword" . 'でログインできませんでした。'
+            'message'     => "$keyword" . 'でログインできませんでした。',
+            'token'       => "$token"
         );
 
         $status = json_encode(

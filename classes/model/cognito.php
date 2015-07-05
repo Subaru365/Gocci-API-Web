@@ -51,6 +51,23 @@ class Model_Cognito extends Model
 	}
 
 
+	//identity_idからtokenを取得
+	public static function get_token($user_id, $identity_id)
+	{
+		$client = new CognitoIdentityClient([
+			'region'  => 'us-east-1',
+    		'version' => 'latest'
+		]);
+
+		$result = $client->getOpenIdTokenForDeveloperIdentity([
+    		'IdentityId'     => "$identity_id",
+    		'IdentityPoolId' => 'us-east-1:a8cc1fdb-92b1-4586-ba97-9e6994a43195',
+    		'Logins'         => ['login.inase.gocci' => "37",],
+		]);
+
+		return $result['Token'];
+	}
+
 
 	//DataSetからユーザー情報を取得
 	public static function get_data($identity_id)
@@ -68,6 +85,7 @@ class Model_Cognito extends Model
 
 		return $result;
 	}
+
 
 }
 
