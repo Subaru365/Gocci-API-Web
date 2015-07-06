@@ -91,8 +91,9 @@ class Controller_V1_Auth extends Controller
     public function action_welcome()
     {
         $keyword     = 'セッション';
-        //$token       = 'none';
+        $token       = 'none';
         $identity_id = Input::get('identity_id');
+        $sns_flag    = Input::get('sns_flag');
 
         $user_data   = Model_User::get_auth($identity_id);
 
@@ -101,7 +102,9 @@ class Controller_V1_Auth extends Controller
         $profile_img = $user_data['profile_img'];
         $badge_num   = $user_data['badge_num'];
 
-        $token       = Model_Cognito::get_token($user_id, $identity_id);
+        if ($sns_flag == 0) {
+            $token = Model_Cognito::get_token($user_id, $identity_id);
+        }
 
         $login = Model_Login::post_login($user_id);
 
@@ -122,10 +125,9 @@ class Controller_V1_Auth extends Controller
 
         try
         {
+
             $profile_img = Model_User::post_data(
                 $username, $profile_img, $identity_id);
-
-            //$device_check = Model_Device::check_id($register_id);
 
 
             //AWS SNSに端末を登録
