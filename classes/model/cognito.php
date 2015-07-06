@@ -62,7 +62,7 @@ class Model_Cognito extends Model
 		$result = $client->getOpenIdTokenForDeveloperIdentity([
     		'IdentityId'     => "$identity_id",
     		'IdentityPoolId' => 'us-east-1:a8cc1fdb-92b1-4586-ba97-9e6994a43195',
-    		'Logins'         => ['login.inase.gocci' => "37",],
+    		'Logins'         => ['login.inase.gocci' => "$user_id",],
 		]);
 
 		return $result['Token'];
