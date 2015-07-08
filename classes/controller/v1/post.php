@@ -23,10 +23,7 @@ class Controller_V1_Post extends Controller_V1_Base
 
 			$record = Model_Notice::post_data(
 				$keyword, $user_id, $target_user_id, $post_id);
-/*
-			$sns_push = $this->publish(
-				$keyword, $user_id, $target_user_id, $post_id);
-*/
+
 			$status   = Controller_V1_Post::success($keyword);
 		}
 
@@ -57,10 +54,7 @@ class Controller_V1_Post extends Controller_V1_Base
 
 			$record = Model_Notice::post_data(
 				$keyword, $user_id, $target_user_id, $post_id);
-/*
-			$sns_push = $this->publish(
-				$keyword, $user_id, $target_user_id, $post_id);
-*/
+
 			$status = Controller_V1_Post::success($keyword);
 		}
 
@@ -88,10 +82,7 @@ class Controller_V1_Post extends Controller_V1_Base
 
 			$record = Model_Notice::post_data(
 				$keyword, $user_id, $target_user_id, $post_id);
-/*
-			$sns_push = $this->publish(
-				$keyword, $user_id, $target_user_id, $post_id);
-*/
+
 			$status = Controller_V1_Post::success($keyword);
 		}
 
@@ -178,6 +169,21 @@ class Controller_V1_Post extends Controller_V1_Base
 	}
 
 
+	//Post
+	public function action_post()
+	{
+		$keyword = '投稿';
+
+		$user_id = session::get('user_id');
+		$rest_id = Input::get('rest_id');
+
+		try
+		{
+			$result = Model::
+		}
+	}
+
+
 	//PostBlock
 	public function action_postblock()
 	{
@@ -257,7 +263,7 @@ class Controller_V1_Post extends Controller_V1_Base
 	{
 		try
 		{
-			$login_flag = Model_User::get_login($target_user_id);
+			$login_flag = Model_User::check_login($target_user_id);
 
 			if ($check_login == '1') {
 				//ログイン中

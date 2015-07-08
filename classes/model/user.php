@@ -2,9 +2,19 @@
 
 class Model_User extends Model
 {
+    public static function check_id($identity_id)
+    {
+        $query = DB::select('user_id')->from('users')
+        ->where('identity_id', "$identity_id");
+
+        $user_id = $query->execute()->as_array();
+
+        return $user_id;
+    }
+
 
     //ログインフラグ取得
-    public static function get_login($user_id)
+    public static function check_login($user_id)
     {
         $query = DB::select('login_flag')->from('users')
         ->where('user_id', "$user_id");
@@ -16,7 +26,7 @@ class Model_User extends Model
 
 
     //最新レコードの次のuser_id取得
-    public static function get_id()
+    public static function get_next_id()
     {
         $query = DB::select('user_id')->from('users')
         ->order_by('user_id', 'desc')
@@ -39,6 +49,17 @@ class Model_User extends Model
 
         $username = $query->execute()->as_array();
         return $username[0];
+    }
+
+
+    //
+    public static function get_badge($user_id)
+    {
+        $query = DB::select('badge_num')->from('users')
+        ->where('user_id', "$user_id");
+
+        $user_id = $query->execute()->as_array();
+        return $user_id[0]['badge_num'];
     }
 
 
@@ -90,30 +111,6 @@ class Model_User extends Model
     }
 
 
-    //Notice Reset
-    public static function reset_badge($user_id)
-    {
-        $query = DB::update('users')
-        ->value('badge_num', '0')
-        ->where('user_id', "$user_id")
-        ->execute();
-
-        return $query;
-    }
-
-
-    //ログイン
-    public static function flag_login($user_id)
-    {
-        $query = DB::update('users')
-        ->value('login_flag', '1')
-        ->where('user_id', "$user_id")
-        ->execute();
-
-        return $query;
-    }
-
-
     //ユーザー登録
     public static function post_data($username, $profile_img, $identity_id)
     {
@@ -133,6 +130,29 @@ class Model_User extends Model
     }
 
 
+    //Notice Reset
+    public static function reset_badge($user_id)
+    {
+        $query = DB::update('users')
+        ->value('badge_num', '0')
+        ->where('user_id', "$user_id")
+        ->execute();
+
+        return $query;
+    }
+
+
+    public static function update_name($user_id, $username)
+    {
+        $query = DB::update('users')
+        ->value('username', "$username")
+        ->where('user_id', "$user_id")
+        ->execute();
+
+        return $query;
+    }
+
+
 
     //Conversion
     //===========================================================================//
@@ -145,7 +165,7 @@ class Model_User extends Model
         ->where('username', "$username")
         ->execute()->as_array();
 
-        return $query[0];
+        return $query;
     }
 
 

@@ -13,17 +13,10 @@ class Controller_V1_Get extends Controller_V1_Base
 	public function action_timeline()
     {
         $user_id = session::get('user_id');
-        $limit 	 = Input::get('limit');
-
-
-		if (empty($limit)) {
-		    $limit = 20;
-		}
-
 
 		//"POST_Data"
 		$sort_key  = 'all';
-		$post_data = Model_Post::get_data($user_id, $sort_key, $sort_key, $limit);
+		$post_data = Model_Post::get_data($user_id, $sort_key, $sort_key);
 
 
 	   	$timelinepage = json_encode($post_data,
@@ -177,9 +170,26 @@ class Controller_V1_Get extends Controller_V1_Base
 	   	echo "$notice";
 
 
-	   	$result = Model_User::reset_badge($user_id);
+	   	$tmp = Model_User::reset_badge($user_id);
 	}
 
 
+	public function action_near()
+	{
+		$lon = Input::get('lon');
+		$lat = Input::get('lat');
+
+		$data = Model_Restaurant::get_near($lon, $lat);
+
+		if (empty($data)) {
+			$data = 'none';
+		}
+
+
+		$near = json_encode($data,
+    		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+
+	   	echo "$near";
+	}
 }
 
