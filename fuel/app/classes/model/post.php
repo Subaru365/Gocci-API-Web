@@ -26,6 +26,8 @@ class Model_Post extends Model
 		->join('tags', 'LEFT OUTER')
 		->on('posts.post_tag_id', '=', 'tags.tag_id')
 
+		->where('post_status_flag', '1')
+
 		->order_by('posts.post_date','desc')
 
 		->limit("$limit");
@@ -115,7 +117,7 @@ class Model_Post extends Model
 	public static function post_delete($post_id)
 	{
 		$query = DB::update('posts')
-		->set  (array('public_flag' => '0'))
+		->set  (array('post_status_flag' => '0'))
 		->where('post_id', "$post_id");
 
 		$result = $query->execute();
