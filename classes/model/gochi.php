@@ -41,7 +41,7 @@ class Model_Gochi extends Model
 
 
 	//gochi順に投稿を格納する
-	public static function get_rank($limit)
+	public static function get_rank($limit = 20)
 	{
 		//対象となる投稿の期間($interval)
 		$now_date = date("Y-m-d");
@@ -50,6 +50,11 @@ class Model_Gochi extends Model
 
 		$query = DB::select('gochi_post_id')->from('gochis')
 		->where	   ('gochi_date', 'BETWEEN', array("$interval", "$now_date"))
+		->and_where('post_status_flag', '1')
+
+		->join('posts', 'INNER')
+		->on('gochi_post_id', '=', 'post_id')
+
 		->group_by ('gochi_post_id')
 		->order_by (DB::expr('COUNT(gochi_id)'), 'desc')
 		->limit    ("$limit");
@@ -75,7 +80,7 @@ class Model_Gochi extends Model
 		$query = DB::select('post_user_id')->from('posts')
 		->where('post_id', "$post_id");
 
-		$post_user_id = $query->$execute()->$as_array();
+		$post_user_id = $query->execute()->as_array();
 
 		return $post_user_id[0]['post_user_id'];
 	}

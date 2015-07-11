@@ -2,8 +2,9 @@
 
 class Model_Notice extends Model
 {
+
     public static function get_data($user_id)
-　  {
+    {
         $query = DB::select(
     		    'notices.notice_id', 'notices.notice_a_user_id', 'users.username',
     		    'users.profile_img', 'notices.notice', 'notices.notice_post_id',
@@ -40,7 +41,7 @@ class Model_Notice extends Model
 
     //Notice登録
     public static function post_data(
-   	    $keyword, $a_user_id, $p_user_id, $post_id = 0)
+   	    $keyword, $a_user_id, $p_user_id, $post_id = 1)
     {
        	if ($keyword == 'gochi!') {
        		  $notice = 'like';
@@ -61,7 +62,7 @@ class Model_Notice extends Model
        		  'notice_a_user_id' => "$a_user_id",
        		  'notice_p_user_id' => "$p_user_id",
        		  'notice'           => "$notice",
-       		  'notice_post_id '  => "$post_id"
+       		  'notice_post_id'   => "$post_id"
        	))
        	->execute();
 

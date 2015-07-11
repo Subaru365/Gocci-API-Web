@@ -30,28 +30,22 @@ class Controller_V1_Get extends Controller_V1_Base
 	public function action_popular()
     {
         $user_id = session::get('user_id');
-        $limit 	 = Input::get('limit');
-        $limit = 10;
 
 		//"POST_Data"
 		$sort_key  = 'post';
 
-		$post_id = Model_Gochi::get_rank($limit);
+		$post_id = Model_Gochi::get_rank();
 
 		$num = count($post_id);
 
-		//--debug
-		//print_r($post_id);
 
 		for ($i=0; $i < $num; $i++) {
 
-			$post_data[$i] = Model_Post::get_data(
-				$user_id, $sort_key, $post_id[$i]['gochi_post_id'], $limit);
+			$tmp[$i] = Model_Post::get_data(
+				$user_id, $sort_key, $post_id[$i]['gochi_post_id']);
 
+			$data[$i] =  $tmp[$i][0];
 		}
-
-
-		$data = array("posts" => $post_data);
 
 	   	$popularpage = json_encode($data,
 	   		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
@@ -95,11 +89,6 @@ class Controller_V1_Get extends Controller_V1_Base
     {
     	$user_id = session::get('user_id');
     	$rest_id = Input::get('rest_id');
-		$limit   = Input::get('limit');
-
-		if (empty($limit)) {
-		    $limit = 30;
-		}
 
 
 		//"Rest_Data"
@@ -111,7 +100,7 @@ class Controller_V1_Get extends Controller_V1_Base
 
 		//"POST_Data"
 		$sort_key  = 'rest';
-		$post_data = Model_Post::get_data($user_id, $sort_key, $rest_id, $limit);
+		$post_data = Model_Post::get_data($user_id, $sort_key, $rest_id);
 
 
 	   	$data = array(
@@ -138,10 +127,9 @@ class Controller_V1_Get extends Controller_V1_Base
 
         //"POST_Data"
         $sort_key  = 'user';
-        $limit     = 30;
 
         $post_data = Model_Post::get_data(
-            $target_user_id, $sort_key, $target_user_id, $limit);
+            $target_user_id, $sort_key, $target_user_id);
 
 
 	   	$data = array(
@@ -174,6 +162,7 @@ class Controller_V1_Get extends Controller_V1_Base
 	}
 
 
+	//Near
 	public function action_near()
 	{
 		$lon = Input::get('lon');
@@ -181,15 +170,84 @@ class Controller_V1_Get extends Controller_V1_Base
 
 		$data = Model_Restaurant::get_near($lon, $lat);
 
-		if (empty($data)) {
-			$data = 'none';
-		}
-
 
 		$near = json_encode($data,
     		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
 
 	   	echo "$near";
+	}
+
+
+	//Follow
+	public function action_follow()
+	{
+		$user_id = session::get('user_id');
+		$target_user_id = Input::get('target_user_id');
+
+		$data = Model_Follow::get_follow($user_id, $target_user_id);
+
+		$follow_list = json_encode($data,
+    		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+
+	   	echo "$follow_list";
+	}
+
+
+	//Follower List
+	public function action_follower()
+	{
+		$user_id = session::get('user_id');
+		$target_user_id = Input::get('target_user_id');
+
+		$data = Model_Follow::get_follower($user_id, $target_user_id);
+
+
+		$follower_list = json_encode($data,
+    		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+
+	   	echo "$follower_list";
+	}
+
+
+	public function action_want()
+	{
+		$target_user_id = Input::get('target_user_id');
+
+		$data = Model_Want::get_want($target_user_id);
+
+
+		$want_list = json_encode($data,
+    		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+
+	   	echo "$want_list";
+	}
+
+
+	public function action_user_cheer()
+	{
+		$target_user_id = Input::get('target_user_id');
+
+		$data = Model_Post::get_user_cheer($target_user_id);
+
+
+		$user_cheer_list = json_encode($data,
+    		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+
+	   	echo "$user_cheer_list";
+	}
+
+
+	public function action_rest_cheer()
+	{
+		$rest_id = Input::get('rest_id');
+
+		$data = Model_Post::get_rest_cheer($rest_id);
+
+
+		$rest_cheer_list = json_encode($data,
+    		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+
+	   	echo "$rest_cheer_list";
 	}
 }
 
