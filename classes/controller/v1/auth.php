@@ -6,7 +6,7 @@ error_reporting(-1);
  * Auth api
  *
  *         //$time_start = microtime(true);
- * //debug
+ *  //debug
  *       //$timelimit = microtime(true) - $time_start;
  *       //echo '格納完了：' . $timelimit . ' seconds\r\n';
  */
@@ -39,7 +39,7 @@ class Controller_V1_Auth extends Controller
 
             $user_id = Model_User::get_next_id();
 
-            $status  = Controller_V1_Auth::signup(
+            $status = $this->signup(
                 $keyword, $user_id, $username, $profile_img,
                 $os, $model, $register_id, $identity_id);
 
@@ -70,12 +70,10 @@ class Controller_V1_Auth extends Controller
 
             $badge_num = Model_User::get_badge($user_id);
 
-            $status = Controller_V1_Auth::success(
+            $status = $this->success(
                 $keyword, $user_id, $username,
                 $profile_img, $identity_id, $badge_num, $token);
         }
-
-        echo "$status";
     }
 
 
@@ -114,12 +112,10 @@ class Controller_V1_Auth extends Controller
         $identity_id = $cognito_data['IdentityId'];
         $token       = $cognito_data['Token'];
 
-
-        $status = Controller_V1_Auth::signup(
+        $status = $this->signup(
             $keyword, $user_id, $username, $profile_img,
             $os, $model, $register_id, $identity_id, $token);
 
-        echo "$status";
     }
 
 
@@ -144,11 +140,9 @@ class Controller_V1_Auth extends Controller
 
         $login = Model_Login::post_login($user_id);
 
-        $status = Controller_V1_Auth::success(
+        $status = $this->success(
             $keyword, $user_id, $username,
             $profile_img, $identity_id, $badge_num, $token);
-
-        echo "$status";
     }
 
 
@@ -174,7 +168,7 @@ class Controller_V1_Auth extends Controller
                 $user_id, $os, $model, $register_id, $endpoint_arn);
 
             //success出力へ
-            $status = Controller_V1_Auth::success(
+            $status = $this->success(
                 $keyword, $user_id, $username,
                 $profile_img, $identity_id, $badge_num, $token);
         }
@@ -184,14 +178,12 @@ class Controller_V1_Auth extends Controller
         catch(\Database_Exception $e)
         {
             //failed出力へ
-            $status = Controller_V1_Auth::failed(
+            $status = $this->failed(
                 $keyword, $user_id, $username,
                 $profile_img, $identity_id, $badge_num, $token);
 
             error_log($e);
         }
-
-        return $status;
     }
 
 
@@ -200,7 +192,7 @@ class Controller_V1_Auth extends Controller
         $keyword, $user_id, $username,
         $profile_img, $identity_id, $badge_num, $token)
     {
-        $result = array(
+        $data = array(
             'code'        => 200,
             'user_id'     => "$user_id",
             'username'    => "$username",
@@ -211,15 +203,7 @@ class Controller_V1_Auth extends Controller
             'token'       => "$token"
         );
 
-
-        $status = json_encode(
-            $result,
-            JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
-        );
-
-        session::set('user_id', $user_id);
-
-        return $status;
+        $status = $this->output_json($data)
     }
 
 
@@ -228,7 +212,7 @@ class Controller_V1_Auth extends Controller
         $keyword, $user_id, $username,
         $profile_img, $identity_id, $badge_num, $token)
     {
-        $result = array(
+        $data = array(
             'code'        => 401,
             'username'    => "$username",
             'profile_img' => "$profile_img",
@@ -238,13 +222,18 @@ class Controller_V1_Auth extends Controller
             'token'       => "$token"
         );
 
+        $status = $this->output_json($data)
+    }
 
-        $status = json_encode(
-            $result,
+
+    private static function output_json($data)
+    {
+        $json = json_encode(
+            $data,
             JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
         );
 
-        return $status;
+        echo "$json";
     }
 
 
@@ -274,7 +263,7 @@ class Controller_V1_Auth extends Controller
             $identity_id = Model_Cognito::post_data(
                 $user_id, $username, $os, $model, $register_id);
 
-            $status = Controller_V1_Auth::signup(
+            $status = $this->signup(
                 $keyword, $user_id, $username, $profile_img,
                 $os, $model, $register_id, $identity_id);
 
@@ -301,7 +290,7 @@ class Controller_V1_Auth extends Controller
                     $user_id, $os, $model, $register_id, $endpoint_arn);
 
                 //success出力へ
-                $status = Controller_V1_Auth::success(
+                $status = $this->success(
                     $keyword, $user_id, $username,
                     $profile_img, $identity_id, $badge_num);
             }
@@ -310,13 +299,11 @@ class Controller_V1_Auth extends Controller
             catch(\Database_Exception $e)
             {
                 //failed出力へ
-                $status = Controller_V1_Auth::failed(
+                $status = $this->failed(
                     $keyword, $username, $profile_img, $identity_id, $badge_num);
-
                 error_log($e);
             }
         }
-        echo "$status";
     }
 
 
