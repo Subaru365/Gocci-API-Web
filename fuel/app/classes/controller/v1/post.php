@@ -30,11 +30,9 @@ class Controller_V1_Post extends Controller_V1_Base
 
 		catch(\Database_Exception $e)
 		{
-			$status = Controller_V1_Post::failed($keyword);
+			$status = $this->failed($keyword);
 			error_log($e);
 		}
-
-	   	echo "$status";
 	}
 
 
@@ -55,16 +53,14 @@ class Controller_V1_Post extends Controller_V1_Base
 			$record = Model_Notice::post_data(
 				$keyword, $user_id, $target_user_id, $post_id);
 
-			$status = Controller_V1_Post::success($keyword);
+			$status = $this->success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = Controller_V1_Post::failed($keyword);
+			$status = $this->failed($keyword);
 			error_log($e);
 		}
-
-	   	echo "$status";
 	}
 
 
@@ -82,16 +78,14 @@ class Controller_V1_Post extends Controller_V1_Base
 			$record = Model_Notice::post_data(
 				$keyword, $user_id, $follow_user_id);
 
-			$status = Controller_V1_Post::success($keyword);
+			$status = $this->success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = Controller_V1_Post::failed($keyword);
+			$status = $this->failed($keyword);
 			error_log($e);
 		}
-
-	   	echo "$status";
 	}
 
 
@@ -106,16 +100,14 @@ class Controller_V1_Post extends Controller_V1_Base
 		try
 		{
 			$result = Model_Follow::post_unfollow($user_id, $unfollow_user_id);
-			$status = Controller_V1_Post::success($keyword);
+			$status = $this->success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = Controller_V1_Post::failed($keyword);
+			$status = $this->failed($keyword);
 			error_log($e);
 		}
-
-	   	echo "$status";
 	}
 
 
@@ -130,16 +122,14 @@ class Controller_V1_Post extends Controller_V1_Base
 		try
 		{
 			$result = Model_Want::post_want($user_id, $rest_id);
-			$status = Controller_V1_Post::success($keyword);
+			$status = $this->success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = Controller_V1_Post::failed($keyword);
+			$status = $this->failed($keyword);
 			error_log($e);
 		}
-
-	   	echo "$status";
 	}
 
 
@@ -154,16 +144,14 @@ class Controller_V1_Post extends Controller_V1_Base
 		try
 		{
 			$result = Model_Want::post_unwant($user_id, $rest_id);
-			$status = Controller_V1_Post::success($keyword);
+			$status = $this->success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = Controller_V1_Post::failed($keyword);
+			$status = $this->failed($keyword);
 			error_log($e);
 		}
-
-	   	echo "$status";
 	}
 
 
@@ -186,16 +174,14 @@ class Controller_V1_Post extends Controller_V1_Base
 			$result = Model_Post::post_data(
 				$user_id, $rest_id, $movie_name,
 				$category, $tag, $value, $memo, $cheer_flag);
-			$status = Controller_V1_Post::success($keyword);
+			$status = $this->success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = Controller_V1_Post::failed($keyword);
+			$status = $this->failed($keyword);
 			error_log($e);
 		}
-
-	   	echo "$status";
 	}
 
 
@@ -210,16 +196,14 @@ class Controller_V1_Post extends Controller_V1_Base
 		try
 		{
 			$result = Model_Block::post_block($user_id, $post_id);
-			$status = Controller_V1_Post::success($keyword);
+			$status = $this->success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = Controller_V1_Post::failed($keyword);
+			$status = $this->failed($keyword);
 			error_log($e);
 		}
-
-	   	echo "$status";
 	}
 
 
@@ -233,16 +217,14 @@ class Controller_V1_Post extends Controller_V1_Base
 		try
 		{
 			$result = Model_Post::post_delete($post_id);
-			$status = Controller_V1_Post::success($keyword);
+			$status = $this->success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = Controller_V1_Post::failed($keyword);
+			$status = $this->failed($keyword);
 			error_log($e);
 		}
-
-	   	echo "$status";
 	}
 
 
@@ -270,7 +252,7 @@ class Controller_V1_Post extends Controller_V1_Base
 
 		catch(\Database_Exception $e)
 		{
-			$status = Controller_V1_Post::failed($keyword);
+			$status = $this->failed($keyword);
 			error_log($e);
 		}
 	}
@@ -288,16 +270,14 @@ class Controller_V1_Post extends Controller_V1_Base
 		{
 			//$clean_feedback = Controller_V1_Inputfilter::action_encoding($feedback);
 			$result = Model_Feedback::post_add($user_id, $feedback);
-			$status = Controller_V1_Post::success($keyword);
+			$status = $this->success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = Controller_V1_Post::failed($keyword);
+			$status = $this->failed($keyword);
 			error_log($e);
 		}
-
-	   	echo "$status";
 	}
 
 
@@ -331,43 +311,33 @@ class Controller_V1_Post extends Controller_V1_Base
 		}
 		catch(\Database_Exception $e)
 		{
-			$status = Controller_V1_Post::failed($keyword);
+			$status = $this->failed($keyword);
 			error_log($e);
 		}
 	}
 
 
-	//DBデータ入力成功関数
+	//DBデータ入力成功
 	public function success($keyword)
 	{
-		$result = array(
+		$data = array(
 			'code' 	  => 200,
 			'message' => "$keyword" . 'しました。'
 		);
 
-		$status = json_encode(
-			$result,
-			JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
-		);
-
-		return $status;
+		$status = $this->output_json($data);
 	}
 
 
-	//DBデータ入力エラー関数
+	//DBデータ入力エラー
 	public function failed($keyword)
 	{
-		$result = array(
+		$data = array(
 			'code' 	  => 401,
 			'message' => "$keyword" . 'できませんでした。'
 		);
 
-		$status = json_encode(
-			$result,
-			JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
-		);
-
-		return $status;
+		$status = $this->output_json($data);
 	}
 
 
