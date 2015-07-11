@@ -3,7 +3,7 @@ class Model_Restaurant extends Model
 {
 	public static function get_near($lon, $lat)
 	{
-		$query = DB::select('restname')->from('restaurants')
+		$query = DB::select('rest_id', 'restname')->from('restaurants')
 		->order_by(DB::expr('GLength(GeomFromText(CONCAT(' . "'" . 'LineString(' .
 			"$lon" . ' ' . "$lat" . ",'" . ', X(lon_lat), ' . "' '," . ' Y(lon_lat),' . "')'" . ')))'))
 		->limit(10);
@@ -34,10 +34,15 @@ class Model_Restaurant extends Model
 		->set(array(
 			'restname' => "$rest_name",
 			'lat' 	   => "$lat",
-			'lon' 	   => "$lon"
-		));
+			'lon' 	   => "$lon",
+			'lon_lat'  => DB::expr('GeomFromText(' . "'" .
+				'POINT(' . "$lon" . ' ' . "$lat" .')' . "'" . ')')
+		))
+		->execute();
 
-		$result = $query->execute();
-		return $result;
+		$query = DB::count_records('restaurants');
+
+		//$rest_id = $query;
+		return $query;
 	}
 }

@@ -53,10 +53,6 @@ class Model_Comment extends Model
 		$result = $query->execute()->as_array();
 	   	$comment_num = count($result);
 
-
-	   	//--debug--//
-	   	//echo "$comment_num";
-
 		return $comment_num;
 	}
 
@@ -74,7 +70,7 @@ class Model_Comment extends Model
 		$query = DB::select('post_user_id')->from('posts')
 		->where('post_id', "$post_id");
 
-		$post_user_id = $query->$execute()->$as_array();
+		$post_user_id = $query->execute()->as_array();
 
 		return $post_user_id[0]['post_user_id'];
 	}

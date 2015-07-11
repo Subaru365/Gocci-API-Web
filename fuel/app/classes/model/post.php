@@ -3,9 +3,8 @@ class Model_Post extends Model
 {
 
 	//"POST"取得
-	public static function get_data($user_id, $sort_key, $sort_id, $limit = 15)
+	public static function get_data($user_id, $sort_key, $sort_id, $limit = 20)
 	{
-
 		$query = DB::select(
 			'posts.post_id', 'posts.post_user_id', 'users.username',
 			'users.profile_img', 'posts.post_rest_id', 'restaurants.restname',
@@ -97,19 +96,85 @@ class Model_Post extends Model
 	}
 
 
-	//ユーザーに対する応援数取得
+	public static function get_user_cheer($user_id)
+	{
+		$query = DB::select('rest_id', 'restname', 'locality')
+		->from('posts')
+
+		->join('restaurants', 'INNER')
+		->on('post_rest_id', '=', 'rest_id')
+
+		->where('post_user_id', "$user_id")
+		->and_where('cheer_flag', '1')
+		->and_where('post_status_flag', '1')
+
+		->distinct(true);
+
+		$cheer_list = $query->execute()->as_array();
+		return $cheer_list;
+	}
+
+
+	public static function get_rest_cheer($rest_id)
+	{
+		$query = DB::select('user_id', 'username', 'profile_img')
+		->from('posts')
+
+		->join('users', 'INNER')
+		->on('post_user_id', '=', 'user_id')
+
+		->where('post_rest_id', "$rest_id")
+		->and_where('cheer_flag', '1')
+		->and_where('post_status_flag', '1')
+
+		->distinct(true);
+
+		$cheer_list = $query->execute()->as_array();
+		return $cheer_list;
+	}
+
+
+	//ユーザーに対する応援店数取得
 	public static function cheer_num($user_id)
 	{
-		$query = DB::select('post_id')->from('posts')
+		$query = DB::select('post_rest_id')->from('posts')
 
 		->where	   ('post_user_id', "$user_id")
-		->and_where('cheer_flag', '1');
+		->and_where('cheer_flag', '1')
+		->and_where('post_status_flag', '1')
+
+		->distinct(true);
 
 		$result = $query->execute()->as_array();
 
-
 		$cheer_num = count($result);
 		return $cheer_num;
+	}
+
+
+	public static function post_data(
+		$user_id, $rest_id, $movie_name,
+		$category_id, $tag_id, $value, $memo, $cheer_flag)
+	{
+		$movie     = "$movie_name" . '-movie.ts';
+		$thumbnail = '0002-' . "$movie_name" . '-img.png';
+
+
+		$query = DB::insert('posts')
+		->set(array(
+			'post_user_id' => "$user_id",
+			'post_rest_id' => "$rest_id",
+			'movie'		   => "$movie",
+			'thmbnail'     => "$thumbnail",
+			'category_id'  => "category_id",
+			'tag_id'	   => "tag_id",
+			'value'        => "$value",
+			'memo'         => "$memo",
+			'cheer_flag'   => "$cheer_flag"
+		))
+		->execute();
+
+		return $query;
 	}
 
 
