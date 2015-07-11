@@ -340,14 +340,4 @@ class Controller_V1_Post extends Controller_V1_Base
 		$status = $this->output_json($data);
 	}
 
-
-	public function output_json($data)
-	{
-		$json = json_encode(
-			$data,
-			JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
-		);
-
-		echo "$json";
-	}
 }

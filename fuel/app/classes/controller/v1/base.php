@@ -18,7 +18,7 @@ class Controller_V1_Base extends Controller
 	}
 
 
-	protected function unauth()
+	private function unauth()
 	{
 		$status = array(
 			'code'   => '401',
@@ -30,6 +30,17 @@ class Controller_V1_Base extends Controller
         );
 
 		echo "$status";
+	}
+
+
+	public function output_json($data)
+	{
+		$json = json_encode(
+			$data,
+			JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+		);
+
+		echo "$json";
 	}
 
 }
