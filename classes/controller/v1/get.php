@@ -18,11 +18,7 @@ class Controller_V1_Get extends Controller_V1_Base
 		$sort_key  = 'all';
 		$post_data = Model_Post::get_data($user_id, $sort_key, $sort_key);
 
-
-	   	$timelinepage = json_encode($post_data,
-	   		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-
-	   	echo "$timelinepage";
+	   	$status = $this->output_json($data);
 	}
 
 
@@ -36,8 +32,8 @@ class Controller_V1_Get extends Controller_V1_Base
 
 		$post_id = Model_Gochi::get_rank();
 
-		$num = count($post_id);
 
+		$num = count($post_id);
 
 		for ($i=0; $i < $num; $i++) {
 
@@ -47,10 +43,7 @@ class Controller_V1_Get extends Controller_V1_Base
 			$data[$i] =  $tmp[$i][0];
 		}
 
-	   	$popularpage = json_encode($data,
-	   		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-
-	   	echo "$popularpage";
+	   	$status = $this->output_json($data);
 	}
 
 
@@ -66,7 +59,6 @@ class Controller_V1_Get extends Controller_V1_Base
 		//"POST_Data"
 		$post_data = Model_Post::get_data($user_id, $sort_key, $post_id, $limit);
 
-		//print_r($post_data);
 
 	    //"Comments_data"
 	   	$comment_data = Model_Comment::get_data($post_id);
@@ -77,10 +69,7 @@ class Controller_V1_Get extends Controller_V1_Base
 	   		"comments" 	=> $comment_data
 	   	);
 
-	   	$commentpage = json_encode($data,
-	   		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-
-	   	echo "$commentpage";
+	   	$status = $this->output_json($data);
 	}
 
 
@@ -108,10 +97,7 @@ class Controller_V1_Get extends Controller_V1_Base
 	   		"posts" => $post_data
 	   	);
 
-	   	$restaurantpage = json_encode($data,
-	   		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-
-	   	echo "$restaurantpage";
+	   	$status = $this->output_json($data);
 	}
 
 
@@ -137,10 +123,7 @@ class Controller_V1_Get extends Controller_V1_Base
 	   		"posts"  => $post_data
 	   	);
 
-	   	$userpage = json_encode($data,
-	   		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-
-	   	echo "$userpage";
+	   	$status = $this->output_json($data);
 	}
 
 
@@ -151,12 +134,7 @@ class Controller_V1_Get extends Controller_V1_Base
 
     	$data = Model_Notice::get_data($user_id);
 
-
-    	$notice = json_encode($data,
-    		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-
-	   	echo "$notice";
-
+    	$status = $this->output_json($data);
 
 	   	$tmp = Model_User::reset_badge($user_id);
 	}
@@ -170,11 +148,7 @@ class Controller_V1_Get extends Controller_V1_Base
 
 		$data = Model_Restaurant::get_near($lon, $lat);
 
-
-		$near = json_encode($data,
-    		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-
-	   	echo "$near";
+    	$status = $this->output_json($data);
 	}
 
 
@@ -186,10 +160,7 @@ class Controller_V1_Get extends Controller_V1_Base
 
 		$data = Model_Follow::get_follow($user_id, $target_user_id);
 
-		$follow_list = json_encode($data,
-    		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-
-	   	echo "$follow_list";
+    	$status = $this->output_json($data);
 	}
 
 
@@ -201,11 +172,7 @@ class Controller_V1_Get extends Controller_V1_Base
 
 		$data = Model_Follow::get_follower($user_id, $target_user_id);
 
-
-		$follower_list = json_encode($data,
-    		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-
-	   	echo "$follower_list";
+    	$status = $this->output_json($data);
 	}
 
 
@@ -215,11 +182,7 @@ class Controller_V1_Get extends Controller_V1_Base
 
 		$data = Model_Want::get_want($target_user_id);
 
-
-		$want_list = json_encode($data,
-    		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-
-	   	echo "$want_list";
+    	$status = $this->output_json($data);
 	}
 
 
@@ -229,11 +192,7 @@ class Controller_V1_Get extends Controller_V1_Base
 
 		$data = Model_Post::get_user_cheer($target_user_id);
 
-
-		$user_cheer_list = json_encode($data,
-    		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-
-	   	echo "$user_cheer_list";
+    	$status = $this->output_json($data);
 	}
 
 
@@ -243,11 +202,7 @@ class Controller_V1_Get extends Controller_V1_Base
 
 		$data = Model_Post::get_rest_cheer($rest_id);
 
-
-		$rest_cheer_list = json_encode($data,
-    		JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
-
-	   	echo "$rest_cheer_list";
+    	$status = $this->output_json($data);
 	}
 }
 
