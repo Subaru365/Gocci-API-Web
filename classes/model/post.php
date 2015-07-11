@@ -162,15 +162,15 @@ class Model_Post extends Model
 
 		$query = DB::insert('posts')
 		->set(array(
-			'post_user_id' => "$user_id",
-			'post_rest_id' => "$rest_id",
-			'movie'		   => "$movie",
-			'thmbnail'     => "$thumbnail",
-			'category_id'  => "category_id",
-			'tag_id'	   => "tag_id",
-			'value'        => "$value",
-			'memo'         => "$memo",
-			'cheer_flag'   => "$cheer_flag"
+			'post_user_id'      => "$user_id",
+			'post_rest_id'      => "$rest_id",
+			'movie'		        => "$movie",
+			'thumbnail'         => "$thumbnail",
+			'post_category_id'  => "$category_id",
+			'post_tag_id'	    => "$tag_id",
+			'value'        		=> "$value",
+			'memo'         		=> "$memo",
+			'cheer_flag'   		=> "$cheer_flag"
 		))
 		->execute();
 

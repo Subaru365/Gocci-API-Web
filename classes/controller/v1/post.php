@@ -1,5 +1,5 @@
 <?php
-header('Content-Type: application/json; charset=UTF-8');
+//header('Content-Type: application/json; charset=UTF-8');
 /*
 * POST API
 *　投稿に関するAPIです。
@@ -169,20 +169,20 @@ class Controller_V1_Post extends Controller_V1_Base
 		$memo        = Input::get('memo');
 		$cheer_flag  = Input::get('cheer_flag');
 
-		try
-		{
+//		try
+//		{
 			$result = Model_Post::post_data(
 				$user_id, $rest_id, $movie_name,
-				$category, $tag, $value, $memo, $cheer_flag);
+				$category_id, $tag_id, $value, $memo, $cheer_flag);
 			$status = $this->success($keyword);
-		}
+//		}
 
-		catch(\Database_Exception $e)
+/*		catch(\Database_Exception $e)
 		{
 			$status = $this->failed($keyword);
 			error_log($e);
 		}
-	}
+*/	}
 
 
 	//PostBlock
