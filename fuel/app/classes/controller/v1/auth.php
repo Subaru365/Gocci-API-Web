@@ -188,7 +188,7 @@ class Controller_V1_Auth extends Controller
 
 
     //DBデータ入力成功
-    private static function success(
+    private function success(
         $keyword, $user_id, $username,
         $profile_img, $identity_id, $badge_num, $token)
     {
@@ -203,12 +203,13 @@ class Controller_V1_Auth extends Controller
             'token'       => "$token"
         );
 
-        $status = $this->output_json($data)
+        $status = $this->output_json($data);
+        session::set('user_id', $user_id);
     }
 
 
     //DBデータ入力エラー
-    private static function failed(
+    private function failed(
         $keyword, $user_id, $username,
         $profile_img, $identity_id, $badge_num, $token)
     {
@@ -222,7 +223,7 @@ class Controller_V1_Auth extends Controller
             'token'       => "$token"
         );
 
-        $status = $this->output_json($data)
+        $status = $this->output_json($data);
     }
 
 

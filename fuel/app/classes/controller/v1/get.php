@@ -16,7 +16,7 @@ class Controller_V1_Get extends Controller_V1_Base
 
 		//"POST_Data"
 		$sort_key  = 'all';
-		$post_data = Model_Post::get_data($user_id, $sort_key, $sort_key);
+		$data = Model_Post::get_data($user_id, $sort_key, $sort_key);
 
 	   	$status = $this->output_json($data);
 	}
