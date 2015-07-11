@@ -40,9 +40,13 @@ class Model_Restaurant extends Model
 		))
 		->execute();
 
-		$query = DB::count_records('restaurants');
+		$query = DB::select('rest_id')->from('restaurants')
+        ->order_by('rest_id', 'desc')
+        ->limit   ('1');
 
-		//$rest_id = $query;
-		return $query;
+        $result = $query->execute()->as_array();
+        $rest_id = $result[0]['rest_id'];
+
+		return $rest_id;
 	}
 }
