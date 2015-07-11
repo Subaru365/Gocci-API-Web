@@ -14,7 +14,6 @@ error_reporting(-1);
 class Controller_V1_Auth extends Controller
 {
 
-
     //SNSサインイン
     public function action_sns()
     {
@@ -115,7 +114,6 @@ class Controller_V1_Auth extends Controller
         $status = $this->signup(
             $keyword, $user_id, $username, $profile_img,
             $os, $model, $register_id, $identity_id, $token);
-
     }
 
 
