@@ -25,7 +25,7 @@ class Controller_V1_Post extends Controller_V1_Base
 			$record = Model_Notice::post_data(
 				$keyword, $user_id, $target_user_id, $post_id);
 
-			$status   = Controller_V1_Post::success($keyword);
+			$status = $this->success($keyword);
 		}
 
 		catch(\Database_Exception $e)
@@ -240,7 +240,7 @@ class Controller_V1_Post extends Controller_V1_Base
 		try
 		{
 			if (empty($username)) {
-				$result = Model::update_profile_img($user_id, $profile_img)
+				$result = Model::update_profile_img($user_id, $profile_img);
 
 			}elseif (empty($profile_img)) {
 				$result = Model_User::update_name($user_id, $username);
