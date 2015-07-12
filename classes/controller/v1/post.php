@@ -1,5 +1,5 @@
 <?php
-//header('Content-Type: application/json; charset=UTF-8');
+header('Content-Type: application/json; charset=UTF-8');
 /*
 * POST API
 *　投稿に関するAPIです。
@@ -228,10 +228,10 @@ class Controller_V1_Post extends Controller_V1_Base
 	}
 
 
-	//PostDelete
+	//プロフィール編集
 	public function action_update_profile()
 	{
-		$keyword = 'ユーザー名を変更';
+		$keyword = 'プロフィールを変更';
 
 		$user_id     = session::get('user_id');
 		$username    = Input::get('username');
@@ -239,7 +239,10 @@ class Controller_V1_Post extends Controller_V1_Base
 
 		try
 		{
-			if (empty($username)) {
+			if (empty($username + $profile_img)) {
+				//更新なし
+
+			}elseif (empty($username)) {
 				$result = Model::update_profile_img($user_id, $profile_img);
 
 			}elseif (empty($profile_img)) {
@@ -250,7 +253,18 @@ class Controller_V1_Post extends Controller_V1_Base
 					$user_id, $username, $profile_img);
 			}
 
-			$status = $this->success($keyword);
+			$user_data   = Model_User::get_profile($user_id);
+			$username    = $user_data['username'];
+			$profile_img = $user_data['profile_img'];
+
+			$data = array(
+				'code' 	      => 200,
+				'message'     => "$keyword" . 'しました',
+				'username'    => "$username",
+				'profile_img' => "$profile_img"
+			);
+
+			$status = $this->output_json($data);
 		}
 
 		catch(\Database_Exception $e)
@@ -299,7 +313,7 @@ class Controller_V1_Post extends Controller_V1_Base
 
 			$data = array(
 				'code' 	  => 200,
-				'message' => "$keyword" . 'しました。',
+				'message' => "$keyword" . 'しました',
 				'rest_id' => "$rest_id"
 			);
 
