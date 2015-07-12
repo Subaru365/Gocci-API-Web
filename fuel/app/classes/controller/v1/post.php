@@ -229,16 +229,27 @@ class Controller_V1_Post extends Controller_V1_Base
 
 
 	//PostDelete
-	public function action_update_username()
+	public function action_update_profile()
 	{
 		$keyword = 'ユーザー名を変更';
 
-		$user_id  = session::get('user_id');
-		$username = Input::get('username');
+		$user_id     = session::get('user_id');
+		$username    = Input::get('username');
+		$profile_img = Input::get('profile_img');
 
 		try
 		{
-			$result = Model_User::update_name($user_id, $username);
+			if (empty($username)) {
+				$result = Model::update_profile_img($user_id, $profile_img)
+
+			}elseif (empty($profile_img)) {
+				$result = Model_User::update_name($user_id, $username);
+
+			}else{
+				$result = Model_User::update_profile(
+					$user_id, $username, $profile_img);
+			}
+
 			$status = $this->success($keyword);
 		}
 

@@ -142,6 +142,17 @@ class Model_User extends Model
     }
 
 
+    public static function update_profile_img($user_id, $profile_img)
+    {
+        $query = DB::update('users')
+        ->value('profile_img', "$profile_img")
+        ->where('user_id', "$user_id")
+        ->execute();
+
+        return $query;
+    }
+
+
     public static function update_name($user_id, $username)
     {
         $query = DB::update('users')
@@ -151,6 +162,21 @@ class Model_User extends Model
 
         return $query;
     }
+
+
+    public static function update_profile($user_id, $username, $profile_img)
+    {
+        $query = DB::update('users')
+        ->set(array(
+            'username'    => "$username",
+            'profile_img' => "$profile_img"
+        ))
+        ->where('user_id', "$user_id")
+        ->execute();
+
+        return $query;
+    }
+
 
 
 
