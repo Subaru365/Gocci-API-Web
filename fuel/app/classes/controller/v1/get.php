@@ -102,7 +102,7 @@ class Controller_V1_Get extends Controller_V1_Base
 
 
 	//User Page
-	public static function action_user()
+	public function action_user()
 	{
 		$user_id 		= session::get('user_id');
 		$target_user_id = Input::get('target_user_id');
@@ -117,13 +117,12 @@ class Controller_V1_Get extends Controller_V1_Base
         $post_data = Model_Post::get_data(
             $target_user_id, $sort_key, $target_user_id);
 
-
 	   	$data = array(
 	   		"header" => $user_data,
 	   		"posts"  => $post_data
 	   	);
 
-	   	$status = $this->output_json($data);
+		$status = $this->output_json($data);
 	}
 
 
