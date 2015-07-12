@@ -12,10 +12,9 @@ class Controller_V1_Get extends Controller_V1_Base
 	//Timeline Page
 	public function action_timeline()
     {
+    	$sort_key  = 'all';
         $user_id = session::get('user_id');
 
-		//"POST_Data"
-		$sort_key  = 'all';
 		$data = Model_Post::get_data($user_id, $sort_key, $sort_key);
 
 	   	$status = $this->output_json($data);
@@ -25,12 +24,10 @@ class Controller_V1_Get extends Controller_V1_Base
 	//Timeline更新
 	public function action_timeline_next()
 	{
-		$sort_key= 'next';
+		$sort_key = 'next';
         $user_id      = session::get('user_id');
         $next_post_id = Input::get('post_id');
 
-		//"POST_Data"
-		$sort_key  = 'next';
 		$data = Model_Post::get_data($user_id, $sort_key, $next_post_id);
 
 	   	$status = $this->output_json($data);
@@ -40,10 +37,8 @@ class Controller_V1_Get extends Controller_V1_Base
 	//Popular Page
 	public function action_popular()
     {
-        $user_id = session::get('user_id');
-
-		//"POST_Data"
-		$sort_key  = 'post';
+    	$sort_key = 'post';
+        $user_id  = session::get('user_id');
 
 		$post_id = Model_Gochi::get_rank();
 
@@ -62,22 +57,39 @@ class Controller_V1_Get extends Controller_V1_Base
 	}
 
 
+	//Popular Page
+	public function action_popular_next()
+    {
+    	$sort_key = 'post';
+        $user_id  = session::get('user_id');
+        $post_id  = Input::get('post_id');
+
+		$post_id = Model_Gochi::get_rank($post_id);
+
+		$num = count($post_id);
+
+		for ($i=0; $i < $num; $i++) {
+
+			$tmp[$i] = Model_Post::get_data(
+				$user_id, $sort_key, $post_id[$i]['gochi_post_id']);
+
+			$data[$i] =  $tmp[$i][0];
+		}
+
+	   	$status = $this->output_json($data);
+	}
+
+
 	//Comment Page
     public function action_comment()
     {
+    	$sort_key = 'post';
+
     	$user_id  = session::get('user_id');
         $post_id  = Input::get('post_id');
-        $limit = 1;
-        $sort_key = 'post';
 
-
-		//"POST_Data"
 		$post_data = Model_Post::get_data($user_id, $sort_key, $post_id, $limit);
-
-
-	    //"Comments_data"
 	   	$comment_data = Model_Comment::get_data($post_id);
-
 
 	   	$data = array(
 	   		"post" 		=> $post_data[0],
@@ -91,19 +103,17 @@ class Controller_V1_Get extends Controller_V1_Base
 	//Restaurant Page
 	public function action_rest()
     {
+    	$sort_key  = 'rest';
     	$user_id = session::get('user_id');
     	$rest_id = Input::get('rest_id');
 
 
-		//"Rest_Data"
 		$rest_data = Model_Restaurant::get_data($rest_id);
 
 		$want_flag = Model_Want::get_flag($user_id, $rest_id);
-		$rest_data['0']['want_flag']= $want_flag;
+		$rest_data['0']['want_flag'] = $want_flag;
 
 
-		//"POST_Data"
-		$sort_key  = 'rest';
 		$post_data = Model_Post::get_data($user_id, $sort_key, $rest_id);
 
 
@@ -119,18 +129,15 @@ class Controller_V1_Get extends Controller_V1_Base
 	//User Page
 	public function action_user()
 	{
+		$sort_key  = 'user';
 		$user_id 		= session::get('user_id');
 		$target_user_id = Input::get('target_user_id');
 
 
 		$user_data = Model_User::get_data($user_id, $target_user_id);
 
-
-        //"POST_Data"
-        $sort_key  = 'user';
-
         $post_data = Model_Post::get_data(
-            $target_user_id, $sort_key, $target_user_id);
+        	$target_user_id, $sort_key, $target_user_id);
 
 	   	$data = array(
 	   		"header" => $user_data,
@@ -148,9 +155,9 @@ class Controller_V1_Get extends Controller_V1_Base
 
     	$data = Model_Notice::get_data($user_id);
 
-    	$status = $this->output_json($data);
-
 	   	$tmp = Model_User::reset_badge($user_id);
+
+	   	$status = $this->output_json($data);
 	}
 
 

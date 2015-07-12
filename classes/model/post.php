@@ -38,9 +38,7 @@ class Model_Post extends Model
 		if ($sort_key == 'all') {
 			//何もしない。全て出力する。
 		}elseif ($sort_key == 'next') {
-			$limit_id = "$sort_id" + "$limit";
-			$query->where(
-				'post_id', 'between', array("$sort_id", "$limit_id"));
+			$query->offset("$limit");
 
 		}elseif ($sort_key == 'post') {
 			$query->where('posts.post_id', "$sort_id");
