@@ -6,10 +6,10 @@ class Model_Post extends Model
 	public static function get_data($user_id, $sort_key, $sort_id, $limit = 20)
 	{
 		$query = DB::select(
-			'posts.post_id', 'posts.post_user_id', 'users.username',
-			'users.profile_img', 'posts.post_rest_id', 'restaurants.restname',
-			'posts.movie', 'posts.thumbnail', 'categories.category', 'tags.tag',
-			'posts.value', 'posts.memo', 'posts.post_date', 'posts.cheer_flag'
+			'post_id', 'movie', 'thumbnail', 'category', 'tag', 'value',
+			'memo', 'post_date', 'cheer_flag',
+			'user_id', 'username', 'profile_img', 'rest_id', 'restname',
+			DB::expr('X(lon_lat), Y(lon_lat)')
 		)
 		->from('posts')
 
@@ -67,8 +67,8 @@ class Model_Post extends Model
 		for ($i=0; $i < $post_num; $i++) {
 
 			$post_id	  = $post_data[$i]['post_id'];
-			$post_user_id = $post_data[$i]['post_user_id'];
-			$post_rest_id = $post_data[$i]['post_rest_id'];
+			$post_user_id = $post_data[$i]['user_id'];
+			$post_rest_id = $post_data[$i]['rest_id'];
 			$post_date 	  = $post_data[$i]['post_date'];
 
 
