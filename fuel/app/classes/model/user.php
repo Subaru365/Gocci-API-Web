@@ -52,7 +52,19 @@ class Model_User extends Model
     }
 
 
-    //
+    //ユーザー名、プロフィール画像取得
+    public static function get_profile($user_id)
+    {
+        $query = DB::select('username', 'profile_img')
+        ->from('users')
+        ->where('user_id', "$user_id");
+
+        $username = $query->execute()->as_array();
+        return $username[0];
+    }
+
+
+    //通知数取得
     public static function get_badge($user_id)
     {
         $query = DB::select('badge_num')->from('users')
