@@ -22,6 +22,21 @@ class Controller_V1_Get extends Controller_V1_Base
 	}
 
 
+	//Timeline更新
+	public function action_timeline_next()
+	{
+		$sort_key= 'next';
+        $user_id      = session::get('user_id');
+        $next_post_id = Input::get('post_id');
+
+		//"POST_Data"
+		$sort_key  = 'next';
+		$data = Model_Post::get_data($user_id, $sort_key, $next_post_id);
+
+	   	$status = $this->output_json($data);
+	}
+
+
 	//Popular Page
 	public function action_popular()
     {
@@ -175,6 +190,7 @@ class Controller_V1_Get extends Controller_V1_Base
 	}
 
 
+	//行きたい登録リスト
 	public function action_want()
 	{
 		$target_user_id = Input::get('target_user_id');
@@ -185,6 +201,7 @@ class Controller_V1_Get extends Controller_V1_Base
 	}
 
 
+	//応援店舗リスト
 	public function action_user_cheer()
 	{
 		$target_user_id = Input::get('target_user_id');
@@ -195,6 +212,7 @@ class Controller_V1_Get extends Controller_V1_Base
 	}
 
 
+	//応援ユーザーリスト
 	public function action_rest_cheer()
 	{
 		$user_id = Input::get('user_id');
