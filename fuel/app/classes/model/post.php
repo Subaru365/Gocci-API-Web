@@ -38,7 +38,8 @@ class Model_Post extends Model
 		if ($sort_key == 'all') {
 			//何もしない。全て出力する。
 		}elseif ($sort_key == 'next') {
-			$query->offset("$limit");
+			$sort = $sort_id * $limit;
+			$query->offset("$sort");
 
 		}elseif ($sort_key == 'post') {
 			$query->where('posts.post_id', "$sort_id");

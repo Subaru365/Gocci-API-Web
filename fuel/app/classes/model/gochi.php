@@ -41,10 +41,10 @@ class Model_Gochi extends Model
 
 
 	//gochi順に投稿を格納する
-	public static function get_rank($post_id = 0, $limit = 20)
+	public static function get_rank($call_num = 0, $limit = 3)
 	{
 		//対象となる投稿の期間($interval)
-		$now_date = date("Y-m-d");
+		$now_date = date("Y-m-d",strtotime("+1 day"));
 		$interval = date("Y-m-d",strtotime("-3 month"));
 
 
@@ -62,8 +62,9 @@ class Model_Gochi extends Model
 
 		->limit("$limit");
 
-		if ($post_id != 0) {
-			$query->offset("$limit");
+		if ($call_num != 0) {
+			$sort = $call_num * $limit;
+			$query->offset("$sort");
 		}
 
 		$result = $query->execute()->as_array();

@@ -25,10 +25,10 @@ class Controller_V1_Get extends Controller_V1_Base
 	public function action_timeline_next()
 	{
 		$sort_key = 'next';
-        $user_id      = session::get('user_id');
-        $next_post_id = Input::get('post_id');
+        $user_id  = session::get('user_id');
+        $call_num = Input::get('call');
 
-		$data = Model_Post::get_data($user_id, $sort_key, $next_post_id);
+		$data = Model_Post::get_data($user_id, $sort_key, $call_num);
 
 	   	$status = $this->output_json($data);
 	}
@@ -46,9 +46,8 @@ class Controller_V1_Get extends Controller_V1_Base
 		$num = count($post_id);
 
 		for ($i=0; $i < $num; $i++) {
-
 			$tmp[$i] = Model_Post::get_data(
-				$user_id, $sort_key, $post_id[$i]['gochi_post_id']);
+				$user_id, $sort_key, $post_id[$i]['post_id']);
 
 			$data[$i] =  $tmp[$i][0];
 		}
@@ -62,18 +61,22 @@ class Controller_V1_Get extends Controller_V1_Base
     {
     	$sort_key = 'post';
         $user_id  = session::get('user_id');
-        $post_id  = Input::get('post_id');
+        $call_num = Input::get('call');
 
-		$post_id = Model_Gochi::get_rank($post_id);
+		$post_id = Model_Gochi::get_rank($call_num);
 
 		$num = count($post_id);
 
 		for ($i=0; $i < $num; $i++) {
 
 			$tmp[$i] = Model_Post::get_data(
-				$user_id, $sort_key, $post_id[$i]['gochi_post_id']);
+				$user_id, $sort_key, $post_id[$i]['post_id']);
 
 			$data[$i] =  $tmp[$i][0];
+		}
+
+		if ($num == 0) {
+			$data = array();
 		}
 
 	   	$status = $this->output_json($data);
