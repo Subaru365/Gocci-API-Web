@@ -197,9 +197,18 @@ class Controller_V1_Get extends Controller_V1_Base
 
 	public function action_rest_cheer()
 	{
+		$user_id = Input::get('user_id');
 		$rest_id = Input::get('rest_id');
 
 		$data = Model_Post::get_rest_cheer($rest_id);
+
+		$num = count($data);
+
+		for ($i=0; $i < $num; $i++) {
+			$target_user_id = $data[$i]['user_id'];
+			$follow_flag = Model_Follow::get_flag($user_id, $target_user_id);
+			$data[$i]['follow_flag'] = $follow_flag;
+		}
 
     	$status = $this->output_json($data);
 	}

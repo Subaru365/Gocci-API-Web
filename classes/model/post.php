@@ -96,6 +96,7 @@ class Model_Post extends Model
 	}
 
 
+	//1ユーザーが応援している店舗リスト
 	public static function get_user_cheer($user_id)
 	{
 		$query = DB::select('rest_id', 'restname', 'locality')
@@ -115,6 +116,7 @@ class Model_Post extends Model
 	}
 
 
+	//1店舗に対して応援しているユーザーリスト
 	public static function get_rest_cheer($rest_id)
 	{
 		$query = DB::select('user_id', 'username', 'profile_img')
@@ -152,6 +154,7 @@ class Model_Post extends Model
 	}
 
 
+	//動画投稿
 	public static function post_data(
 		$user_id, $rest_id, $movie_name,
 		$category_id, $tag_id, $value, $memo, $cheer_flag)
