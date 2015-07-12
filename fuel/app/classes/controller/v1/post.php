@@ -169,20 +169,20 @@ class Controller_V1_Post extends Controller_V1_Base
 		$memo        = Input::get('memo');
 		$cheer_flag  = Input::get('cheer_flag');
 
-//		try
-//		{
+		try
+		{
 			$result = Model_Post::post_data(
 				$user_id, $rest_id, $movie_name,
 				$category_id, $tag_id, $value, $memo, $cheer_flag);
 			$status = $this->success($keyword);
-//		}
+		}
 
-/*		catch(\Database_Exception $e)
+		catch(\Database_Exception $e)
 		{
 			$status = $this->failed($keyword);
 			error_log($e);
 		}
-*/	}
+	}
 
 
 	//PostBlock
@@ -228,26 +228,18 @@ class Controller_V1_Post extends Controller_V1_Base
 	}
 
 
-	//RestAdd
-	public function action_restadd()
+	//PostDelete
+	public function action_update_username()
 	{
-		$keyword = '店舗を追加';
+		$keyword = 'ユーザー名を変更';
 
-		$rest_name = Input::get('rest_name');
-		$lat 	   = Input::get('lat');
-		$lon	   = Input::get('lon');
+		$user_id  = session::get('user_id');
+		$username = Input::get('username');
 
 		try
 		{
-			$rest_id = Model_Restaurant::post_add($rest_name, $lat, $lon);
-
-			$data = array(
-				'code' 	  => 200,
-				'message' => "$keyword" . 'しました。',
-				'rest_id' => "$rest_id"
-			);
-
-			$status = $this->output_json($data);
+			$result = Model_User::update_name($user_id, $username);
+			$status = $this->success($keyword);
 		}
 
 		catch(\Database_Exception $e)
@@ -279,6 +271,37 @@ class Controller_V1_Post extends Controller_V1_Base
 			error_log($e);
 		}
 	}
+
+
+	//RestAdd
+	public function action_restadd()
+	{
+		$keyword = '店舗を追加';
+
+		$rest_name = Input::get('rest_name');
+		$lat 	   = Input::get('lat');
+		$lon	   = Input::get('lon');
+
+		try
+		{
+			$rest_id = Model_Restaurant::post_add($rest_name, $lat, $lon);
+
+			$data = array(
+				'code' 	  => 200,
+				'message' => "$keyword" . 'しました。',
+				'rest_id' => "$rest_id"
+			);
+
+			$status = $this->output_json($data);
+		}
+
+		catch(\Database_Exception $e)
+		{
+			$status = $this->failed($keyword);
+			error_log($e);
+		}
+	}
+
 
 
 
@@ -322,7 +345,7 @@ class Controller_V1_Post extends Controller_V1_Base
 	{
 		$data = array(
 			'code' 	  => 200,
-			'message' => "$keyword" . 'しました。'
+			'message' => "$keyword" . 'しました'
 		);
 
 		$status = $this->output_json($data);
@@ -334,7 +357,7 @@ class Controller_V1_Post extends Controller_V1_Base
 	{
 		$data = array(
 			'code' 	  => 401,
-			'message' => "$keyword" . 'できませんでした。'
+			'message' => "$keyword" . 'できませんでした'
 		);
 
 		$status = $this->output_json($data);
