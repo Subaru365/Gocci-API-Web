@@ -59,8 +59,12 @@ class Model_User extends Model
         ->from('users')
         ->where('user_id', "$user_id");
 
-        $username = $query->execute()->as_array();
-        return $username[0];
+        $user_data = $query->execute()->as_array();
+
+        $user_data[0]['profile_img'] =
+            self::decode_profile_img($user_data[0]['profile_img']);
+
+        return $user_data[0];
     }
 
 
@@ -84,6 +88,10 @@ class Model_User extends Model
         ->where('identity_id', "$identity_id");
 
         $user_data = $query->execute()->as_array();
+
+        $user_data[0]['profile_img'] =
+            self::decode_profile_img($user_data[0]['profile_img']);
+
         return $user_data[0];
     }
 
@@ -99,6 +107,9 @@ class Model_User extends Model
 
         $user_data = $query->execute()->as_array();
 
+
+        $user_data[0]['profile_img'] =
+            self::decode_profile_img($user_data[0]['profile_img']);
 
         //---------------------------------------------------------//
         //付加情報格納(follow_num, fllower_num, cheer_num, status_flag)
@@ -127,7 +138,11 @@ class Model_User extends Model
     public static function post_data($username, $profile_img, $identity_id)
     {
         if ($profile_img == 'none') {
-        $profile_img = 'https://s3-us-west-2.amazonaws.com/gocci.img.provider/tosty_' . mt_rand(1, 7) . '.png';
+            $profile_img = 'http://test.imgs.gocci.me/0_tosty_' . mt_rand(1, 7) . '.png';
+
+        }else{
+            $profile_img = self::encode_profile_img($profile_img);
+
         }
 
         $query = DB::insert('users')
@@ -156,6 +171,8 @@ class Model_User extends Model
 
     public static function update_profile_img($user_id, $profile_img)
     {
+        $profile_img = self::encode_profile_img($profile_img);
+
         $query = DB::update('users')
         ->value('profile_img', "$profile_img")
         ->where('user_id', "$user_id")
@@ -178,6 +195,8 @@ class Model_User extends Model
 
     public static function update_profile($user_id, $username, $profile_img)
     {
+        $profile_img = self::encode_profile_img($profile_img);
+
         $query = DB::update('users')
         ->set(array(
             'username'    => "$username",
@@ -211,6 +230,8 @@ class Model_User extends Model
     public static function update_data(
         $user_id, $username, $profile_img, $identity_id)
     {
+        $profile_img = self::encode_profile_img($profile_img);
+
         $query = DB::update('users')
         ->set(array(
             'username'    => "$username",
@@ -221,6 +242,24 @@ class Model_User extends Model
         ->execute();
 
         return $query;
+    }
+
+
+    private static function encode_profile_img($profile_img)
+    {
+        $split     = explode('_', $profile_img);
+        $directory = explode('-', $split[1]);
+
+        $profile_img =
+            "$directory[0]" . '/' . "$directory[1]" . '/' . "$profile_img" . '_img.png';
+
+        return $profile_img;
+    }
+
+
+    private static function decode_profile_img($profile_img)
+    {
+        return $profile_img = 'http://test.imgs.gocci.me/' . "$profile_img";
     }
 
 

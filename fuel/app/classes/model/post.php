@@ -55,7 +55,6 @@ class Model_Post extends Model
 			exit;
 		}
 
-		//配列[comments]に格納
 
 		$post_data = $query->execute()->as_array();
 		$post_num  = count($post_data);
@@ -68,6 +67,19 @@ class Model_Post extends Model
 
 
 		for ($i=0; $i < $post_num; $i++) {
+
+			$movie     = $post_data[$i]['movie'];
+			$thumbnail = $post_data[$i]['thumbnail'];
+
+			$post_data[$i]['movie'] =
+				'http://test.hls-movies.gocci.me/' . "$movie" . '.m3u8';
+
+			$post_data[$i]['thumbnail'] =
+				'http://test.thumbnails.gocci.me/' . "$thumbnail";
+
+			$post_data[$i]['profile_img'] =
+				self::decode_profile_img($post_data[$i]['profile_img']);
+
 
 			$post_id	  = $post_data[$i]['post_id'];
 			$post_user_id = $post_data[$i]['user_id'];
@@ -135,6 +147,14 @@ class Model_Post extends Model
 		->distinct(true);
 
 		$cheer_list = $query->execute()->as_array();
+
+		$num = count($cheer_list);
+
+		for ($i=0; $i < $num; $i++) {
+			$cheer_list[$i]['profile_img'] =
+				self::decode_profile_img($cheer_list[$i]['profile_img']);
+		}
+
 		return $cheer_list;
 	}
 
@@ -162,8 +182,13 @@ class Model_Post extends Model
 		$user_id, $rest_id, $movie_name,
 		$category_id, $tag_id, $value, $memo, $cheer_flag)
 	{
-		$movie     = "$movie_name" . '-movie.ts';
-		$thumbnail = '0002-' . "$movie_name" . '-img.png';
+		$directory = explode('-', $movie_name);
+
+		$movie     = "$directory[0]" . '/' . "$directory[1]" . '/'
+					 . "$movie_name" . '_movie';
+
+		$thumbnail = "$directory[0]" . '/' . "$directory[1]" . '/'
+					 . '00002_' . "$movie_name" . '_img.png';
 
 
 		$query = DB::insert('posts')
@@ -195,5 +220,25 @@ class Model_Post extends Model
 
 		return $result;
 	}
+
+
+	//==========================================================================//
+
+	private static function encode_profile_img($profile_img)
+    {
+        $split     = explode('_', $profile_img);
+        $directory = explode('-', $split[1]);
+
+        $profile_img =
+            "$directory[0]" . '/' . "$directory[1]" . '/' . "$profile_img" . '_img.png';
+
+        return $profile_img;
+    }
+
+
+	private static function decode_profile_img($profile_img)
+    {
+        return $profile_img = 'http://test.imgs.gocci.me/' . "$profile_img";
+    }
 
 }

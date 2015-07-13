@@ -91,7 +91,7 @@ class Controller_V1_Get extends Controller_V1_Base
     	$user_id  = session::get('user_id');
         $post_id  = Input::get('post_id');
 
-		$post_data = Model_Post::get_data($user_id, $sort_key, $post_id, $limit);
+		$post_data = Model_Post::get_data($user_id, $sort_key, $post_id);
 	   	$comment_data = Model_Comment::get_data($post_id);
 
 	   	$data = array(
