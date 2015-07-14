@@ -12,7 +12,6 @@ class Controller_V1_Post extends Controller_V1_Base
 	public function action_gochi()
 	{
 		$keyword = 'gochi!';
-
 		$user_id = session::get('user_id');
 		$post_id = Input::get('post_id');
 
@@ -39,11 +38,10 @@ class Controller_V1_Post extends Controller_V1_Base
 	//Comment
 	public function action_comment()
 	{
+		$keyword = 'コメント';
 		$user_id = session::get('user_id');
 		$post_id = Input::get('post_id');
 		$comment = Input::get('comment');
-
-		$keyword = 'コメント';
 
 		try
 		{
@@ -69,11 +67,11 @@ class Controller_V1_Post extends Controller_V1_Base
 	{
 		$keyword = 'フォロー';
 		$user_id 		= session::get('user_id');
-		$follow_user_id = Input::get('target_user_id');
+		$target_user_id = Input::get('target_user_id');
 
 		try
 		{
-			$result = Model_Follow::post_follow($user_id, $follow_user_id);
+			$result = Model_Follow::post_follow($user_id, $target_user_id);
 
 			$record = Model_Notice::post_data(
 				$keyword, $user_id, $follow_user_id);

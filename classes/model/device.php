@@ -3,22 +3,12 @@ class Model_Device extends Model
 {
     public static function check_device($register_id)
     {
-        $query = DB::select('device_id')->from('devices')
-        ->where('register_id', "$register_id");
-
-        $device_id = $query->execute()->as_array();
-        return $device_id;
-    }
-
-
-    public static function get_old_data($register_id)
-    {
         $query = DB::select('device_user_id', 'endpoint_arn')
         ->from('devices')
         ->where('register_id', "$register_id");
 
-        $old_data = $query->execute()->as_array();
-        return $old_data;
+        $device_data = $query->execute()->as_array();
+        return $device_data;
     }
 
 
