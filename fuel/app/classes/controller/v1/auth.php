@@ -89,16 +89,16 @@ class Controller_V1_Auth extends Controller
         $register_id = Input::get('register_id');
 
 
-        $check_device = Model_Device::check_device($register_id);
+        $device_data = Model_Device::check_device($register_id);
 
         if (empty($check_device)) {
 
 
         }else{
+        //既存登録端末あり
 
-            $old_data = Model_Device::get_old_data($register_id);
-            $user_id_old = $old_data[0]['device_user_id'];
-            $endpoint_arn= $old_data[0]['endpoint_arn'];
+            $user_id_old = $device_data[0]['device_user_id'];
+            $endpoint_arn= $device_data[0]['endpoint_arn'];
 
             $tmp = Model_Sns::delete_endpoint($endpoint_arn);
             $tmp = Model_Device::delete_device($user_id_old);

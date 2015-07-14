@@ -13,6 +13,17 @@ class Model_User extends Model
     }
 
 
+    public static function check_name($username)
+    {
+        $query = DB::select('username')->from('users')
+        ->where('username', "$username");
+
+        $username = $query->execute()->as_array();
+
+        return $username;
+    }
+
+
     //ログインフラグ取得
     public static function check_login($user_id)
     {
