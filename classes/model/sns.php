@@ -13,24 +13,23 @@ class Model_Sns extends Model
         $brand = explode('_', $os);
 
         if ($brand[0] == 'android') {
-            $endpoint_arn = Model_Sns::post_android(
-            $user_id, $identity_id, $register_id);
+            $endpoint_arn = self::post_android(
+            	$user_id, $identity_id, $register_id);
 
         }elseif ($brand[0] == 'iOS') {
-			$endpoint_arn = Model_Sns::post_iOS(
+			$endpoint_arn = self::post_iOS(
 				$user_id, $identity_id, $register_id);
 
 		}else{
-            //Webかな？
-            $endpoint_arn = 'none';
             error_log('Model_Sns: endpoint_arn 未発行');
+            exit;
         }
 
         return $endpoint_arn;
 	}
 
 
-	public static function post_android($user_id, $identity_id, $register_id)
+	private static function post_android($user_id, $identity_id, $register_id)
 	{
 		$client = new SnsClient([
 			'region'  => 'ap-northeast-1',
@@ -47,7 +46,7 @@ class Model_Sns extends Model
 	}
 
 
-	public static function post_iOS($user_id, $identity_id, $register_id)
+	private static function post_iOS($user_id, $identity_id, $register_id)
 	{
 		$client = new SnsClient([
 			'region'  => 'ap-northeast-1',
@@ -93,7 +92,4 @@ class Model_Sns extends Model
     		'EndpointArn' => "$endpoint_arn",
 		]);
 	}
-
-
 }
-

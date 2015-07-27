@@ -5,21 +5,22 @@
 
 class Controller_V1_Base extends Controller
 {
-
+	//Check session
 	public function before()
 	{
 		 $user_id = session::get('user_id');
 
 		if(empty($user_id))
 		{
-			$unauth = $this->unauth();
+			self::unauth();
 			error_log('UnAuthorized Accsess..');
 			exit;
 		}
 	}
 
 
-	private function unauth()
+	//Not set session
+	private static function unauth()
 	{
 		$status = array(
 			'code'   => '401',
@@ -34,7 +35,15 @@ class Controller_V1_Base extends Controller
 	}
 
 
-	public function output_json($data)
+	//None {}
+    public static function output_none()
+    {
+        echo '{}';
+    }
+
+
+    //JSON Encode
+	public static function output_json($data)
 	{
 		$json = json_encode(
 			$data,

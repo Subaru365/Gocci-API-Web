@@ -8,7 +8,7 @@ use Aws\CognitoSync\CognitoSyncClient;
 */
 class Model_Cognito extends Model
 {
-
+    public $IdentityPoolId = 'us-east-1:a8cc1fdb-92b1-4586-ba97-9e6994a43195';
 	//IdentityID取得 DataSet [User_Info]
 	public static function post_data($user_id, $username, $os, $model, $register_id)
 	{
@@ -25,29 +25,23 @@ class Model_Cognito extends Model
     		'IdentityPoolId' => "$IdentityPoolId",
    			'Logins' => ['login.inase.gocci'=> "$user_id",],
 		]);
-
-		//$identity_id = $result['IdentityId'];
-		$cognito_data = $result;
-		$identity_id = $cognito_data['IdentityId'];
+        $identity_id = $result['IdentityId'];
 
 		//CognitoSync Dataset 外部処理
         $ch = curl_init();
 
         curl_setopt($ch, CURLOPT_URL,
-            'http://localhost/v1/background/cognito/dataset/?' .
+            'http://localhost/v1/background/dataset/?' .
                 'identity_id=' . "$identity_id" . '&' .
                 'username='    . "$username"    . '&' .
                 'os='          . "$os"          . '&' .
                 'model='       . "$model"       . '&' .
                 'register_id=' . "$register_id"
         );
-
         curl_exec($ch);
-        //curl_close($ch);
+        curl_close($ch);
 
-
-		//return $identity_id;
-		return $cognito_data;
+		return $result;
 	}
 
 
@@ -59,11 +53,23 @@ class Model_Cognito extends Model
     		'version' => 'latest'
 		]);
 
-		$result = $client->getOpenIdTokenForDeveloperIdentity([
-    		'IdentityId'     => "$identity_id",
-    		'IdentityPoolId' => 'us-east-1:a8cc1fdb-92b1-4586-ba97-9e6994a43195',
-    		'Logins'         => ['login.inase.gocci' => "$user_id",],
-		]);
+        /*
+        $identity_data = [
+            'IdentityId'     => "$identity_id",
+            'IdentityPoolId' => 'us-east-1:a8cc1fdb-92b1-4586-ba97-9e6994a43195',
+            'Logins'         => ['login.inase.gocci' => "$user_id",],
+        ];
+        */
+
+		// $result = $client->getOpenIdTokenForDeveloperIdentity($identity_data);
+        
+        $result = $client->getOpenIdTokenForDeveloperIdentity(array(
+            'IdentityPoolId' => "us-east-1:a8cc1fdb-92b1-4586-ba97-9e6994a43195",
+            'IdentityId'     => "$identity_id",
+            'Logins'         => array(
+                'login.inase.gocci' => "$user_id",
+            ),
+        ));
 
 		return $result['Token'];
 	}
@@ -87,5 +93,58 @@ class Model_Cognito extends Model
 	}
 
 
+	public static function dataset(
+		$identity_id, $username, $os, $model, $register_id)
+	{
+		$client = new CognitoSyncClient([
+            'region'  => 'us-east-1',
+            'version' => 'latest'
+        ]);
+		
+		//SyncSessionToken取得
+        $result = $client->listRecords([
+            'DatasetName'    => 'user_info',
+            'IdentityId'     => "$identity_id",
+            'IdentityPoolId' => 'us-east-1:a8cc1fdb-92b1-4586-ba97-9e6994a43195',
+        ]);
+
+        $sync_session_token = $result['SyncSessionToken'];
+
+
+        //DataSet
+        $result = $client->updateRecords([
+            'DatasetName'    => 'user_info',
+            'IdentityId'     => "$identity_id",
+			#'IdentityPoolId' => "$IdentityPoolId",
+            'IdentityPoolId' => 'us-east-1:a8cc1fdb-92b1-4586-ba97-9e6994a43195',
+            'RecordPatches'  => [
+                [
+                    'Key' => 'username',
+                    'Op' => 'replace',
+                    'SyncCount' => 0,
+                    'Value' => "$username",
+                ],
+                [
+                    'Key' => 'os',
+                    'Op' => 'replace',
+                    'SyncCount' => 0,
+                    'Value' => "$os",
+                ],
+                [
+                    'Key' => 'model',
+                    'Op' => 'replace',
+                    'SyncCount' => 0,
+                    'Value' => "$model",
+                ],
+                [
+                    'Key' => 'register_id',
+                    'Op' => 'replace',
+                    'SyncCount' => 0,
+                    'Value' => "$register_id",
+                ],
+            ],
+            'SyncSessionToken' => "$sync_session_token",
+        ]);
+	}
 }
 
