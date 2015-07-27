@@ -8,19 +8,18 @@ class Model_Follow extends Model
 		$query = DB::select(
 			'user_id', 'username', 'profile_img'
 		)
-		->from('follows')
-
-		->join('users', 'INNER')
-		->on('follow_p_user_id', '=', 'user_id')
-
-		->where ('follow_a_user_id', "$target_user_id");
+		->from ('follows')
+		->join ('users', 'INNER')
+		->on   ('follow_p_user_id', '=', 'user_id')
+		->where('follow_a_user_id', "$target_user_id");
 
 		$follow_list = $query->execute()->as_array();
-
 
 		$follow_num = count($follow_list);
 
 		for ($i=0; $i < $follow_num; $i++) {
+			$follow_list[$i]['profile_img'] = 
+				Model_Transcode::decode_profile_img($follow_list[0]['profile_img']);
 
 			$follow_list[$i]['follow_flag'] = Model_Follow::get_flag(
 				$user_id, $follow_list[$i]['user_id']);
@@ -36,22 +35,21 @@ class Model_Follow extends Model
 		$query = DB::select(
 			'user_id', 'username', 'profile_img'
 		)
-		->from('follows')
-
-		->join('users', 'INNER')
-		->on('follow_a_user_id', '=', 'user_id')
-
-		->where ('follow_p_user_id', "$target_user_id");
+		->from ('follows')
+		->join ('users', 'INNER')
+		->on   ('follow_a_user_id', '=', 'user_id')
+		->where('follow_p_user_id', "$target_user_id");
 
 		$follower_list = $query->execute()->as_array();
-
 
 		$follower_num = count($follower_list);
 
 		for ($i=0; $i < $follower_num; $i++) {
+			$follower_list[$i]['profile_img'] = 
+				Model_Transcode::decode_profile_img($follower_list[0]['profile_img']);
 
-			$follower_list[$i]['follow_flag'] = Model_Follow::get_flag(
-				$user_id, $follower_list[$i]['user_id']);
+			$follower_list[$i]['follow_flag'] = 
+				Model_Follow::get_flag($user_id, $follower_list[$i]['user_id']);
 		}
 
 		return $follower_list;
@@ -61,10 +59,10 @@ class Model_Follow extends Model
 	//相手のユーザーに対してフォローしてるかフラグで返す
 	public static function get_flag($user_id, $target_user_id)
 	{
-		$query = DB::select('follow_id')->from('follows')
-
-		->where 	('follow_a_user_id', "$user_id")
-		->and_where ('follow_p_user_id', "$target_user_id");
+		$query = DB::select('follow_id')
+		->from     ('follows')
+		->where    ('follow_a_user_id', "$user_id")
+		->and_where('follow_p_user_id', "$target_user_id");
 
 		$result = $query->execute()->as_array();
 
@@ -82,11 +80,11 @@ class Model_Follow extends Model
 	//フォロー数を返す
 	public static function follow_num($user_id)
 	{
-		$query = DB::select('follow_id')->from('follows')
-		->where	('follow_a_user_id', "$user_id");
+		$query = DB::select('follow_id')
+		->from ('follows')
+		->where('follow_a_user_id', "$user_id");
 
 		$result = $query->execute()->as_array();
-
 
 		$follow_num = count($result);
 		return $follow_num;
@@ -96,11 +94,11 @@ class Model_Follow extends Model
 	//フォロワー数を返す
 	public static function follower_num($user_id)
 	{
-		$query = DB::select('follow_id')->from('follows')
-		->where ('follow_p_user_id', "$user_id");
+		$query = DB::select('follow_id')
+		->from ('follows')
+		->where('follow_p_user_id', "$user_id");
 
 		$result = $query->execute()->as_array();
-
 
 		$follower_num = count($result);
 		return $follower_num;
@@ -133,5 +131,4 @@ class Model_Follow extends Model
 
 		return $result;
 	}
-
 }

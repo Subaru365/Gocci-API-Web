@@ -7,8 +7,5 @@ class Model_Login extends Model
 		$result = DB::insert('logins')
 		->set(array('login_user_id' => "$user_id"))
 		->execute();
-
-		return $result;
 	}
-
 }

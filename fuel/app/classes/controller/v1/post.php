@@ -5,7 +5,6 @@ header('Content-Type: application/json; charset=UTF-8');
 *　投稿に関するAPIです。
 *　関数名の内容をPOSTします。
 */
-
 class Controller_V1_Post extends Controller_V1_Base
 {
 	//Gochi!
@@ -24,12 +23,12 @@ class Controller_V1_Post extends Controller_V1_Base
 			$record = Model_Notice::post_data(
 				$keyword, $user_id, $target_user_id, $post_id);
 
-			$status = $this->success($keyword);
+			self::success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = $this->failed($keyword);
+			self::failed($keyword);
 			error_log($e);
 		}
 	}
@@ -51,12 +50,12 @@ class Controller_V1_Post extends Controller_V1_Base
 			$record = Model_Notice::post_data(
 				$keyword, $user_id, $target_user_id, $post_id);
 
-			$status = $this->success($keyword);
+			self::success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = $this->failed($keyword);
+			self::failed($keyword);
 			error_log($e);
 		}
 	}
@@ -76,12 +75,12 @@ class Controller_V1_Post extends Controller_V1_Base
 			$record = Model_Notice::post_data(
 				$keyword, $user_id, $follow_user_id);
 
-			$status = $this->success($keyword);
+			self::success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = $this->failed($keyword);
+			self::failed($keyword);
 			error_log($e);
 		}
 	}
@@ -91,19 +90,18 @@ class Controller_V1_Post extends Controller_V1_Base
 	public function action_unfollow()
 	{
 		$keyword = 'フォローを解除';
-
 		$user_id   		  = session::get('user_id');
 		$unfollow_user_id = Input::get('target_user_id');
 
 		try
 		{
 			$result = Model_Follow::post_unfollow($user_id, $unfollow_user_id);
-			$status = $this->success($keyword);
+			self::success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = $this->failed($keyword);
+			self::failed($keyword);
 			error_log($e);
 		}
 	}
@@ -113,19 +111,18 @@ class Controller_V1_Post extends Controller_V1_Base
 	public function action_want()
 	{
 		$keyword = '行きたい店リストに追加';
-
 		$user_id = session::get('user_id');
 		$rest_id = Input::get('rest_id');
 
 		try
 		{
 			$result = Model_Want::post_want($user_id, $rest_id);
-			$status = $this->success($keyword);
+			self::success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = $this->failed($keyword);
+			self::failed($keyword);
 			error_log($e);
 		}
 	}
@@ -135,19 +132,18 @@ class Controller_V1_Post extends Controller_V1_Base
 	public function action_unwant()
 	{
 		$keyword = '行きたい店リストから解除';
-
 		$user_id = session::get('user_id');
 		$rest_id = Input::get('rest_id');
 
 		try
 		{
 			$result = Model_Want::post_unwant($user_id, $rest_id);
-			$status = $this->success($keyword);
+			self::success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = $this->failed($keyword);
+			self::failed($keyword);
 			error_log($e);
 		}
 	}
@@ -156,8 +152,7 @@ class Controller_V1_Post extends Controller_V1_Base
 	//Post
 	public function action_post()
 	{
-		$keyword = '投稿';
-
+		$keyword     = '投稿';
 		$user_id     = session::get('user_id');
 		$rest_id     = Input::get('rest_id');
 		$movie_name  = Input::get('movie_name');
@@ -172,12 +167,12 @@ class Controller_V1_Post extends Controller_V1_Base
 			$result = Model_Post::post_data(
 				$user_id, $rest_id, $movie_name,
 				$category_id, $tag_id, $value, $memo, $cheer_flag);
-			$status = $this->success($keyword);
+			self::success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = $this->failed($keyword);
+			self::failed($keyword);
 			error_log($e);
 		}
 	}
@@ -187,19 +182,18 @@ class Controller_V1_Post extends Controller_V1_Base
 	public function action_postblock()
 	{
 		$keyword = '投稿を違反報告';
-
 		$user_id = session::get('user_id');
 		$post_id = Input::get('post_id');
 
 		try
 		{
 			$result = Model_Block::post_block($user_id, $post_id);
-			$status = $this->success($keyword);
+			self::success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = $this->failed($keyword);
+			self::failed($keyword);
 			error_log($e);
 		}
 	}
@@ -209,20 +203,30 @@ class Controller_V1_Post extends Controller_V1_Base
 	public function action_postdel()
 	{
 		$keyword = '投稿を消去';
-
 		$post_id = Input::get('post_id');
 
 		try
 		{
 			$result = Model_Post::post_delete($post_id);
-			$status = $this->success($keyword);
+			self::success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = $this->failed($keyword);
+			self::failed($keyword);
 			error_log($e);
 		}
+	}
+
+
+	//SNS Link
+	public function action_sns()
+	{
+		$user_id = session::get('user_id');
+		$profile_img_url = Input::get('profile_img_url');
+
+		$profile_img = Model_S3::input($user_id, $profile_img_url);
+		Model_User::update_profile_img($user_id, $profile_img);
 	}
 
 
@@ -230,7 +234,6 @@ class Controller_V1_Post extends Controller_V1_Base
 	public function action_update_profile()
 	{
 		$keyword = 'プロフィールを変更';
-
 		$user_id     = session::get('user_id');
 		$username    = Input::get('username');
 		$profile_img = Input::get('profile_img');
@@ -238,15 +241,19 @@ class Controller_V1_Post extends Controller_V1_Base
 		try
 		{
 			if (empty($username + $profile_img)) {
-				//更新なし
+			//更新なし
 
 			}elseif (empty($username)) {
-				$result = Model::update_profile_img($user_id, $profile_img);
+			//プロフィール画像更新
+				$result = Model_User::update_profile_img($user_id, $profile_img);
 
 			}elseif (empty($profile_img)) {
+			//ユーザーネーム更新
+				Model_User::check_name($username);
 				$result = Model_User::update_name($user_id, $username);
 
 			}else{
+			//両方更新
 				$result = Model_User::update_profile(
 					$user_id, $username, $profile_img);
 			}
@@ -261,13 +268,12 @@ class Controller_V1_Post extends Controller_V1_Base
 				'username'    => "$username",
 				'profile_img' => "$profile_img"
 			);
-
-			$status = $this->output_json($data);
+			self::output_json($data);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = $this->failed($keyword);
+			self::failed($keyword);
 			error_log($e);
 		}
 	}
@@ -277,7 +283,6 @@ class Controller_V1_Post extends Controller_V1_Base
 	public function action_feedback()
 	{
 		$keyword = '意見を投稿';
-
 		$user_id  = session::get('user_id');
 		$feedback = Input::get('feedback');
 
@@ -285,12 +290,12 @@ class Controller_V1_Post extends Controller_V1_Base
 		{
 			//$clean_feedback = Controller_V1_Inputfilter::action_encoding($feedback);
 			$result = Model_Feedback::post_add($user_id, $feedback);
-			$status = $this->success($keyword);
+			self::success($keyword);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = $this->failed($keyword);
+			self::failed($keyword);
 			error_log($e);
 		}
 	}
@@ -300,7 +305,6 @@ class Controller_V1_Post extends Controller_V1_Base
 	public function action_restadd()
 	{
 		$keyword = '店舗を追加';
-
 		$rest_name = Input::get('rest_name');
 		$lat 	   = Input::get('lat');
 		$lon	   = Input::get('lon');
@@ -314,76 +318,34 @@ class Controller_V1_Post extends Controller_V1_Base
 				'message' => "$keyword" . 'しました',
 				'rest_id' => "$rest_id"
 			);
-
-			$status = $this->output_json($data);
+			self::output_json($data);
 		}
 
 		catch(\Database_Exception $e)
 		{
-			$status = $this->failed($keyword);
+			self::failed($keyword);
 			error_log($e);
 		}
 	}
-
-
-
-
-
-	//----------------------------------------------------------------//
-
-
-	private function publish($keyword, $user_id, $target_user_id)
-	{
-		try
-		{
-			$login_flag = Model_User::check_login($target_user_id);
-
-			if ($check_login == '1') {
-				//ログイン中
-
-				//SNS Push 外部処理
-        		$ch = curl_init();
-
-        		curl_setopt($ch, CURLOPT_URL,
-            		'http://localhost/v1/background/sns/push/?' .
-                		'keyword='   . "$keyword"         . '&' .
-                		'a_user_id=' . "$username"        . '&' .
-                		'p_user_id=' . "$target_user_id"
-        		);
-
-        		curl_exec($ch);
-        		curl_close($ch);
-			}
-		}
-		catch(\Database_Exception $e)
-		{
-			$status = $this->failed($keyword);
-			error_log($e);
-		}
-	}
-
 
 	//DBデータ入力成功
-	public function success($keyword)
+	private static function success($keyword)
 	{
 		$data = array(
 			'code' 	  => 200,
 			'message' => "$keyword" . 'しました'
 		);
-
-		$status = $this->output_json($data);
+		self::output_json($data);
 	}
 
 
 	//DBデータ入力エラー
-	public function failed($keyword)
+	private static function failed($keyword)
 	{
 		$data = array(
 			'code' 	  => 401,
 			'message' => "$keyword" . 'できませんでした'
 		);
-
-		$status = $this->output_json($data);
+		self::output_json($data);
 	}
-
 }

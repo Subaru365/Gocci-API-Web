@@ -6,10 +6,9 @@ class Model_Notice extends Model
     public static function get_data($user_id)
     {
         $query = DB::select(
-    		    'notices.notice_id', 'notices.notice_a_user_id', 'users.username',
-    		    'users.profile_img', 'notices.notice', 'notices.notice_post_id',
-    		    'notices.read_flag', 'notices.notice_date')
-
+    		    'notice_id', 'notice_a_user_id', 'username',
+    		    'profile_img', 'notice', 'notice_post_id',
+    		    'read_flag', 'notice_date')
        	->from('notices')
 
         ->join('users', 'INNER')
@@ -18,7 +17,6 @@ class Model_Notice extends Model
         ->order_by('notices.notice_date','desc')
 
         ->limit('15')
-
         ->where('notices.notice_p_user_id', "$user_id");
 
         $notice_data = $query->execute()->as_array();
@@ -26,13 +24,10 @@ class Model_Notice extends Model
 
         $num = count($notice_data);
 
-
         for ($i=0; $i < $num; $i++) {
           	//日付情報を現在との差分に書き換え
-          	$notice_date  = $notice_data[$i]['notice_date'];
-
-          	$date_diff = Model_Date::get_data($notice_date);
-          	$notice_data[$i]['notice_date'] = $date_diff;
+          	$notice_data[$i]['notice_date'] = Model_Date::get_data($notice_data[$i]['notice_date']);
+            $notice_data[$i]['profile_img'] = Model_Transcode::decode_profile_img($notice_data[$i]['profile_img']);
         }
 
     		return $notice_data;
@@ -56,7 +51,6 @@ class Model_Notice extends Model
        	  	$notice = 'announce';
        	}
 
-
        	$query = DB::insert('notices')
        	->set(array(
        		  'notice_a_user_id' => "$a_user_id",
@@ -71,7 +65,7 @@ class Model_Notice extends Model
         $ch = curl_init();
 
         curl_setopt($ch, CURLOPT_URL,
-            'http://localhost/v1/background/sns/publish/?' .
+            'http://localhost/v1/background/publish/?' .
             'keyword='   . "$keyword"   . '&' .
             'a_user_id=' . "$a_user_id" . '&' .
             'p_user_id=' . "$p_user_id"
@@ -80,5 +74,4 @@ class Model_Notice extends Model
         curl_exec($ch);
         curl_close($ch);
     }
-
 }

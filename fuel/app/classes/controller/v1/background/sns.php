@@ -13,17 +13,11 @@ class Controller_V1_Background_Sns extends Controller
 
         $login_flag = Model_User::check_login($p_user_id);
 
-            if ($login_flag == '1') {
-
-                //ログイン中
-                $result = Model_Sns::post_message(
-                    $keyword, $a_user_id, $p_user_id);
-
-
-            }else{
-                //ログアウト中
-            }
-        exit;
+        if ($login_flag == '1') {
+        //ログイン中
+            $result = Model_Sns::post_message(
+                $keyword, $a_user_id, $p_user_id);
+        }
     }
 }
 

@@ -1,12 +1,9 @@
 <?php
 class Model_Date extends Model
-
 {
-
-	public static function get_data($date)
 	//TIMESTAMPから現在までの差分を求める
+	public static function get_data($date)
 	{
-
 		$datetime1 = new DateTime("$date");
 		$datetime2 = new DateTime(date('Y-m-d H:i:s'));
 
@@ -36,7 +33,5 @@ class Model_Date extends Model
 		}
 
 		return $date_diff;
-
 	}
-
 }

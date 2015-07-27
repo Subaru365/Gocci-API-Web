@@ -3,28 +3,27 @@
 class Model_Gochi extends Model
 {
 
-	//１投稿対するgochi数を求める
+	//１投稿のgochi数を求める
 	public static function get_num($post_id)
 	{
-
-		$query = DB::select('gochi_id')->from('gochis')
+		$query = DB::select('gochi_id')
+		->from ('gochis')
 		->where('gochi_post_id', "$post_id");
 
-		$result   = $query->execute()->as_array();
+		$result    = $query->execute()->as_array();
 	   	$gochi_num = count($result);
 
 		return $gochi_num;
 	}
 
 
-
-	//１投稿に対し自分がgochiしているかを求める
+	//１投稿に対して自分がgochiしているかを求める
 	public static function get_flag($user_id, $post_id)
 	{
-
-		$query = DB::select('gochi_id')->from('gochis')
-		->where 	('gochi_user_id', "$user_id")
-		->and_where ('gochi_post_id', "$post_id");
+		$query = DB::select('gochi_id')
+		->from     ('gochis')
+		->where    ('gochi_user_id', "$user_id")
+		->and_where('gochi_post_id', "$post_id");
 
 		$result = $query->execute()->as_array();
 
@@ -39,7 +38,6 @@ class Model_Gochi extends Model
 	}
 
 
-
 	//gochi順に投稿を格納する
 	public static function get_rank($call_num = 0, $limit = 3)
 	{
@@ -48,15 +46,15 @@ class Model_Gochi extends Model
 		$interval = date("Y-m-d",strtotime("-3 month"));
 
 
-		$query = DB::select('post_id')->from('gochis')
+		$query = DB::select('post_id')
+		->from     ('gochis')
 		->where	   ('gochi_date', 'BETWEEN', array("$interval", "$now_date"))
 		->and_where('post_status_flag', '1')
 
 		->join('posts', 'INNER')
-		->on('gochi_post_id', '=', 'post_id')
+		->on  ('gochi_post_id', '=', 'post_id')
 
 		->group_by('gochi_post_id')
-
 		->order_by(DB::expr('COUNT(gochi_id)'), 'desc')
 		->order_by('post_date', 'desc')
 
@@ -73,11 +71,9 @@ class Model_Gochi extends Model
 	}
 
 
-
 	//gochi登録
 	public static function post_gochi($user_id, $post_id)
 	{
-
 		$query = DB::insert('gochis')
 		->set(array(
 			'gochi_user_id' => "$user_id",
@@ -85,12 +81,13 @@ class Model_Gochi extends Model
 		))
 		->execute();
 
-		$query = DB::select('post_user_id')->from('posts')
+
+		$query = DB::select('post_user_id')
+		->from ('posts')
 		->where('post_id', "$post_id");
 
 		$post_user_id = $query->execute()->as_array();
 
 		return $post_user_id[0]['post_user_id'];
 	}
-
 }

@@ -1,14 +1,24 @@
 <?php
 class Model_Device extends Model
 {
-    public static function check_device($register_id)
+    //登録履歴確認
+    public static function check_register_id($register_id)
     {
         $query = DB::select('device_user_id', 'endpoint_arn')
         ->from('devices')
         ->where('register_id', "$register_id");
 
         $device_data = $query->execute()->as_array();
-        return $device_data;
+
+
+        if (!empty($device_data)) {
+        //登録あり→消去
+            $old_user_id  = $device_data[0]['device_user_id'];
+            $endpoint_arn = $device_data[0]['endpoint_arn'];
+
+            self::delete_device($old_user_id);
+            Model_Sns::delete_endpoint($endpoint_arn);
+        }
     }
 
 

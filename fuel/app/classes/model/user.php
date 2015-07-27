@@ -2,25 +2,21 @@
 
 class Model_User extends Model
 {
-    public static function check_id($identity_id)
-    {
-        $query = DB::select('user_id')->from('users')
-        ->where('identity_id', "$identity_id");
-
-        $user_id = $query->execute()->as_array();
-
-        return $user_id;
-    }
-
 
     public static function check_name($username)
     {
         $query = DB::select('username')->from('users')
         ->where('username', "$username");
 
-        $username = $query->execute()->as_array();
+        $result = $query->execute()->as_array();
 
-        return $username;
+        if (!empty($result)) {
+        //username使用済み
+            Controller_V1_Base::output_none();
+            $username = $result[0]['username'];
+            error_log("$username" . 'は既に使用されています。');
+            exit;
+        }
     }
 
 
@@ -71,9 +67,8 @@ class Model_User extends Model
         ->where('user_id', "$user_id");
 
         $user_data = $query->execute()->as_array();
-
-        $user_data[0]['profile_img'] =
-            self::decode_profile_img($user_data[0]['profile_img']);
+        $user_data[0]['profile_img'] = 
+            Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
 
         return $user_data[0];
     }
@@ -100,9 +95,14 @@ class Model_User extends Model
 
         $user_data = $query->execute()->as_array();
 
-        $user_data[0]['profile_img'] =
-            self::decode_profile_img($user_data[0]['profile_img']);
-
+        if (empty($user_data)) {
+            Controller_V1_Base::output_none();
+            error_log('登録されてないユーザー:' . "$identity_id");
+            exit;
+        }
+        $user_data[0]['profile_img'] = 
+            Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
+        
         return $user_data[0];
     }
 
@@ -119,42 +119,24 @@ class Model_User extends Model
         $user_data = $query->execute()->as_array();
 
 
-        $user_data[0]['profile_img'] =
-            self::decode_profile_img($user_data[0]['profile_img']);
-
         //---------------------------------------------------------//
         //付加情報格納(follow_num, fllower_num, cheer_num, status_flag)
 
-        $follow_num   = Model_Follow::follow_num($target_user_id);
-        $user_data[0]['follow_num']   = $follow_num;
-
-        $follower_num = Model_Follow::follower_num($target_user_id);
-        $user_data[0]['follower_num'] = $follower_num;
-
-        $cheer_num    = Model_Post::cheer_num($target_user_id);
-        $user_data[0]['cheer_num']    = $cheer_num;
-
-        $want_num     = Model_Want::want_num($target_user_id);
-        $user_data[0]['want_num']     = $want_num;
-
-        $follow_flag  = Model_Want::get_flag($user_id, $target_user_id);
-        $user_data[0]['follow_flag']  = $follow_flag;
-
+        $user_data[0]['profile_img']  = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
+        $user_data[0]['follow_num']   = Model_Follow::follow_num($target_user_id);
+        $user_data[0]['follower_num'] = Model_Follow::follower_num($target_user_id);
+        $user_data[0]['cheer_num']    = Model_Post::cheer_num($target_user_id);
+        $user_data[0]['want_num']     = Model_Want::want_num($target_user_id);
+        $user_data[0]['follow_flag']  = Model_Want::get_flag($user_id, $target_user_id);
 
         return $user_data[0];
     }
 
 
     //ユーザー登録
-    public static function post_data($username, $profile_img, $identity_id)
+    public static function post_data($username, $identity_id)
     {
-        if ($profile_img == 'none') {
-            $profile_img = 'http://test.imgs.gocci.me/0_tosty_' . mt_rand(1, 7) . '.png';
-
-        }else{
-            $profile_img = self::encode_profile_img($profile_img);
-
-        }
+        $profile_img = '0_tosty_' . mt_rand(1, 7) . '.png';
 
         $query = DB::insert('users')
         ->set(array(
@@ -164,6 +146,7 @@ class Model_User extends Model
         ))
         ->execute();
 
+        $profile_img = 'http://test.imgs.gocci.me/' . "$profile_img";
         return $profile_img;
     }
 
@@ -182,7 +165,7 @@ class Model_User extends Model
 
     public static function update_profile_img($user_id, $profile_img)
     {
-        $profile_img = self::encode_profile_img($profile_img);
+        $profile_img = Model_Transcode::encode_profile_img($profile_img);
 
         $query = DB::update('users')
         ->value('profile_img', "$profile_img")
@@ -206,7 +189,7 @@ class Model_User extends Model
 
     public static function update_profile($user_id, $username, $profile_img)
     {
-        $profile_img = self::encode_profile_img($profile_img);
+        $profile_img = Model_Transcode::encode_profile_img($profile_img);
 
         $query = DB::update('users')
         ->set(array(
@@ -237,11 +220,28 @@ class Model_User extends Model
     }
 
 
+    //ユーザー登録
+    public static function post_conversion(
+        $username, $profile_img, $identity_id)
+    {
+        $query = DB::insert('users')
+        ->set(array(
+            'username'    => "$username",
+            'profile_img' => "$profile_img",
+            'identity_id' => "$identity_id"
+        ))
+        ->execute();
+
+        $profile_img = 'http://test.imgs.gocci.me/' . "$profile_img";
+        return $profile_img;
+    }
+
+
     //更新
     public static function update_data(
         $user_id, $username, $profile_img, $identity_id)
     {
-        $profile_img = self::encode_profile_img($profile_img);
+        $profile_img = Model_Transcode::encode_profile_img($profile_img);
 
         $query = DB::update('users')
         ->set(array(
@@ -254,24 +254,4 @@ class Model_User extends Model
 
         return $query;
     }
-
-
-    private static function encode_profile_img($profile_img)
-    {
-        $split     = explode('_', $profile_img);
-        $directory = explode('-', $split[1]);
-
-        $profile_img =
-            "$directory[0]" . '/' . "$directory[1]" . '/' . "$profile_img" . '_img.png';
-
-        return $profile_img;
-    }
-
-
-    private static function decode_profile_img($profile_img)
-    {
-        return $profile_img = 'http://test.imgs.gocci.me/' . "$profile_img";
-    }
-
-
 }
