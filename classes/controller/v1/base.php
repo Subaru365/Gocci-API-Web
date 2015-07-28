@@ -6,6 +6,7 @@
 class Controller_V1_Base extends Controller
 {
 	//Check session
+    /*
 	public function before()
 	{
 		 $user_id = session::get('user_id');
@@ -17,7 +18,7 @@ class Controller_V1_Base extends Controller
 			exit;
 		}
 	}
-
+    */
 
 	//Not set session
 	private static function unauth()
