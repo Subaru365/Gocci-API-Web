@@ -8,17 +8,17 @@ use Aws\CognitoSync\CognitoSyncClient;
 */
 class Model_Cognito extends Model
 {
-    public $IdentityPoolId = 'us-east-1:a8cc1fdb-92b1-4586-ba97-9e6994a43195';
-	//IdentityID取得 DataSet [User_Info]
+    //public $IdentityPoolId = 'us-east-1:2ef43520-856b-4641-b4a1-e08dfc07f802';
+
+    //IdentityID取得 DataSet [User_Info]
 	public static function post_data($user_id, $username, $os, $model, $register_id)
 	{
-		$IdentityPoolId = 'us-east-1:a8cc1fdb-92b1-4586-ba97-9e6994a43195';
+		$IdentityPoolId = 'us-east-1:2ef43520-856b-4641-b4a1-e08dfc07f802';
 
 		$client = new CognitoIdentityClient([
 			'region'  => 'us-east-1',
     		'version' => 'latest'
 		]);
-
 
 		//Identity_ID作成
 		$result = $client->getOpenIdTokenForDeveloperIdentity([
@@ -53,23 +53,11 @@ class Model_Cognito extends Model
     		'version' => 'latest'
 		]);
 
-        /*
-        $identity_data = [
+        $result = $client->getOpenIdTokenForDeveloperIdentity([
             'IdentityId'     => "$identity_id",
-            'IdentityPoolId' => 'us-east-1:a8cc1fdb-92b1-4586-ba97-9e6994a43195',
+            'IdentityPoolId' => 'us-east-1:2ef43520-856b-4641-b4a1-e08dfc07f802',
             'Logins'         => ['login.inase.gocci' => "$user_id",],
-        ];
-        */
-
-		// $result = $client->getOpenIdTokenForDeveloperIdentity($identity_data);
-        
-        $result = $client->getOpenIdTokenForDeveloperIdentity(array(
-            'IdentityPoolId' => "us-east-1:a8cc1fdb-92b1-4586-ba97-9e6994a43195",
-            'IdentityId'     => "$identity_id",
-            'Logins'         => array(
-                'login.inase.gocci' => "$user_id",
-            ),
-        ));
+        ]);
 
 		return $result['Token'];
 	}
@@ -86,7 +74,7 @@ class Model_Cognito extends Model
 		$result = $client->listRecords([
     		'DatasetName' 	 => 'user_info',
     		'IdentityId' 	 => "$identity_id",
-    		'IdentityPoolId' => 'us-east-1:a8cc1fdb-92b1-4586-ba97-9e6994a43195'
+    		'IdentityPoolId' => 'us-east-1:2ef43520-856b-4641-b4a1-e08dfc07f802'
 		]);
 
 		return $result;
@@ -100,12 +88,12 @@ class Model_Cognito extends Model
             'region'  => 'us-east-1',
             'version' => 'latest'
         ]);
-		
+
 		//SyncSessionToken取得
         $result = $client->listRecords([
             'DatasetName'    => 'user_info',
             'IdentityId'     => "$identity_id",
-            'IdentityPoolId' => 'us-east-1:a8cc1fdb-92b1-4586-ba97-9e6994a43195',
+            'IdentityPoolId' => 'us-east-1:2ef43520-856b-4641-b4a1-e08dfc07f802',
         ]);
 
         $sync_session_token = $result['SyncSessionToken'];
@@ -115,8 +103,7 @@ class Model_Cognito extends Model
         $result = $client->updateRecords([
             'DatasetName'    => 'user_info',
             'IdentityId'     => "$identity_id",
-			#'IdentityPoolId' => "$IdentityPoolId",
-            'IdentityPoolId' => 'us-east-1:a8cc1fdb-92b1-4586-ba97-9e6994a43195',
+            'IdentityPoolId' => 'us-east-1:2ef43520-856b-4641-b4a1-e08dfc07f802',
             'RecordPatches'  => [
                 [
                     'Key' => 'username',

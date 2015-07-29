@@ -24,8 +24,11 @@ class Model_Post extends Model
 
 		->join('tags', 'LEFT OUTER')
 		->on('posts.post_tag_id', '=', 'tags.tag_id')
-
+		
+		// ->where_open()
 		->where('post_status_flag', '1')
+		->and_where('posts.post_id', '!=', '231')
+		// ->where_close()
 
 		->order_by('posts.post_date','desc')
 
