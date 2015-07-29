@@ -1,6 +1,6 @@
 <?php
 
-// header('Content-Type: application/json; charset=UTF-8');
+//header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
 /**
  * Auth api
@@ -84,12 +84,12 @@ class Controller_V1_Auth extends Controller
         $identity_id = Input::get('identity_id');
 
         if (empty($identity_id)) {
-            $data = [
-                'code'        => 400,
-                'message'     => "identity_idが空です"
-            ];
-            Controller_V1_Base::output_json($data);
-            exit();
+	    $data = [
+		'code'    => 400,
+		'message' => "identity_idが空です。"
+	    ];
+	    Controller_V1_Base::output_json($data);
+	    exit;
         }
 
         try
