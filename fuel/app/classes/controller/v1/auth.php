@@ -1,6 +1,6 @@
 <?php
 
-//header('Content-Type: application/json; charset=UTF-8');
+header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
 /**
  * Auth api
@@ -82,15 +82,6 @@ class Controller_V1_Auth extends Controller
     {
         $keyword     = 'ログイン';
         $identity_id = Input::get('identity_id');
-
-        if (empty($identity_id)) {
-	    $data = [
-		'code'    => 400,
-		'message' => "identity_idが空です。"
-	    ];
-	    Controller_V1_Base::output_json($data);
-	    exit;
-        }
 
         try
         {
@@ -190,8 +181,8 @@ class Controller_V1_Auth extends Controller
     public function action_conversion()
     {
         $keyword     = '顧客様';
+        $profile_img = 'none';
         $username    = Input::get('username');
-        $profile_img = Input::get('profile_img');
         $os          = Input::get('os');
         $model       = Input::get('model');
         $register_id = Input::get('register_id');
@@ -201,6 +192,7 @@ class Controller_V1_Auth extends Controller
         // 初期化ユーザー
         if (empty($user_id)) {
 
+            $badge_num    = 0;
             $user_id      = Model_User::get_next_id();
             $cognito_data = Model_Cognito::post_data(
                 $user_id, $username, $os, $model, $register_id);
@@ -210,11 +202,9 @@ class Controller_V1_Auth extends Controller
 
             try
             {
-                $profile_img  = Model_S3::input($user_id, $profile_img);
+                //$profile_img  = Model_S3::input($user_id, $profile_img);
 
-                $profile_img  = Model_User::post_conversion(
-                    $username, $profile_img, $identity_id
-                );
+                $profile_img  = Model_User::post_data($username, $identity_id);
 
                 $endpoint_arn = Model_Sns::post_endpoint(
                     $user_id, $identity_id, $register_id, $os
@@ -252,6 +242,7 @@ class Controller_V1_Auth extends Controller
         // VIPユーザー
         } else {
             $user_id      = $user_id[0]['user_id'];
+            $badge_num    = Model_User::get_badge($user_id);
 
             // IdentityID取得
             $cognito_data = Model_Cognito::post_data(
@@ -266,7 +257,7 @@ class Controller_V1_Auth extends Controller
             $token        = $cognito_data['Token'];
 
             try{
-                $profile_img  = Model_S3::input($user_id, $profile_img);
+                //$profile_img  = Model_S3::input($user_id, $profile_img);
 
                 $user_data    = Model_User::update_data(
                     $user_id,
@@ -278,7 +269,8 @@ class Controller_V1_Auth extends Controller
                 $endpoint_arn = Model_Sns::post_endpoint(
                     $user_id,
                     $identity_id,
-                    $register_id
+                    $register_id,
+                    $os
                 );
 
                 // Device情報を登録
@@ -297,7 +289,8 @@ class Controller_V1_Auth extends Controller
                     $username,
                     $profile_img,
                     $identity_id,
-                    $badge_num
+                    $badge_num,
+                    $token
                 );
             }
 

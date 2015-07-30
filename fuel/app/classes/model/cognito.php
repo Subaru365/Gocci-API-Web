@@ -23,7 +23,7 @@ class Model_Cognito extends Model
 		//Identity_ID作成
 		$result = $client->getOpenIdTokenForDeveloperIdentity([
     		'IdentityPoolId' => "$IdentityPoolId",
-   			'Logins' => ['login.inase.gocci'=> "$user_id",],
+   			'Logins' => ['test.login.gocci'=> "$user_id",],
 		]);
         $identity_id = $result['IdentityId'];
 
@@ -56,7 +56,7 @@ class Model_Cognito extends Model
         $result = $client->getOpenIdTokenForDeveloperIdentity([
             'IdentityId'     => "$identity_id",
             'IdentityPoolId' => 'us-east-1:2ef43520-856b-4641-b4a1-e08dfc07f802',
-            'Logins'         => ['login.inase.gocci' => "$user_id",],
+            'Logins'         => ['test.login.gocci' => "$user_id",],
         ]);
 
 		return $result['Token'];

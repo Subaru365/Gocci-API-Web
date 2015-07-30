@@ -9,7 +9,7 @@ class Model_S3 extends Model
     public static function input($user_id, $profile_img_url)
     {
         $i = rand(1, 10);
-        exec('wget -O /tmp/img/' . "$i.png" . ' ' . "$profile_img_url");
+        exec('wget -O /tmp/img/' . "$i" . '.png ' . "$profile_img_url");
 
         $put_name = "$user_id" . '_' . date("Y-m-d-H-i-s") . '.png';
 
@@ -18,10 +18,10 @@ class Model_S3 extends Model
             'version' => '2006-03-01'
         ]);
 
-        $result = $clien->putObject([
+        $result = $client->putObject([
             'Bucket' => 'gocci.imgs.provider.jp-test',
             'Key' => "$put_name",
-            'SourceFile' => '/tmp/' . "$i" . '.png',
+            'SourceFile' => '/tmp/img/' . "$i" . '.png',
         ]);
 
         return $put_name;
