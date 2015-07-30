@@ -218,7 +218,7 @@ class Controller_V1_Post extends Controller_V1_Base
 		}
 	}
 
-
+/*
 	//SNS Link
 	public function action_sns()
 	{
@@ -228,7 +228,7 @@ class Controller_V1_Post extends Controller_V1_Base
 		$profile_img = Model_S3::input($user_id, $profile_img_url);
 		Model_User::update_profile_img($user_id, $profile_img);
 	}
-
+*/
 
 	//プロフィール編集
 	public function action_update_profile()
@@ -245,12 +245,12 @@ class Controller_V1_Post extends Controller_V1_Base
 
 			}elseif (empty($username)) {
 			//プロフィール画像更新
-				$result = Model_User::update_profile_img($user_id, $profile_img);
+				Model_User::update_profile_img($user_id, $profile_img);
 
 			}elseif (empty($profile_img)) {
 			//ユーザーネーム更新
 				Model_User::check_name($username);
-				$result = Model_User::update_name($user_id, $username);
+				Model_User::update_name($user_id, $username);
 
 			}else{
 			//両方更新
@@ -282,7 +282,7 @@ class Controller_V1_Post extends Controller_V1_Base
 	//Feedback
 	public function action_feedback()
 	{
-		$keyword = '意見を投稿';
+		$keyword  = '意見を投稿';
 		$user_id  = session::get('user_id');
 		$feedback = Input::get('feedback');
 
@@ -291,6 +291,33 @@ class Controller_V1_Post extends Controller_V1_Base
 			//$clean_feedback = Controller_V1_Inputfilter::action_encoding($feedback);
 			$result = Model_Feedback::post_add($user_id, $feedback);
 			self::success($keyword);
+		}
+
+		catch(\Database_Exception $e)
+		{
+			self::failed($keyword);
+			error_log($e);
+		}
+	}
+
+
+	//Profile Img
+	public function action_profile_img()
+	{
+		$keyword     = 'プロフィール画像を更新';
+		$user_id     = session::get('user_id');
+		$profile_img = Input::get('profile_img');
+
+		try
+		{
+			$profile_img = Model_User::update_profile_img($user_id, $profile_img);
+
+			$data = array(
+				'code' 	      => 200,
+				'message'     => "$keyword" . 'しました',
+				'profile_img' => "$profile_img"
+			);
+			self::output_json($data);
 		}
 
 		catch(\Database_Exception $e)

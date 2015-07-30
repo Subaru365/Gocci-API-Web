@@ -67,7 +67,7 @@ class Model_User extends Model
         ->where('user_id', "$user_id");
 
         $user_data = $query->execute()->as_array();
-        $user_data[0]['profile_img'] = 
+        $user_data[0]['profile_img'] =
             Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
 
         return $user_data[0];
@@ -100,9 +100,9 @@ class Model_User extends Model
             error_log('登録されてないユーザー:' . "$identity_id");
             exit;
         }
-        $user_data[0]['profile_img'] = 
+        $user_data[0]['profile_img'] =
             Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
-        
+
         return $user_data[0];
     }
 
@@ -172,7 +172,9 @@ class Model_User extends Model
         ->where('user_id', "$user_id")
         ->execute();
 
-        return $query;
+        $profile_img = Model_Transcode::decode_profile_img($profile_img);
+
+        return $profile_img;
     }
 
 
