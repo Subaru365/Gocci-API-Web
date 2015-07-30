@@ -238,7 +238,6 @@ class Controller_V1_Auth extends Controller
                 error_log($e);
             }
 
-
         // VIPユーザー
         } else {
             $user_id      = $user_id[0]['user_id'];
@@ -258,7 +257,6 @@ class Controller_V1_Auth extends Controller
 
             try{
                 //$profile_img  = Model_S3::input($user_id, $profile_img);
-
                 $user_data    = Model_User::update_data(
                     $user_id,
                     $username,
