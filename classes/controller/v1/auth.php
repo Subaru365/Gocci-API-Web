@@ -144,11 +144,9 @@ class Controller_V1_Auth extends Controller
             'badge_num'   => "$badge_num",
             'token'       => "$token"
         ];
-
         Controller_V1_Base::output_json($data);
         session::set('user_id', $user_id);
     }
-
 
     // DBデータ入力エラー
     private static function failed(
