@@ -218,17 +218,25 @@ class Controller_V1_Post extends Controller_V1_Base
 		}
 	}
 
-/*
+
 	//SNS Link
 	public function action_sns()
 	{
+		$keyword = 'プロフィール画像を変更';
 		$user_id = session::get('user_id');
 		$profile_img_url = Input::get('profile_img_url');
 
 		$profile_img = Model_S3::input($user_id, $profile_img_url);
 		Model_User::update_profile_img($user_id, $profile_img);
+
+		$data = array(
+				'code' 	      => 200,
+				'message'     => "$keyword" . 'しました',
+				'profile_img' => "$profile_img"
+			);
+		self::output_json($data);
 	}
-*/
+
 
 	//プロフィール編集
 	public function action_update_profile()
@@ -354,6 +362,7 @@ class Controller_V1_Post extends Controller_V1_Base
 			error_log($e);
 		}
 	}
+
 
 	//DBデータ入力成功
 	private static function success($keyword)

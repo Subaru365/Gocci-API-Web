@@ -95,11 +95,16 @@ class Model_User extends Model
 
         $user_data = $query->execute()->as_array();
 
+
         if (empty($user_data)) {
             Controller_V1_Base::output_none();
             error_log('登録されてないユーザー:' . "$identity_id");
+
+            //Cognitoから消去
+            Model_Cognito::delete_identity_id($identity_id);
             exit;
         }
+
         $user_data[0]['profile_img'] =
             Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
 
@@ -234,7 +239,7 @@ class Model_User extends Model
         ))
         ->execute();
 
-        $profile_img = 'http://test.imgs.gocci.me/' . "$profile_img";
+        $profile_img = Model_Transcode::decode_profile_img($profile_img);
         return $profile_img;
     }
 
@@ -254,6 +259,7 @@ class Model_User extends Model
         ->where('user_id', "$user_id")
         ->execute();
 
-        return $query;
+        $profile_img = Model_Transcode::decode_profile_img($profile_img);
+        return $profile_img;
     }
 }

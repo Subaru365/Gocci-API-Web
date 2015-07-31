@@ -74,6 +74,8 @@ class Model_Post extends Model
 			$post_data[$i]['movie'] =
 				'http://test.hls-movies.gocci.me/' . "$movie" . '.m3u8';
 
+			$post_data[$i]['share'] = 'mp4/' . "$movie" . '.mp4';
+
 			$post_data[$i]['thumbnail'] =
 				'http://test.thumbnails.gocci.me/' . "$thumbnail";
 
