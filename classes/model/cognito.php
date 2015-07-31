@@ -133,5 +133,18 @@ class Model_Cognito extends Model
             'SyncSessionToken' => "$sync_session_token",
         ]);
 	}
+
+
+    public static function delete_identity_id($identity_id)
+    {
+        $client = new CognitoIdentityClient([
+            'region'  => 'us-east-1',
+            'version' => 'latest'
+        ]);
+
+        $result = $client->deleteIdentities([
+            'IdentityIdsToDelete' => ["$identity_id"],
+        ]);
+    }
 }
 

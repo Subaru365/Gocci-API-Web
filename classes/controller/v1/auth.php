@@ -1,7 +1,7 @@
 <?php
+
 header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
-
 /**
  * Auth api
  *
@@ -144,9 +144,11 @@ class Controller_V1_Auth extends Controller
             'badge_num'   => "$badge_num",
             'token'       => "$token"
         ];
+
         Controller_V1_Base::output_json($data);
         session::set('user_id', $user_id);
     }
+
 
     // DBデータ入力エラー
     private static function failed(
@@ -179,8 +181,8 @@ class Controller_V1_Auth extends Controller
     public function action_conversion()
     {
         $keyword     = '顧客様';
-        $profile_img = 'none';
         $username    = Input::get('username');
+        $profile_img = Input::get('profile_img');
         $os          = Input::get('os');
         $model       = Input::get('model');
         $register_id = Input::get('register_id');
@@ -200,17 +202,17 @@ class Controller_V1_Auth extends Controller
 
             try
             {
-                //$profile_img  = Model_S3::input($user_id, $profile_img);
+                $profile_img  = Model_S3::input($user_id, $profile_img);
 
-                $profile_img  = Model_User::post_data($username, $identity_id);
+                $profile_img  = Model_User::post_conversion(
+                    $username, $profile_img, $identity_id);
 
                 $endpoint_arn = Model_Sns::post_endpoint(
                     $user_id, $identity_id, $register_id, $os
                 );
 
                 Model_Device::post_data(
-                    $user_id, $os, $model, $register_id, $endpoint_arn
-                );
+                    $user_id, $os, $model, $register_id, $endpoint_arn);
 
                 self::success(
                     $keyword,
@@ -236,6 +238,7 @@ class Controller_V1_Auth extends Controller
                 error_log($e);
             }
 
+
         // VIPユーザー
         } else {
             $user_id      = $user_id[0]['user_id'];
@@ -254,8 +257,9 @@ class Controller_V1_Auth extends Controller
             $token        = $cognito_data['Token'];
 
             try{
-                //$profile_img  = Model_S3::input($user_id, $profile_img);
-                $user_data    = Model_User::update_data(
+                $profile_img  = Model_S3::input($user_id, $profile_img);
+
+                $profile_img  = Model_User::update_data(
                     $user_id,
                     $username,
                     $profile_img,
