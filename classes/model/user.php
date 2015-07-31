@@ -248,8 +248,6 @@ class Model_User extends Model
     public static function update_data(
         $user_id, $username, $profile_img, $identity_id)
     {
-        $profile_img = Model_Transcode::encode_profile_img($profile_img);
-
         $query = DB::update('users')
         ->set(array(
             'username'    => "$username",
