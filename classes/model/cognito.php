@@ -45,6 +45,23 @@ class Model_Cognito extends Model
 	}
 
 
+    //SNS認証
+    public static function get_sns($identity_id, $provider)
+    {
+        $client = new CognitoIdentityClient([
+            'region'  => 'us-east-1',
+            'version' => 'latest'
+        ]);
+
+        $result = $client->getOpenIdToken([
+            'IdentityId' => "$identity_id",
+            'Logins' => ["$provider",],
+        ]);
+
+        return $result['Token'];
+    }
+
+
 	//identity_idからtokenを取得
 	public static function get_token($user_id, $identity_id)
 	{
