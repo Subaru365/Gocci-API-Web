@@ -12,14 +12,14 @@ class Model_Transcode extends Model
     public static function decode_thmbnail($thumbnail)
     {
         $thumbnail_url = Config::get('_url.thumbnail');
-        $thumbnail = "thumbnail_url" . "$thumbnail" '.png';
+        $thumbnail = "$thumbnail_url" . "$thumbnail" . '.png';
         return $thumbnail;
     }
 
     public static function decode_movie($movie)
     {
         $movie_url = Config::get('_url.movie');
-        $movie = "movie_url" . "$movie" . '.m3u8';
+        $movie = "$movie_url" . "$movie" . '.m3u8';
         return $movie;
     }
 }
