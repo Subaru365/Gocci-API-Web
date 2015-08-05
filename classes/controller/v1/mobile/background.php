@@ -3,7 +3,7 @@
  *
  *
  */
-class Controller_V1_Background extends Controller
+class Controller_V1_Mobile_Background extends Controller
 {
     //CognitoSync Dataset
     public function action_dataset()

@@ -65,7 +65,7 @@ class Model_Notice extends Model
         $ch = curl_init();
 
         curl_setopt($ch, CURLOPT_URL,
-            'http://localhost/v1/background/publish/?' .
+            'http://localhost/v1/mobile/background/publish/?' .
             'keyword='   . "$keyword"   . '&' .
             'a_user_id=' . "$a_user_id" . '&' .
             'p_user_id=' . "$p_user_id"

@@ -6,7 +6,7 @@ error_reporting(-1);
  *
  */
 
-class Controller_V1_Get extends Controller_V1_Base
+class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 {
 
 	//Timeline Page
