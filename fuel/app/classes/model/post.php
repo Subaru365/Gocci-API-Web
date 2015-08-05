@@ -72,7 +72,7 @@ class Model_Post extends Model
 			$thumbnail = $post_data[$i]['thumbnail'];
 
 			$post_data[$i]['movie'] =
-				Model_Transcode::decode_profile_movie($post_data[$i]['movie']);
+				Model_Transcode::decode_movie($post_data[$i]['movie']);
 
 			$post_data[$i]['thumbnail'] =
 				Model_Transcode::decode_thumbnail($post_data[$i]['thumbnail']);
