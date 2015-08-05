@@ -8,23 +8,23 @@ use Aws\CognitoSync\CognitoSyncClient;
 */
 class Model_Cognito extends Model
 {
-    //public $IdentityPoolId = 'us-east-1:2ef43520-856b-4641-b4a1-e08dfc07f802';
-
     //IdentityID取得 DataSet [User_Info]
 	public static function post_data($user_id, $username, $os, $model, $register_id)
 	{
-		$IdentityPoolId = 'us-east-1:2ef43520-856b-4641-b4a1-e08dfc07f802';
+		$cognito_data = Config::get('_cognito');
 
-		$client = new CognitoIdentityClient([
-			'region'  => 'us-east-1',
-    		'version' => 'latest'
-		]);
+        $client = new CognitoIdentityClient([
+            'region'  => 'us-east-1',
+            'version' => 'latest'
+        ]);
 
-		//Identity_ID作成
-		$result = $client->getOpenIdTokenForDeveloperIdentity([
-    		'IdentityPoolId' => "$IdentityPoolId",
-   			'Logins' => ['test.login.gocci'=> "$user_id",],
-		]);
+        $result = $client->getOpenIdTokenForDeveloperIdentity([
+            'IdentityPoolId' => "$cognito_data[IdentityPoolId]",
+            'Logins' => [
+                "$cognito_data[developer_provider]" => "$user_id",
+            ],
+        ]);
+
         $identity_id = $result['IdentityId'];
 
 		//CognitoSync Dataset 外部処理
@@ -45,26 +45,34 @@ class Model_Cognito extends Model
 	}
 
 
-    //SNS認証
-    public static function get_sns($identity_id, $provider)
+    //SNS連携
+    public static function post_sns($user_id, $identity_id, $provider, $token)
     {
+        $cognito_data = Config::get('_cognito');
+
         $client = new CognitoIdentityClient([
             'region'  => 'us-east-1',
             'version' => 'latest'
         ]);
 
-        $result = $client->getOpenIdToken([
-            'IdentityId' => "$identity_id",
-            'Logins' => ["$provider",],
+        $result = $client->getOpenIdTokenForDeveloperIdentity([
+            'IdentityId'     => "$identity_id",
+            'IdentityPoolId' => "$cognito_data[IdentityPoolId]",
+            'Logins'         => [
+                "$cognito_data[developer_provider]" => "$user_id",
+                "$provider" => "$token",
+            ],
         ]);
 
-        return $result['Token'];
+        return $result;
     }
 
 
 	//identity_idからtokenを取得
 	public static function get_token($user_id, $identity_id)
 	{
+        $cognito_data = Config::get('_cognito');
+
 		$client = new CognitoIdentityClient([
 			'region'  => 'us-east-1',
     		'version' => 'latest'
@@ -72,35 +80,22 @@ class Model_Cognito extends Model
 
         $result = $client->getOpenIdTokenForDeveloperIdentity([
             'IdentityId'     => "$identity_id",
-            'IdentityPoolId' => 'us-east-1:2ef43520-856b-4641-b4a1-e08dfc07f802',
-            'Logins'         => ['test.login.gocci' => "$user_id",],
+            'IdentityPoolId' => "$cognito_data[IdentityPoolId]",
+            'Logins'         => [
+                "$cognito_data[developer_provider]" => "$user_id",
+            ],
         ]);
 
 		return $result['Token'];
 	}
 
 
-	//DataSetからユーザー情報を取得
-	public static function get_data($identity_id)
-	{
-		$client = new CognitoSyncClient([
-			'region'  => 'us-east-1',
-    		'version' => 'latest'
-		]);
-
-		$result = $client->listRecords([
-    		'DatasetName' 	 => 'user_info',
-    		'IdentityId' 	 => "$identity_id",
-    		'IdentityPoolId' => 'us-east-1:2ef43520-856b-4641-b4a1-e08dfc07f802'
-		]);
-
-		return $result;
-	}
-
-
+    //DataSet
 	public static function dataset(
 		$identity_id, $username, $os, $model, $register_id)
 	{
+        $IdentityPoolId = Config::get('_cognito.IdentityPoolId');
+
 		$client = new CognitoSyncClient([
             'region'  => 'us-east-1',
             'version' => 'latest'
@@ -110,17 +105,16 @@ class Model_Cognito extends Model
         $result = $client->listRecords([
             'DatasetName'    => 'user_info',
             'IdentityId'     => "$identity_id",
-            'IdentityPoolId' => 'us-east-1:2ef43520-856b-4641-b4a1-e08dfc07f802',
+            'IdentityPoolId' => "$IdentityPoolId",
         ]);
 
         $sync_session_token = $result['SyncSessionToken'];
 
 
-        //DataSet
         $result = $client->updateRecords([
             'DatasetName'    => 'user_info',
             'IdentityId'     => "$identity_id",
-            'IdentityPoolId' => 'us-east-1:2ef43520-856b-4641-b4a1-e08dfc07f802',
+            'IdentityPoolId' => "$IdentityPoolId",
             'RecordPatches'  => [
                 [
                     'Key' => 'username',
@@ -163,5 +157,28 @@ class Model_Cognito extends Model
             'IdentityIdsToDelete' => ["$identity_id"],
         ]);
     }
-}
 
+
+
+    //=========================================================================//
+
+
+    //identity_id取得
+    public static function get_identity_id($provider, $token)
+    {
+        $IdentityPoolId = Config::get('_cognito.IdentityPoolId');
+
+        $client = new CognitoIdentityClient([
+            'region'  => 'us-east-1',
+            'version' => 'latest'
+        ]);
+
+        $result = $client->getOpenIdTokenForDeveloperIdentity([
+            'IdentityPoolId' => '$IdentityPoolId',
+            'Logins' => [
+                "$provider" => "$token",
+            ],
+        ]);
+        return $result['identity_id'];
+    }
+}
