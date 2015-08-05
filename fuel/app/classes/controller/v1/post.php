@@ -7,6 +7,43 @@ header('Content-Type: application/json; charset=UTF-8');
 */
 class Controller_V1_Post extends Controller_V1_Base
 {
+	//SNS Link
+	public function action_sns()
+	{
+		$keyword     = 'SNS連携';
+		$user_id     = session::get('user_id');
+		$provider    = Input::get('provider');
+		$token       = Input::get('token');
+		$profile_img = Input::get('profile_img');
+
+		try
+		{
+			if ($profile_img != 'none')
+			{
+				$profile_img = Model_S3::input($user_id, $profile_img);
+				Model_User::update_profile_img($user_id, $profile_img);
+			}
+
+			$identity_id = Model_User::get_identity_id($user_id);
+			Model_Cognito::post_sns($user_id, $identity_id, $provider, $token);
+
+			$data = array(
+				'code' 	      => 200,
+				'message'     => "$keyword" . 'しました',
+				'profile_img' => "$profile_img"
+			);
+
+			self::output_json($data);
+		}
+
+		catch(\Database_Exception $e)
+		{
+			self::failed($keyword);
+			error_log($e);
+		}
+	}
+
+
 	//Gochi!
 	public function action_gochi()
 	{
@@ -216,25 +253,6 @@ class Controller_V1_Post extends Controller_V1_Base
 			self::failed($keyword);
 			error_log($e);
 		}
-	}
-
-
-	//SNS Link
-	public function action_sns()
-	{
-		$keyword = 'プロフィール画像を変更';
-		$user_id = session::get('user_id');
-		$profile_img_url = Input::get('profile_img_url');
-
-		$profile_img = Model_S3::input($user_id, $profile_img_url);
-		Model_User::update_profile_img($user_id, $profile_img);
-
-		$data = array(
-				'code' 	      => 200,
-				'message'     => "$keyword" . 'しました',
-				'profile_img' => "$profile_img"
-			);
-		self::output_json($data);
 	}
 
 

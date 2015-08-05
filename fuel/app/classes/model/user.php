@@ -2,7 +2,7 @@
 
 class Model_User extends Model
 {
-
+    //ユーザー名チェック
     public static function check_name($username)
     {
         $query = DB::select('username')->from('users')
@@ -32,7 +32,7 @@ class Model_User extends Model
     }
 
 
-    //最新レコードの次のuser_id取得
+    //次のuser_id取得
     public static function get_next_id()
     {
         $query = DB::select('user_id')->from('users')
@@ -45,6 +45,17 @@ class Model_User extends Model
         $user_id++;
 
         return $user_id;
+    }
+
+
+    //identity_id取得
+    public static function get_identity_id($user_id)
+    {
+        $query = DB::select('identity_id')->from('users')
+        ->where('user_id', "$user_id");
+
+        $identity_id = $query->execute()->as_array();
+        return $identity_id[0]['identity_id'];
     }
 
 
@@ -156,7 +167,7 @@ class Model_User extends Model
     }
 
 
-    //Notice Reset
+    //通知数リセット
     public static function reset_badge($user_id)
     {
         $query = DB::update('users')
@@ -168,6 +179,7 @@ class Model_User extends Model
     }
 
 
+    //プロフィール画像変更
     public static function update_profile_img($user_id, $profile_img)
     {
         $profile_img = Model_Transcode::encode_profile_img($profile_img);
@@ -183,6 +195,7 @@ class Model_User extends Model
     }
 
 
+    //ユーザー名変更
     public static function update_name($user_id, $username)
     {
         $query = DB::update('users')
@@ -194,6 +207,7 @@ class Model_User extends Model
     }
 
 
+    //プロフィール画像・ユーザー名変更
     public static function update_profile($user_id, $username, $profile_img)
     {
         $profile_img = Model_Transcode::encode_profile_img($profile_img);
