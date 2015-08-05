@@ -72,15 +72,15 @@ class Model_Post extends Model
 			$thumbnail = $post_data[$i]['thumbnail'];
 
 			$post_data[$i]['movie'] =
-				'http://test.hls-movies.gocci.me/' . "$movie" . '.m3u8';
-
-			$post_data[$i]['share'] = 'mp4/' . "$movie" . '.mp4';
+				Model_Transcode::decode_profile_movie($post_data[$i]['movie']);
 
 			$post_data[$i]['thumbnail'] =
-				'http://test.thumbnails.gocci.me/' . "$thumbnail";
+				Model_Transcode::decode_thumbnail($post_data[$i]['thumbnail']);
 
 			$post_data[$i]['profile_img'] =
-				self::decode_profile_img($post_data[$i]['profile_img']);
+				Model_Transcode::decode_profile_img($post_data[$i]['profile_img']);
+
+			$post_data[$i]['share'] = 'mp4/' . "$movie" . '.mp4';
 
 
 			$post_id	  = $post_data[$i]['post_id'];
@@ -88,27 +88,14 @@ class Model_Post extends Model
 			$post_rest_id = $post_data[$i]['rest_id'];
 			$post_date 	  = $post_data[$i]['post_date'];
 
-
-	   		$gochi_num 	  = Model_Gochi::get_num($post_id);
-	   		$post_data[$i]['gochi_num']   = $gochi_num;
-
-	    	$comment_num  = Model_Comment::get_num($post_id);
-	   		$post_data[$i]['comment_num'] = $comment_num;
-
-	    	$want_flag	  = Model_Want::get_flag($user_id, $post_rest_id);
-	    	$post_data[$i]['want_flag']	  = $want_flag;
-
-	    	$follow_flag  = Model_Follow::get_flag($user_id, $post_user_id);
-	    	$post_data[$i]['follow_flag'] = $follow_flag;
-
-	    	$gochi_flag	  = Model_Gochi::get_flag($user_id, $post_id);
-	    	$post_data[$i]['gochi_flag']  = $gochi_flag;
-
-	    	$date_diff 	  = Model_Date::get_data($post_date);
-			$post_data[$i]['post_date']   = $date_diff;
+	   		$post_data[$i]['gochi_num']   = Model_Gochi::get_num($post_id);
+	   		$post_data[$i]['comment_num'] = Model_Comment::get_num($post_id);
+	    	$post_data[$i]['want_flag']	  = Model_Want::get_flag($user_id, $post_rest_id);
+	    	$post_data[$i]['follow_flag'] = Model_Follow::get_flag($user_id, $post_user_id);
+	    	$post_data[$i]['gochi_flag']  = Model_Gochi::get_flag($user_id, $post_id);
+			$post_data[$i]['post_date']   = Model_Date::get_data($post_date);
 
 		}
-
 		return $post_data;
 	}
 
@@ -190,7 +177,7 @@ class Model_Post extends Model
 					 . "$movie_name" . '_movie';
 
 		$thumbnail = "$directory[0]" . '/' . "$directory[1]" . '/'
-					 . '00002_' . "$movie_name" . '_img.png';
+					 . '00002_' . "$movie_name" . '_img';
 
 
 		$query = DB::insert('posts')
@@ -222,20 +209,6 @@ class Model_Post extends Model
 
 		return $result;
 	}
-
-
-	//==========================================================================//
-
-	private static function encode_profile_img($profile_img)
-    {
-        $split     = explode('_', $profile_img);
-        $directory = explode('-', $split[1]);
-
-        $profile_img =
-            "$directory[0]" . '/' . "$directory[1]" . '/' . "$profile_img" . '_img.png';
-
-        return $profile_img;
-    }
 
 
 	private static function decode_profile_img($profile_img)
