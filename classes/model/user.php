@@ -152,7 +152,7 @@ class Model_User extends Model
     //ユーザー登録
     public static function post_data($username, $identity_id)
     {
-        $profile_img = '0_tosty_' . mt_rand(1, 7) . '.png';
+        $profile_img = '0_tosty_' . mt_rand(1, 7);
 
         $query = DB::insert('users')
         ->set(array(
@@ -182,8 +182,6 @@ class Model_User extends Model
     //プロフィール画像変更
     public static function update_profile_img($user_id, $profile_img)
     {
-        $profile_img = Model_Transcode::encode_profile_img($profile_img);
-
         $query = DB::update('users')
         ->value('profile_img', "$profile_img")
         ->where('user_id', "$user_id")
@@ -210,8 +208,6 @@ class Model_User extends Model
     //プロフィール画像・ユーザー名変更
     public static function update_profile($user_id, $username, $profile_img)
     {
-        $profile_img = Model_Transcode::encode_profile_img($profile_img);
-
         $query = DB::update('users')
         ->set(array(
             'username'    => "$username",
