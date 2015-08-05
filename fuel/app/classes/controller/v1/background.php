@@ -1,6 +1,6 @@
 <?php
 /**
- * 
+ *
  *
  */
 class Controller_V1_Background extends Controller
@@ -33,16 +33,4 @@ class Controller_V1_Background extends Controller
             Model_Sns::post_message($keyword, $a_user_id, $p_user_id);
         }
     }
-
-
-    //Device Register
-    public function action_device_register()
-    {
-        $user_id     = Input::get('user_id');
-        $identity_id = Input::get('identity_id');
-        $os          = Input::get('os');
-        $model       = Input::get('model');
-        $register_id = Input::get('register_id');
-    }
-
 }
