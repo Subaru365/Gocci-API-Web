@@ -31,7 +31,7 @@ class Model_Cognito extends Model
         $ch = curl_init();
 
         curl_setopt($ch, CURLOPT_URL,
-            'http://localhost/v1/background/dataset/?' .
+            'http://localhost/v1/mobile/background/dataset/?' .
                 'identity_id=' . "$identity_id" . '&' .
                 'username='    . "$username"    . '&' .
                 'os='          . "$os"          . '&' .

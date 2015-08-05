@@ -3,7 +3,7 @@
 *
 */
 
-class Controller_V1_Base extends Controller
+class Controller_V1_Mobile_Base extends Controller
 {
 	//Check session
 	public function before()

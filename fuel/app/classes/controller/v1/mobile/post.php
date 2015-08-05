@@ -5,7 +5,7 @@ header('Content-Type: application/json; charset=UTF-8');
 *　投稿に関するAPIです。
 *　関数名の内容をPOSTします。
 */
-class Controller_V1_Post extends Controller_V1_Base
+class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 {
 	//SNS Link
 	public function action_sns()

@@ -12,7 +12,7 @@ error_reporting(-1);
  *
  */
 
-class Controller_V1_Auth extends Controller
+class Controller_V1_Mobile_Auth extends Controller
 {
     // サインアップ
     public function action_signup()
@@ -145,7 +145,7 @@ class Controller_V1_Auth extends Controller
             'token'       => "$token"
         ];
 
-        Controller_V1_Base::output_json($data);
+        Controller_V1_Mobile_Base::output_json($data);
         session::set('user_id', $user_id);
     }
 
@@ -171,7 +171,7 @@ class Controller_V1_Auth extends Controller
             'token'       => "$token"
         ];
 
-        Controller_V1_Base::output_json($data);
+        Controller_V1_Mobile_Base::output_json($data);
     }
 
 
