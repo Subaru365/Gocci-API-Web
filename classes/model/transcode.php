@@ -18,7 +18,7 @@ class Model_Transcode extends Model
 
     public static function decode_movie($movie)
     {
-        $movie_url = Config::get('_url.movie');
+        $movie_url = Config::get('_url.hls_movie');
         $movie = "$movie_url" . "$movie" . '.m3u8';
         return $movie;
     }
