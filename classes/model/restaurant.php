@@ -6,7 +6,7 @@ class Model_Restaurant extends Model
 		$query = DB::select('rest_id', 'restname')->from('restaurants')
 		->order_by(DB::expr('GLength(GeomFromText(CONCAT(' . "'" . 'LineString(' .
 			"$lon" . ' ' . "$lat" . ",'" . ', X(lon_lat), ' . "' '," . ' Y(lon_lat),' . "')'" . ')))'))
-		->limit(10);
+		->limit(30);
 
 		$near_data = $query->execute()->as_array();
 		return $near_data;
