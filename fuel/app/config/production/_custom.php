@@ -2,7 +2,7 @@
 
 return array(
     '_cognito' => array(
-        'IdentityPoolId' => 'none',
+        'IdentityPoolId' => 'us-east-1:b0252276-27e1-4069-be84-3383d4b3f897',
         'developer_provider' => 'login.gocci',
     ),
 

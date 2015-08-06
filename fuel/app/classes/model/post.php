@@ -68,18 +68,9 @@ class Model_Post extends Model
 
 		for ($i=0; $i < $post_num; $i++) {
 
-			$movie     = $post_data[$i]['movie'];
-			$thumbnail = $post_data[$i]['thumbnail'];
-
-			$post_data[$i]['movie'] =
-				Model_Transcode::decode_movie($post_data[$i]['movie']);
-
-			$post_data[$i]['thumbnail'] =
-				Model_Transcode::decode_thumbnail($post_data[$i]['thumbnail']);
-
-			$post_data[$i]['profile_img'] =
-				Model_Transcode::decode_profile_img($post_data[$i]['profile_img']);
-
+			$post_data[$i]['movie']       = Model_Transcode::decode_movie($post_data[$i]['movie']);
+			$post_data[$i]['thumbnail']   = Model_Transcode::decode_thumbnail($post_data[$i]['thumbnail']);
+			$post_data[$i]['profile_img'] = Model_Transcode::decode_profile_img($post_data[$i]['profile_img']);
 			$post_data[$i]['share'] = 'mp4/' . "$movie" . '.mp4';
 
 
@@ -168,16 +159,12 @@ class Model_Post extends Model
 
 	//動画投稿
 	public static function post_data(
-		$user_id, $rest_id, $movie_name,
-		$category_id, $tag_id, $value, $memo, $cheer_flag)
+		$user_id, $rest_id, $movie_name, $category_id, $tag_id, $value, $memo, $cheer_flag)
 	{
 		$directory = explode('-', $movie_name);
 
-		$movie     = "$directory[0]" . '/' . "$directory[1]" . '/'
-					 . "$movie_name" . '_movie';
-
-		$thumbnail = "$directory[0]" . '/' . "$directory[1]" . '/'
-					 . '00002_' . "$movie_name" . '_img';
+		$movie     = "$directory[0]" . '/' . "$directory[1]" . '/'  . "$movie_name" . '_movie';
+		$thumbnail = "$directory[0]" . '/' . "$directory[1]" . '/'  . '00002_' . "$movie_name" . '_img';
 
 
 		$query = DB::insert('posts')
