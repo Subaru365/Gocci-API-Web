@@ -133,6 +133,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	public function action_user()
 	{
 		$sort_key  = 'user';
+		$limit     = '99';
 		$user_id 		= session::get('user_id');
 		$target_user_id = Input::get('target_user_id');
 
@@ -140,7 +141,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 		$user_data = Model_User::get_data($user_id, $target_user_id);
 
         $post_data = Model_Post::get_data(
-        	$target_user_id, $sort_key, $target_user_id);
+        	$target_user_id, $sort_key, $target_user_id, $limit);
 
 	   	$data = array(
 	   		"header" => $user_data,
