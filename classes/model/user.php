@@ -12,7 +12,7 @@ class Model_User extends Model
 
         if (!empty($result)) {
         //username使用済み
-            Controller_V1_Base::output_none();
+            Controller_V1_Mobile_Base::output_none();
             $username = $result[0]['username'];
             error_log("$username" . 'は既に使用されています。');
             exit;
@@ -108,7 +108,7 @@ class Model_User extends Model
 
 
         if (empty($user_data)) {
-            Controller_V1_Base::output_none();
+            Controller_V1_Mobile_Base::output_none();
             error_log('登録されてないユーザー:' . "$identity_id");
 
             //Cognitoから消去
