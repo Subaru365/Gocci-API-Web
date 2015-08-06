@@ -68,6 +68,8 @@ class Model_Post extends Model
 
 		for ($i=0; $i < $post_num; $i++) {
 
+			$movie = $post_data[$i]['movie'];
+
 			$post_data[$i]['movie']       = Model_Transcode::decode_movie($post_data[$i]['movie']);
 			$post_data[$i]['thumbnail']   = Model_Transcode::decode_thumbnail($post_data[$i]['thumbnail']);
 			$post_data[$i]['profile_img'] = Model_Transcode::decode_profile_img($post_data[$i]['profile_img']);
@@ -85,7 +87,6 @@ class Model_Post extends Model
 	    	$post_data[$i]['follow_flag'] = Model_Follow::get_flag($user_id, $post_user_id);
 	    	$post_data[$i]['gochi_flag']  = Model_Gochi::get_flag($user_id, $post_id);
 			$post_data[$i]['post_date']   = Model_Date::get_data($post_date);
-
 		}
 		return $post_data;
 	}
