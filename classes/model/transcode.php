@@ -9,7 +9,7 @@ class Model_Transcode extends Model
         return $profile_img;
     }
 
-    public static function decode_thmbnail($thumbnail)
+    public static function decode_thumbnail($thumbnail)
     {
         $thumbnail_url = Config::get('_url.thumbnail');
         $thumbnail = "$thumbnail_url" . "$thumbnail" . '.png';
