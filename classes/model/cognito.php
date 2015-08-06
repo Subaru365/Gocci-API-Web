@@ -174,7 +174,7 @@ class Model_Cognito extends Model
         ]);
 
         $result = $client->getOpenIdTokenForDeveloperIdentity([
-            'IdentityPoolId' => '$IdentityPoolId',
+            'IdentityPoolId' => "$IdentityPoolId",
             'Logins' => [
                 "$provider" => "$token",
             ],

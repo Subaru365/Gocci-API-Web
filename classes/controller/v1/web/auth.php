@@ -7,7 +7,7 @@ error_reporting(-1);
  *
  */
 
-class Controller_Web_Auth extends Controller
+class Controller_V1_Web_Auth extends Controller
 {
 
 
@@ -117,7 +117,7 @@ class Controller_Web_Auth extends Controller
                 $username,
                 $profile_img,
                 $identity_id,
-                $badge_num,
+                $badge_num
             );
 
             error_log($e);
@@ -131,7 +131,7 @@ class Controller_Web_Auth extends Controller
         $username,
         $profile_img,
         $identity_id,
-        $badge_num,
+        $badge_num
     )
     {
         $data = [
@@ -144,7 +144,7 @@ class Controller_Web_Auth extends Controller
             'badge_num'   => "$badge_num",
         ];
 
-        Controller_V1_Base::output_json($data);
+        Controller_V1_Mobile_Base::output_json($data);
         session::set('user_id', $user_id);
     }
 
@@ -156,7 +156,7 @@ class Controller_Web_Auth extends Controller
         $username,
         $profile_img,
         $identity_id,
-        $badge_num,
+        $badge_num
     )
     {
         $data = [
@@ -168,6 +168,6 @@ class Controller_Web_Auth extends Controller
             'badge_num'   => "$badge_num",
         ];
 
-        Controller_V1_Base::output_json($data);
+        Controller_V1_Mobile_Base::output_json($data);
     }
 }
