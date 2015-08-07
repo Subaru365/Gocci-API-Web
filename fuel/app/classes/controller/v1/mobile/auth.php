@@ -1,6 +1,6 @@
 <?php
 
-header('Content-Type: application/json; charset=UTF-8');
+//header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
 /**
  * Auth api
@@ -69,8 +69,7 @@ class Controller_V1_Mobile_Auth extends Controller
                 $username,
                 $profile_img,
                 $identity_id,
-                $badge_num,
-                $token
+                $badge_num
             );
 
             error_log($e);
@@ -115,8 +114,7 @@ class Controller_V1_Mobile_Auth extends Controller
                 $username,
                 $profile_img,
                 $identity_id,
-                $badge_num,
-                $token
+                $badge_num
             );
 
             error_log($e);
@@ -167,8 +165,7 @@ class Controller_V1_Mobile_Auth extends Controller
             'username'    => "$username",
             'profile_img' => "$profile_img",
             'identity_id' => "$identity_id",
-            'badge_num'   => "$badge_num",
-            'token'       => "$token"
+            'badge_num'   => "$badge_num"
         ];
 
         Controller_V1_Mobile_Base::output_json($data);
@@ -240,7 +237,9 @@ class Controller_V1_Mobile_Auth extends Controller
 
 
         // VIPユーザー
-        } else {
+        }
+        else
+        {
             $user_id      = $user_id[0]['user_id'];
             $badge_num    = Model_User::get_badge($user_id);
 
@@ -256,7 +255,8 @@ class Controller_V1_Mobile_Auth extends Controller
             $identity_id  = $cognito_data['IdentityId'];
             $token        = $cognito_data['Token'];
 
-            try{
+            try
+            {
                 $profile_img  = Model_S3::input($user_id, $profile_img);
 
                 $profile_img  = Model_User::update_data(
