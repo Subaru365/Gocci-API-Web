@@ -14,7 +14,7 @@ class Model_S3 extends Model
         $code = 'wget -O /tmp/img/' . "$i" . '.png ' . "$profile_img_url";
         exec("$code");
 
-        $put_name = "$user_id" . '_' . date("Y-m-d-H-i-s") . '_img.png';
+        $put_name = "$user_id" . '_' . date("Y-m-d-H-i-s") . '.png';
 
         $client = new S3Client([
             'region'  => 'ap-northeast-1',
