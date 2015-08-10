@@ -132,8 +132,7 @@ class Model_Post extends Model
 		$num = count($cheer_list);
 
 		for ($i=0; $i < $num; $i++) {
-			$cheer_list[$i]['profile_img'] =
-				self::decode_profile_img($cheer_list[$i]['profile_img']);
+			$cheer_list[$i]['profile_img'] =　Model_Transcode::decode_profile_img($cheer_list[$i]['profile_img']);
 		}
 
 		return $cheer_list;
@@ -141,7 +140,7 @@ class Model_Post extends Model
 
 
 	//ユーザーに対する応援店数取得
-	public static function cheer_num($user_id)
+	public static function get_user_cheer_num($user_id)
 	{
 		$query = DB::select('post_rest_id')->from('posts')
 
@@ -150,6 +149,22 @@ class Model_Post extends Model
 		->and_where('post_status_flag', '1')
 
 		->distinct(true);
+
+		$result = $query->execute()->as_array();
+
+		$cheer_num = count($result);
+		return $cheer_num;
+	}
+
+
+	//店舗に対する応援総数
+	public static function get_rest_cheer_num($rest_id)
+	{
+		$query = DB::select('post_id')->from('posts')
+
+		->where	   ('post_rest_id', "$rest_id")
+		->and_where('cheer_flag', '1')
+		->and_where('post_status_flag', '1');
 
 		$result = $query->execute()->as_array();
 
@@ -197,11 +212,4 @@ class Model_Post extends Model
 
 		return $result;
 	}
-
-
-	private static function decode_profile_img($profile_img)
-    {
-        return $profile_img = 'http://test.imgs.gocci.me/' . "$profile_img";
-    }
-
 }

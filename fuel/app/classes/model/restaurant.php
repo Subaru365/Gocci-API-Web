@@ -23,6 +23,7 @@ class Model_Restaurant extends Model
 		->where('rest_id', "$rest_id");
 
 		$rest_data = $query->execute()->as_array();
+
 		return $rest_data;
 	}
 

@@ -110,15 +110,11 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
     	$user_id = session::get('user_id');
     	$rest_id = Input::get('rest_id');
 
-
 		$rest_data = Model_Restaurant::get_data($rest_id);
-
-		$want_flag = Model_Want::get_flag($user_id, $rest_id);
-		$rest_data['0']['want_flag'] = $want_flag;
-
+		$rest_data['0']['want_flag'] = Model_Want::get_flag($user_id, $rest_id);
+		$rest_data['0']['cheer_num'] = Model_Post::get_rest_cheer_num($rest_id);
 
 		$post_data = Model_Post::get_data($user_id, $sort_key, $rest_id);
-
 
 	   	$data = array(
 	   		"restaurants" => $rest_data[0],

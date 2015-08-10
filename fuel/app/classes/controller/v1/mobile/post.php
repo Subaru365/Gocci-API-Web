@@ -103,11 +103,11 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 	{
 		$keyword = 'フォロー';
 		$user_id 		= session::get('user_id');
-		$target_user_id = Input::get('target_user_id');
+		$follow_user_id = Input::get('target_user_id');
 
 		try
 		{
-			$result = Model_Follow::post_follow($user_id, $target_user_id);
+			$result = Model_Follow::post_follow($user_id, $follow_user_id);
 
 			$record = Model_Notice::post_data(
 				$keyword, $user_id, $follow_user_id);
@@ -328,30 +328,30 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 
 
 	//Profile Img
-	public function action_profile_img()
-	{
-		$keyword     = 'プロフィール画像を更新';
-		$user_id     = session::get('user_id');
-		$profile_img = Input::get('profile_img');
+	// public function action_profile_img()
+	// {
+	// 	$keyword     = 'プロフィール画像を更新';
+	// 	$user_id     = session::get('user_id');
+	// 	$profile_img = Input::get('profile_img');
 
-		try
-		{
-			$profile_img = Model_User::update_profile_img($user_id, $profile_img);
+	// 	try
+	// 	{
+	// 		$profile_img = Model_User::update_profile_img($user_id, $profile_img);
 
-			$data = array(
-				'code' 	      => 200,
-				'message'     => "$keyword" . 'しました',
-				'profile_img' => "$profile_img"
-			);
-			self::output_json($data);
-		}
+	// 		$data = array(
+	// 			'code' 	      => 200,
+	// 			'message'     => "$keyword" . 'しました',
+	// 			'profile_img' => "$profile_img"
+	// 		);
+	// 		self::output_json($data);
+	// 	}
 
-		catch(\Database_Exception $e)
-		{
-			self::failed($keyword);
-			error_log($e);
-		}
-	}
+	// 	catch(\Database_Exception $e)
+	// 	{
+	// 		self::failed($keyword);
+	// 		error_log($e);
+	// 	}
+	// }
 
 
 	//RestAdd
