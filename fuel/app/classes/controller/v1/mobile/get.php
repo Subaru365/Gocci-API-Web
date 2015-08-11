@@ -155,7 +155,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 
     	$data = Model_Notice::get_data($user_id);
 
-	   	$tmp = Model_User::reset_badge($user_id);
+	   	Model_User::reset_badge($user_id);
 
 	   	$status = $this->output_json($data);
 	}
