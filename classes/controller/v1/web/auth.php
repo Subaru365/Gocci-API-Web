@@ -1,13 +1,10 @@
 <?php
-
 header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
-
 /**
  * Auth api
  *
  */
-
 class Controller_V1_Web_Auth extends Controller
 {
     // ログイン
