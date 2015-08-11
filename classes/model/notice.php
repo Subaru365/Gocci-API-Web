@@ -14,10 +14,14 @@ class Model_Notice extends Model
         ->join('users', 'INNER')
         ->on('notices.notice_a_user_id', '=', 'users.user_id')
 
+        ->join('posts', 'INNER')
+        ->on('notice_post_id', '=', 'post_id')
+
         ->order_by('notices.notice_date','desc')
 
         ->limit('15')
-        ->where('notices.notice_p_user_id', "$user_id");
+        ->where('notices.notice_p_user_id', "$user_id")
+        ->where('post_status_flag', '1');
 
         $notice_data = $query->execute()->as_array();
 
