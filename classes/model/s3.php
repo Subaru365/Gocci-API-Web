@@ -28,8 +28,6 @@ class Model_S3 extends Model
         ]);
 
         $name = explode('.', $put_name);
-        $profile_img = Model_Transcode::decode_profile_img($name[0]);
-
-        return $profile_img;
+        return $name;
     }
 }
