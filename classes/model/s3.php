@@ -28,6 +28,6 @@ class Model_S3 extends Model
         ]);
 
         $name = explode('.', $put_name);
-        return $name;
+        return $name[0];
     }
 }
