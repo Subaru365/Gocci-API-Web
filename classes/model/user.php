@@ -247,7 +247,6 @@ class Model_User extends Model
             'identity_id' => "$identity_id"
         ))
         ->execute();
-
         $profile_img = Model_Transcode::decode_profile_img($profile_img);
         return $profile_img;
     }
