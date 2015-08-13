@@ -215,6 +215,14 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 	}
 
 
+	//Post有効化
+	public function action_post_publish()
+	{
+		$movie = Input::get('movie');
+		Model_Post::post_publish($movie);
+	}
+
+
 	//PostBlock
 	public function action_postblock()
 	{
