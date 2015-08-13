@@ -126,9 +126,7 @@ class Model_User extends Model
     //ユーザーページ情報取得
     public static function get_data($user_id, $target_user_id)
     {
-        $query = DB::select(
-            'user_id', 'username', 'profile_img')
-
+        $query = DB::select('user_id', 'username', 'profile_img')
         ->from('users')
         ->where('user_id', "$target_user_id");
 
@@ -143,7 +141,7 @@ class Model_User extends Model
         $user_data[0]['follower_num'] = Model_Follow::follower_num($target_user_id);
         $user_data[0]['cheer_num']    = Model_Post::get_user_cheer_num($target_user_id);
         $user_data[0]['want_num']     = Model_Want::want_num($target_user_id);
-        $user_data[0]['follow_flag']  = Model_Want::get_flag($user_id, $target_user_id);
+        $user_data[0]['follow_flag']  = Model_Follow::get_flag($user_id, $target_user_id);
 
         return $user_data[0];
     }
