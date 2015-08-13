@@ -201,6 +201,17 @@ class Model_Post extends Model
 	}
 
 
+	//投稿を表示
+	public static function post_publish($movie)
+	{
+		$query = DB::update('posts')
+		->set  (array('post_status_flag' => '1'))
+		->where('movie', "$movie");
+
+		$result = $query->execute();
+	}
+
+
 	//投稿を消去
 	public static function post_delete($post_id)
 	{
