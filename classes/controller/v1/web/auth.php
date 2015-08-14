@@ -1,5 +1,5 @@
 <?php
-header('Content-Type: application/json; charset=UTF-8');
+# header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
 /**
  * Auth api
