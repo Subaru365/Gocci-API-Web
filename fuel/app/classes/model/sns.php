@@ -79,7 +79,7 @@ class Model_Sns extends Model
 		]);
 
 		$result = $client->publish([
-    		'Message'   => '"message":' . "$username" . 'さんから' . "$keyword" . 'されました。}"',
+    		'Message'   => "$username" . 'さんから' . "$keyword" . 'されました。',
     		'TargetArn' => "$target_arn",
 		]);
 	}
