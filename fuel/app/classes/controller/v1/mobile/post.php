@@ -215,14 +215,6 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 	}
 
 
-	//Post有効化
-	public function action_post_publish()
-	{
-		$movie = Input::get('movie');
-		Model_Post::post_publish($movie);
-	}
-
-
 	//PostBlock
 	public function action_postblock()
 	{
@@ -333,33 +325,6 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 			error_log($e);
 		}
 	}
-
-
-	//Profile Img
-	// public function action_profile_img()
-	// {
-	// 	$keyword     = 'プロフィール画像を更新';
-	// 	$user_id     = session::get('user_id');
-	// 	$profile_img = Input::get('profile_img');
-
-	// 	try
-	// 	{
-	// 		$profile_img = Model_User::update_profile_img($user_id, $profile_img);
-
-	// 		$data = array(
-	// 			'code' 	      => 200,
-	// 			'message'     => "$keyword" . 'しました',
-	// 			'profile_img' => "$profile_img"
-	// 		);
-	// 		self::output_json($data);
-	// 	}
-
-	// 	catch(\Database_Exception $e)
-	// 	{
-	// 		self::failed($keyword);
-	// 		error_log($e);
-	// 	}
-	// }
 
 
 	//RestAdd

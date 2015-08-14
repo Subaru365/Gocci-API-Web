@@ -33,4 +33,12 @@ class Controller_V1_Mobile_Background extends Controller
             Model_Sns::post_message($keyword, $a_user_id, $p_user_id);
         }
     }
+
+
+    //Post有効化
+    public function action_post_publish()
+    {
+        $movie = Input::get('movie');
+        Model_Post::post_publish($movie);
+    }
 }
