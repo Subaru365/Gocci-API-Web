@@ -18,11 +18,11 @@ class Model_Follow extends Model
 		$follow_num = count($follow_list);
 
 		for ($i=0; $i < $follow_num; $i++) {
-			$follow_list[$i]['profile_img'] = 
-				Model_Transcode::decode_profile_img($follow_list[0]['profile_img']);
+			$follow_list[$i]['profile_img'] =
+				Model_Transcode::decode_profile_img($follow_list[$i]['profile_img']);
 
-			$follow_list[$i]['follow_flag'] = Model_Follow::get_flag(
-				$user_id, $follow_list[$i]['user_id']);
+			$follow_list[$i]['follow_flag'] =
+				Model_Follow::get_flag($user_id, $follow_list[$i]['user_id']);
 		}
 
 		return $follow_list;
@@ -45,10 +45,10 @@ class Model_Follow extends Model
 		$follower_num = count($follower_list);
 
 		for ($i=0; $i < $follower_num; $i++) {
-			$follower_list[$i]['profile_img'] = 
-				Model_Transcode::decode_profile_img($follower_list[0]['profile_img']);
+			$follower_list[$i]['profile_img'] =
+				Model_Transcode::decode_profile_img($follower_list[$i]['profile_img']);
 
-			$follower_list[$i]['follow_flag'] = 
+			$follower_list[$i]['follow_flag'] =
 				Model_Follow::get_flag($user_id, $follower_list[$i]['user_id']);
 		}
 
