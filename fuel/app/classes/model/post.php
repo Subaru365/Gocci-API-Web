@@ -209,6 +209,7 @@ class Model_Post extends Model
 		->where('movie', "$movie");
 
 		$result = $query->execute();
+		return $result;
 	}
 
 
