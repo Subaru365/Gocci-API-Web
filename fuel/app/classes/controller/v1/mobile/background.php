@@ -42,11 +42,9 @@ class Controller_V1_Mobile_Background extends Controller
         $user_id = Input::get('user_id');
         $movie   = Input::get('movie');
 
-        $result = Model_Post::post_publish($movie);
+        Model_Post::post_publish($movie);
+        Model_Sns::post_complete($user_id);
 
-        if ($result == 'true') {
-            Model_Sns::post_complete($user_id);
-            echo '確認ありがとう！(^_-)-☆';
-        }
+        echo '確認ありがとう！';
     }
 }
