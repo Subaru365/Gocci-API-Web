@@ -23,10 +23,11 @@ class Model_Comment extends Model
 		for ($i=0; $i < $comment_num; $i++) {
 
 			//日付情報を現在との差分に書き換え
-			$comment_date = $comment_data[$i]['comment_date'];
+			$comment_data[$i]['comment_date'] =
+				Model_Date::get_data($comment_data[$i]['comment_date']);
 
-			$date_diff    = Model_Date::get_data($comment_date);
-			$comment_data[$i]['comment_date'] = $date_diff;
+			$comment_data[$i]['profile_img'] =
+				Model_Transcode::decode_profile_img($comment_data[$i]['profile_img']);
 		}
 
 		return $comment_data;
