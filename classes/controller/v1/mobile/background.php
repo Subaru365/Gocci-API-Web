@@ -38,7 +38,6 @@ class Controller_V1_Mobile_Background extends Controller
     //Post有効化
     public function action_post_publish()
     {
-        $keyword
         $user_id = Input::get('user_id');
         $movie   = Input::get('movie');
 
