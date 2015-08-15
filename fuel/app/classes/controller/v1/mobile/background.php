@@ -42,6 +42,6 @@ class Controller_V1_Mobile_Background extends Controller
         $movie   = Input::get('movie');
 
         Model_Post::post_publish($movie);
-        Model_Sns::post_($user_id);
+        Model_Sns::post_complete($user_id);
     }
 }
