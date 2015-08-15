@@ -72,6 +72,8 @@ class Model_Sns extends Model
         $user_name  = Model_User::get_name($user_id);
         $target_arn = Model_Device::get_arn($target_user_id);
 
+        $message = "$username" . 'さんから' . "$keyword" . 'されました。';
+
 
 		$client = new SnsClient([
 			'region'  => 'ap-northeast-1',
@@ -79,7 +81,7 @@ class Model_Sns extends Model
 		]);
 
 		$result = $client->publish([
-    		'Message'   => "$username" . 'さんから' . "$keyword" . 'されました。',
+    		'Message'   => "$message",
     		'TargetArn' => "$target_arn",
 		]);
 	}

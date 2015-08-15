@@ -12,7 +12,7 @@ return array(
 
     '_sns' => array(
 		'android_ApplicationArn' => 'arn:aws:sns:ap-northeast-1:318228258127:app/GCM/gocci-android',
-		'iOS_ApplicationArn' => 'arn:aws:sns:ap-northeast-1:318228258127:app/APNS_SANDBOX/gocci-iOS-dev',
+		'iOS_ApplicationArn' => 'arn:aws:sns:ap-northeast-1:318228258127:app/APNS_SANDBOX/Gocci_iOS_Dev',
     ),
 
     '_url' => array(
