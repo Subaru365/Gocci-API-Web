@@ -89,7 +89,7 @@ class Model_Sns extends Model
 
 	public static function post_complete($user_id)
 	{
-		$message = '投稿が完了しました。'
+		$message = '投稿が完了しました。';
 		$target_arn = Model_Device::get_arn($user_id);
 
 		$client = new SnsClient([
