@@ -177,6 +177,22 @@ class Model_User extends Model
     }
 
 
+    //SNS連携
+    public static function update_sns_flag($user_id, $provider)
+    {
+        if ($provider == 'graph.facebook.com') {
+            $flag = 'facebook_flag';
+        } else {
+            $flag = 'twitter_flag';
+        }
+
+        $query = DB::update('users')
+        ->value("$flag", '1')
+        ->where('user_id', "$user_id")
+        ->execute();
+    }
+
+
     //プロフィール画像変更
     public static function update_profile_img($user_id, $profile_img)
     {

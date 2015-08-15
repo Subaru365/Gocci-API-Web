@@ -25,6 +25,7 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 			}
 
 			$identity_id = Model_User::get_identity_id($user_id);
+			Model_User::update_sns_flag($user_id, $provider);
 			Model_Cognito::post_sns($user_id, $identity_id, $provider, $token);
 
 			$data = array(
