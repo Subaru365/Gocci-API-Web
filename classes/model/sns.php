@@ -87,6 +87,23 @@ class Model_Sns extends Model
 	}
 
 
+	public static function post_complete($user_id)
+	{
+		$message = '投稿が完了しました。'
+		$target_arn = Model_Device::get_arn($user_id);
+
+		$client = new SnsClient([
+			'region'  => 'ap-northeast-1',
+    		'version' => '2010-03-31'
+		]);
+
+		$result = $client->publish([
+    		'Message'   => "$message",
+    		'TargetArn' => "$target_arn",
+		]);
+	}
+
+
 	public static function delete_endpoint($endpoint_arn)
 	{
 		$client = new SnsClient([
