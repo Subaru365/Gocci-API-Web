@@ -4,6 +4,9 @@ error_reporting(-1);
  *
  *
  */
+
+use Aws\Sns\SnsClient;
+
 class Controller_V1_Mobile_Background extends Controller
 {
     //CognitoSync Dataset

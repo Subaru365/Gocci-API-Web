@@ -74,16 +74,15 @@ class Model_Sns extends Model
 
         $message = "$username" . 'さんから' . "$keyword" . 'されました。';
 
+        $client = new SnsClient([
+            'region'  => 'ap-northeast-1',
+            'version' => '2010-03-31'
+        ]);
 
-		$client = new SnsClient([
-			'region'  => 'ap-northeast-1',
-    		'version' => '2010-03-31'
-		]);
-
-		$result = $client->publish([
-    		'Message'   => "$message",
-    		'TargetArn' => "$target_arn",
-		]);
+        $result = $client->publish([
+            'Message'   => "$message",
+            'TargetArn' => "$target_arn",
+        ]);
 	}
 
 
