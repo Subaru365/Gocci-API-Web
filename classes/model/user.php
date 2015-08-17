@@ -28,7 +28,7 @@ class Model_User extends Model
 
         $login_flag = $query->execute()->as_array();
 
-        return $login_flag[0];
+        return $login_flag[0]['login_flag'];
     }
 
 
@@ -66,7 +66,7 @@ class Model_User extends Model
         ->where('user_id', "$user_id");
 
         $username = $query->execute()->as_array();
-        return $username[0];
+        return $username[0]['username'];
     }
 
 
