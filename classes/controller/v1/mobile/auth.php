@@ -205,8 +205,7 @@ class Controller_V1_Mobile_Auth extends Controller
                     $username, $profile_img, $identity_id);
 
                 $endpoint_arn = Model_Sns::post_endpoint(
-                    $user_id, $identity_id, $register_id, $os
-                );
+                    $user_id, $identity_id, $register_id, $os);
 
                 Model_Device::post_data(
                     $user_id, $os, $model, $register_id, $endpoint_arn);
