@@ -69,7 +69,7 @@ class Model_Sns extends Model
 
 	public static function post_message($keyword, $user_id, $target_user_id)
 	{
-        $user_name  = Model_User::get_name($user_id);
+        $username  = Model_User::get_name($user_id);
         $target_arn = Model_Device::get_arn($target_user_id);
 
         $message = "$username" . 'さんから' . "$keyword" . 'されました。';
