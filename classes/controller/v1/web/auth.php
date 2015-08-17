@@ -1,5 +1,5 @@
 <?php
-# header('Content-Type: application/json; charset=UTF-8');
+header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
 /**
  * Auth api
@@ -77,7 +77,6 @@ class Controller_V1_Web_Auth extends Controller
         Controller_V1_Mobile_Base::output_json($data);
         session::set('user_id', $user_id);
     }
-
 
     // DBデータ入力エラー
     private static function failed(
