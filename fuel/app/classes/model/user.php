@@ -269,15 +269,17 @@ class Model_User extends Model
 
     //ユーザー登録
     public static function post_conversion(
-        $username, $profile_img, $identity_id)
+        $user_id, $username, $profile_img, $identity_id)
     {
         $query = DB::insert('users')
         ->set(array(
+            'user_id'     => "$user_id",
             'username'    => "$username",
             'profile_img' => "$profile_img",
             'identity_id' => "$identity_id"
         ))
         ->execute();
+
         $profile_img = Model_Transcode::decode_profile_img($profile_img);
         return $profile_img;
     }
