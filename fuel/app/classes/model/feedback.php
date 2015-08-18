@@ -1,5 +1,15 @@
 <?php
-class Model_Feedback extends Model_Crud
+class Model_Feedback extends Model
 {
-     protected static $_table_name = 'feedbacks';
+	public static function post_add($user_id, $feedback)
+	{
+		$query = DB::insert('feedbacks')
+		->set(array(
+			'feedback_user_id' => "$user_id",
+			'feedback'         => "$feedback"
+		))
+		->execute();
+
+		return $query;
+	}
 }

@@ -106,8 +106,9 @@ return array(
 	 * Fuel::L_ALL
 	 */
 	'log_threshold'    => Fuel::L_ALL,
-	// 'log_path'         => APPPATH.'logs/',
-	// 'log_date_format'  => 'Y-m-d H:i:s',
+	'log_path'         => '/var/log/fuelphp/',
+	'log_file'         => 'fuelphp_log',
+	'log_date_format'  => 'Y-m-d H:i:s',
 
 	/**
 	 * Security settings
@@ -271,7 +272,7 @@ return array(
 		 */
 		 'packages'  => array(
 		 	//'orm',
-			'auth',
+			//'auth',
 		 ),
 
 		/**
@@ -297,7 +298,9 @@ return array(
 		 * add it like 'session' => 'auth'.
 		 * If you don't want the config in a group use null as groupname.
 		 */
-		// 'config'  => array(),
+		 'config'  => array(
+		 	'_custom' => null,
+		 ),
 
 		/**
 		 * Language files to autoload

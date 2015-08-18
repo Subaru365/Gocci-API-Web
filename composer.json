@@ -26,8 +26,7 @@
         "fuelphp/upload": "2.0.2",
         "monolog/monolog": "1.5.*",
         "michelf/php-markdown": "1.4.0",
-<<<<<<< HEAD
-		"aws/aws-sdk-php": "3.*"
+        "aws/aws-sdk-php": "3.*"
     },
     "suggest": {
         "dwoo/dwoo" : "Allow Dwoo templating with the Parser package",

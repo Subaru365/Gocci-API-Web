@@ -1,5 +1,11 @@
 <?php
-class Model_Login extends Model_Crud
+
+class Model_Login extends Model
 {
-     protected static $_table_name = 'logins';
+	public static function post_login($user_id)
+	{
+		$result = DB::insert('logins')
+		->set(array('login_user_id' => "$user_id"))
+		->execute();
+	}
 }

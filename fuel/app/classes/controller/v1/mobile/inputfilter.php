@@ -4,7 +4,7 @@
 * input filter Controller
 * 入力されたテキストに不正がないかチェックします
 */
-class Controller_Inputfilter extends Controller
+class Controller_V1_Movile_Inputfilter extends Controller
 {
 
 	public static function action_encoding($value)
