@@ -238,7 +238,7 @@ class Controller_V1_Mobile_Auth extends Controller
 
     public function action_conversion()
     {
-        $keyword     = '顧客様';
+        $keyword     = 'お戻りさん';
         $username    = Input::get('username');
         $profile_img = Input::get('profile_img');
         $os          = Input::get('os');
@@ -252,6 +252,7 @@ class Controller_V1_Mobile_Auth extends Controller
 
             $badge_num    = 0;
             $user_id      = Model_User::get_next_id();
+
             $cognito_data = Model_Cognito::post_data(
                 $user_id, $username, $os, $model, $register_id);
 
@@ -262,13 +263,13 @@ class Controller_V1_Mobile_Auth extends Controller
             {
                 $profile_img  = Model_S3::input($user_id, $profile_img);
 
-                $profile_img  = Model_User::update_data(
+                $profile_img  = Model_User::post_conversion(
                     $user_id, $username, $profile_img, $identity_id);
 
                 $endpoint_arn = Model_Sns::post_endpoint(
                     $user_id, $identity_id, $register_id, $os);
 
-                Model_Device::update_data(
+                Model_Device::post_data(
                     $user_id, $os, $model, $register_id, $endpoint_arn);
 
                 self::success(
@@ -290,7 +291,8 @@ class Controller_V1_Mobile_Auth extends Controller
                     $username,
                     $profile_img,
                     $identity_id,
-                    $badge_num
+                    $badge_num,
+                    $token
                 );
                 error_log($e);
             }
@@ -300,6 +302,8 @@ class Controller_V1_Mobile_Auth extends Controller
         }
         else
         {
+            $keyword = '顧客様 登録';
+
             $user_id      = $user_id[0]['user_id'];
             $badge_num    = Model_User::get_badge($user_id);
 
