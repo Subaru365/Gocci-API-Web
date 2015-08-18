@@ -11,7 +11,6 @@ class Controller_Test extends Controller
 	public function action_index()
 	{
 
-		// POSTされてきた緯度・経度を取得
 		$lat = input::get('lat');
 		$lon = input::get('lon');
 		if (!$lat || !$lon || !is_numeric($lat) || !is_numeric($lon)) {
