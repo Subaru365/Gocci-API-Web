@@ -71,6 +71,8 @@ class Model_Post extends Model
 			$movie = $post_data[$i]['movie'];
 
 			$post_data[$i]['movie']       = Model_Transcode::decode_movie($post_data[$i]['movie']);
+			$post_data[$i]['test_movie']       = Model_Transcode::decode_movie($post_data[$i]['movie']);
+			
 			$post_data[$i]['thumbnail']   = Model_Transcode::decode_thumbnail($post_data[$i]['thumbnail']);
 			$post_data[$i]['profile_img'] = Model_Transcode::decode_profile_img($post_data[$i]['profile_img']);
 			$post_data[$i]['share'] = 'mp4/' . "$movie" . '.mp4';
