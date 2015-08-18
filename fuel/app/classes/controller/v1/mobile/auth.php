@@ -191,6 +191,8 @@ class Controller_V1_Mobile_Auth extends Controller
             $user_id  = $user_data['user_id'];
             $username = $user_data['username'];
 
+            $badge_num    = Model_User::get_badge($user_id);
+
             $cognito_data = Model_Cognito::post_dev_sns(
                 $user_id, $provider, $token, $username, $os, $model, $register_id);
 
