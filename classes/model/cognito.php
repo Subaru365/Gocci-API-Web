@@ -181,4 +181,43 @@ class Model_Cognito extends Model
         ]);
         return $result['identity_id'];
     }
+
+
+    //SNS連携
+    public static function post_dev_sns(
+        $user_id, $provider, $token, $username, $os, $model, $register_id)
+    {
+        $cognito_data = Config::get('_cognito');
+
+        $client = new CognitoIdentityClient([
+            'region'  => 'us-east-1',
+            'version' => 'latest'
+        ]);
+
+        $result = $client->getOpenIdTokenForDeveloperIdentity([
+            'IdentityPoolId' => "$cognito_data[IdentityPoolId]",
+            'Logins'         => [
+                "$cognito_data[developer_provider]" => "$user_id",
+                "$provider" => "$token",
+            ],
+        ]);
+
+        $identity_id = $result['IdentityId'];
+
+        //CognitoSync Dataset 外部処理
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL,
+            'http://localhost/v1/mobile/background/dataset/'
+                .'?identity_id='. "$identity_id"
+                .'&username='   . "$username"
+                .'&os='         . "$os"
+                .'&model='      . "$model"
+                .'&register_id='. "$register_id"
+        );
+        curl_exec($ch);
+        curl_close($ch);
+
+        return $result;
+    }
 }

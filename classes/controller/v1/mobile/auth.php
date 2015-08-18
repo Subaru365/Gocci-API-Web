@@ -175,6 +175,65 @@ class Controller_V1_Mobile_Auth extends Controller
     // Conversion
     // ==========================================================================
 
+    public function action_sns_conversion()
+    {
+        $keyword = 'SNS様';
+        $profile_img = Input::get('profile_img');
+        $token       = Input::get('token');
+        $provider    = Input::get('provider');
+        $os          = Input::get('os');
+        $model       = Input::get('model');
+        $register_id = Input::get('register_id');
+
+        try{
+            $user_data = Model_User::check_img($profile_img);
+
+            $user_id  = $user_data['user_id'];
+            $username = $user_data['username'];
+
+            $cognito_data = Model_Cognito::post_dev_sns(
+                $user_id, $provider, $token, $username, $os, $model, $register_id);
+
+            $identity_id  = $cognito_data['IdentityId'];
+            $token        = $cognito_data['Token'];
+
+            $profile_img  = Model_S3::input($user_id, $profile_img);
+
+            $profile_img  = Model_User::update_data(
+                $user_id, $username, $profile_img, $identity_id);
+
+            $endpoint_arn = Model_Sns::post_endpoint(
+                $user_id, $identity_id, $register_id, $os);
+
+            Model_Device::update_data(
+                $user_id, $os, $model, $register_id, $endpoint_arn);
+
+            self::success(
+                $keyword,
+                $user_id,
+                $username,
+                $profile_img,
+                $identity_id,
+                $badge_num,
+                $token
+            );
+        }
+
+        // データベース登録エラー
+        catch(\Database_Exception $e)
+        {
+            self::failed(
+                $keyword,
+                $username,
+                $profile_img,
+                $identity_id,
+                $badge_num
+            );
+            error_log($e);
+        }
+    }
+
+
     public function action_conversion()
     {
         $keyword     = '顧客様';
@@ -201,13 +260,13 @@ class Controller_V1_Mobile_Auth extends Controller
             {
                 $profile_img  = Model_S3::input($user_id, $profile_img);
 
-                $profile_img  = Model_User::post_conversion(
-                    $username, $profile_img, $identity_id);
+                $profile_img  = Model_User::update_data(
+                    $user_id, $username, $profile_img, $identity_id);
 
                 $endpoint_arn = Model_Sns::post_endpoint(
                     $user_id, $identity_id, $register_id, $os);
 
-                Model_Device::post_data(
+                Model_Device::update_data(
                     $user_id, $os, $model, $register_id, $endpoint_arn);
 
                 self::success(

@@ -20,6 +20,23 @@ class Model_User extends Model
     }
 
 
+    public static function check_img($profile_img)
+    {
+        $query = DB::select('user_id', 'username')->from('users')
+        ->where('profile_img', "$profile_img");
+
+        $result = $query->execute()->as_array();
+
+        if (empty($result)) {
+        //profile_img該当なし
+            Controller_V1_Mobile_Base::output_none();
+            error_log("$profile_img" . 'は該当するものがありませんでした。');
+            exit;
+        }
+        return $result[0];
+    }
+
+
     //ログインフラグ取得
     public static function check_login($user_id)
     {
