@@ -28,18 +28,18 @@ class Model_Cognito extends Model
         $identity_id = $result['IdentityId'];
 
 		//CognitoSync Dataset 外部処理
-        // $ch = curl_init();
+        $ch = curl_init();
 
-        // curl_setopt($ch, CURLOPT_URL,
-        //     'http://localhost/v1/mobile/background/dataset/'
-        //         .'?identity_id='. "$identity_id"
-        //         .'&username='   . "$username"
-        //         .'&os='         . "$os"
-        //         .'&model='      . "$model"
-        //         .'&register_id='. "$register_id"
-        // );
-        // curl_exec($ch);
-        // curl_close($ch);
+        curl_setopt($ch, CURLOPT_URL,
+            'http://localhost/v1/mobile/background/dataset/'
+                .'?identity_id='. "$identity_id"
+                .'&username='   . "$username"
+                .'&os='         . "$os"
+                .'&model='      . "$model"
+                .'&register_id='. "$register_id"
+        );
+        curl_exec($ch);
+        curl_close($ch);
 
 		return $result;
 	}

@@ -50,4 +50,22 @@ class Controller_V1_Mobile_Background extends Controller
 
         echo '確認ありがとう！';
     }
+
+
+    //Register_id更新
+    public function action_update_register_id()
+    {
+        $user_id     = Input::get('user_id');
+        $register_id = Input::get('register_id');
+        $os          = Input::get('os');
+
+        $old_endpoint_arn = Model_Device::get_arn($user_id);
+        Model_Sns::delete_endpoint($old_endpoint_arn);
+
+        $new_endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
+        Model_Device::update_register_id($user_id, $register_id, $new_endpoint_arn);
+
+        echo '端末情報を更新しました。';
+    }
+
 }
