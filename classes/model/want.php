@@ -11,7 +11,7 @@ class Model_Want extends Model
 		->join('restaurants', 'INNER')
 		->on('want_rest_id', '=', 'rest_id')
 
-		->where 	('want_user_id', "$user_id");
+		->where('want_user_id', "$user_id");
 
 		$want_list = $query->execute()->as_array();
 		return $want_list;

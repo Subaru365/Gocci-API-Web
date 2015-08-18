@@ -16,10 +16,17 @@ class Model_Transcode extends Model
         return $thumbnail;
     }
 
-    public static function decode_movie($movie)
+    public static function decode_hls_movie($movie)
     {
         $movie_url = Config::get('_url.hls_movie');
         $movie = "$movie_url" . "$movie" . '.m3u8';
+        return $movie;
+    }
+
+    public static function decode_mp4_movie($movie)
+    {
+        $movie_url = Config::get('_url.mp4_movie');
+        $movie = "$movie_url" . "$movie" . 'mp4';
         return $movie;
     }
 }
