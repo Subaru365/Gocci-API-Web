@@ -58,8 +58,10 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 			$target_user_id = Model_Gochi::post_gochi(
 				$user_id, $post_id);
 
-			$record = Model_Notice::post_data(
-				$keyword, $user_id, $target_user_id, $post_id);
+			if ($user_id != $target_user_id) {
+				$record = Model_Notice::post_data(
+					$keyword, $user_id, $target_user_id, $post_id);
+			}
 
 			self::success($keyword);
 		}
@@ -85,8 +87,10 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 			$target_user_id = Model_Comment::post_comment(
 				$user_id, $post_id, $comment);
 
-			$record = Model_Notice::post_data(
-				$keyword, $user_id, $target_user_id, $post_id);
+			if ($user_id != $target_user_id) {
+				$record = Model_Notice::post_data(
+					$keyword, $user_id, $target_user_id, $post_id);
+			}
 
 			self::success($keyword);
 		}
