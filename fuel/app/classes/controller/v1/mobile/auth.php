@@ -43,8 +43,7 @@ class Controller_V1_Mobile_Auth extends Controller
 
             $profile_img  = Model_User::post_data($username, $identity_id);
 
-            $endpoint_arn = Model_Sns::post_endpoint(
-                $user_id, $identity_id, $register_id, $os);
+            $endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
 
             Model_Device::post_data(
                 $user_id, $os, $model, $register_id, $endpoint_arn);
@@ -204,8 +203,7 @@ class Controller_V1_Mobile_Auth extends Controller
             $profile_img  = Model_User::update_data(
                 $user_id, $username, $profile_img, $identity_id);
 
-            $endpoint_arn = Model_Sns::post_endpoint(
-                $user_id, $identity_id, $register_id, $os);
+            $endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
 
             Model_Device::update_data(
                 $user_id, $os, $model, $register_id, $endpoint_arn);
@@ -266,8 +264,7 @@ class Controller_V1_Mobile_Auth extends Controller
                 $profile_img  = Model_User::post_conversion(
                     $user_id, $username, $profile_img, $identity_id);
 
-                $endpoint_arn = Model_Sns::post_endpoint(
-                    $user_id, $identity_id, $register_id, $os);
+                $endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
 
                 Model_Device::post_data(
                     $user_id, $os, $model, $register_id, $endpoint_arn);
@@ -330,12 +327,7 @@ class Controller_V1_Mobile_Auth extends Controller
                     $identity_id
                 );
 
-                $endpoint_arn = Model_Sns::post_endpoint(
-                    $user_id,
-                    $identity_id,
-                    $register_id,
-                    $os
-                );
+                $endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
 
                 // Device情報を登録
                 $device       = Model_Device::update_data(

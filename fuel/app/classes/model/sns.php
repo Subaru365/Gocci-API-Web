@@ -7,18 +7,16 @@ use Aws\Sns\SnsClient;
 class Model_Sns extends Model
 {
 
-	public static function post_endpoint($user_id, $identity_id, $register_id, $os)
+	public static function post_endpoint($user_id, $register_id, $os)
 	{
 		//AWS SNSに端末を登録
         $brand = explode('_', $os);
 
         if ($brand[0] == 'android') {
-            $endpoint_arn = self::post_android(
-            	$user_id, $identity_id, $register_id);
+            $endpoint_arn = self::post_android($user_id, $register_id);
 
         }elseif ($brand[0] == 'iOS') {
-			$endpoint_arn = self::post_iOS(
-				$user_id, $identity_id, $register_id);
+			$endpoint_arn = self::post_iOS($user_id, $register_id);
 
 		}else{
             error_log('Model_Sns: endpoint_arn 未発行');
@@ -29,7 +27,7 @@ class Model_Sns extends Model
 	}
 
 
-	private static function post_android($user_id, $identity_id, $register_id)
+	private static function post_android($user_id, $register_id)
 	{
 		$android_Arn = Config::get('_sns.android_ApplicationArn');
 
@@ -39,7 +37,7 @@ class Model_Sns extends Model
 		]);
 
 		$result = $client->createPlatformEndpoint([
-    		'CustomUserData' => 'user_id:' . "$user_id" . ' / ' . "$identity_id",
+    		'CustomUserData' => 'user_id / ' . "$user_id",
     		'PlatformApplicationArn' => "$android_Arn",
     		'Token' => "$register_id",
     	]);
@@ -48,7 +46,7 @@ class Model_Sns extends Model
 	}
 
 
-	private static function post_iOS($user_id, $identity_id, $register_id)
+	private static function post_iOS($user_id, $register_id)
 	{
 		$iOS_Arn = Config::get('_sns.iOS_ApplicationArn');
 
@@ -58,7 +56,7 @@ class Model_Sns extends Model
 		]);
 
 		$result = $client->createPlatformEndpoint([
-    		'CustomUserData' => 'user_id:' . "$user_id" . ' / ' . "$identity_id",
+    		'CustomUserData' => 'user_id / ' . "$user_id",
     		'PlatformApplicationArn' => "$iOS_Arn",
     		'Token' => "$register_id",
     	]);

@@ -57,13 +57,10 @@ class Model_Device extends Model
      }
 
 
-     public static function update_data(
-        $user_id, $os, $model, $register_id, $endpoint_arn)
-     {
+    public static function update_register_id($user_id, $register_id, $endpoint_arn)
+    {
         $query = DB::update('devices')
         ->set(array(
-            'os'          => "$os",
-            'model'       => "$model",
             'register_id' => "$register_id",
             'endpoint_arn'=> "$endpoint_arn"
         ))
@@ -71,15 +68,31 @@ class Model_Device extends Model
         ->execute();
 
         return $query;
+    }
+
+    public static function update_data(
+       $user_id, $os, $model, $register_id, $endpoint_arn)
+    {
+       $query = DB::update('devices')
+       ->set(array(
+           'os'          => "$os",
+           'model'       => "$model",
+           'register_id' => "$register_id",
+           'endpoint_arn'=> "$endpoint_arn"
+       ))
+       ->where('device_user_id', "$user_id")
+       ->execute();
+
+       return $query;
      }
 
 
-     public static function delete_device($user_id)
-     {
-        $query = DB::delete('devices')
-        ->where('device_user_id', "$user_id")
-        ->execute();
-     }
+    public static function delete_device($user_id)
+    {
+       $query = DB::delete('devices')
+       ->where('device_user_id', "$user_id")
+       ->execute();
+    }
 }
 
 
