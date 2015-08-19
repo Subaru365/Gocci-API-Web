@@ -26,7 +26,7 @@ class Model_Transcode extends Model
     public static function decode_mp4_movie($movie)
     {
         $movie_url = Config::get('_url.mp4_movie');
-        $movie = "$movie_url" . "$movie" . 'mp4';
+        $movie = "$movie_url" . "$movie" . '.mp4';
         return $movie;
     }
 }
