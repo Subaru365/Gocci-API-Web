@@ -17,6 +17,36 @@ class Controller_V1_Web_Base extends Controller
 	public function before()
 	{
 
+		// ブラウザの全てのHTTPリクエストヘッダを取得する(token取得)
+
+		// jwt(token)を持ってるか
+
+		// 
+		// $jwt = self:: 
+		/*
+		if(empty($jwt))
+		{
+			self::unauth();
+			error_log('UnAuthorized Accsess..');
+			exit;
+		}
+		*/
+	}
+
+	// Not JWT 
+	private static function unauth()
+	{
+		$status = array(
+			'code'   => '401',
+			'status' => 'UnAuthorized'
+		);
+
+		$status = json_encode(
+        	$status,
+            JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+        );
+
+		echo $status;
 	}
 
 	// decode
