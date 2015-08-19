@@ -23,6 +23,9 @@ class Controller_V1_Web_Auth extends Controller
             $profile_img = $user_data['profile_img'];
             $badge_num   = $user_data['badge_num'];
 
+            // JWT生成
+            $jwt = self::encode($user_id, $username);
+
             Model_Login::post_login($user_id);
 
             self::success(
@@ -31,7 +34,8 @@ class Controller_V1_Web_Auth extends Controller
                 $username,
                 $profile_img,
                 $identity_id,
-                $badge_num
+                $badge_num,
+                $jwt
             );
 
             $sort_key  = 'all';
@@ -54,6 +58,46 @@ class Controller_V1_Web_Auth extends Controller
         }
     }
 
+    // decode
+    public static function decode()
+    {
+        $key = 'i_am_a_secret_key';
+        try {
+            $decoded = JWT::decode($jwt, $key, array('HS256'));
+            error_log('ログイン成功');
+
+        } catch (Exception $e){
+            die("[ERROR] Invalid jwt. Detail: " . $e->getMessage() . "\n");
+        }
+        return true;
+    }
+
+    // encode
+    public static function encode($user_id, $username)
+    {
+        $key   = 'i_am_a_secret_key';
+        $json  = array('user_id' => $user_id,'username' => $username);
+        $token = json_encode($json);
+
+        if ($token === NULL) {
+            die("[Error]\n");
+        }
+
+        $jwt = JWT::encode($token, $key);
+
+        return $jwt;    
+    }
+
+    public static function output_json($data)
+    {
+        $json = json_encode(
+            $data,
+            JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+        );
+
+        echo "$json";
+    }
+
     // DBデータ入力成功
     private static function success(
         $keyword,
@@ -61,7 +105,8 @@ class Controller_V1_Web_Auth extends Controller
         $username,
         $profile_img,
         $identity_id,
-        $badge_num
+        $badge_num,
+        $jwt
     )
     {
         $data = [
@@ -72,6 +117,7 @@ class Controller_V1_Web_Auth extends Controller
             'profile_img' => "$profile_img",
             'identity_id' => "$identity_id",
             'badge_num'   => "$badge_num",
+            'jwt'         => $jwt,
         ];
 
         Controller_V1_Mobile_Base::output_json($data);
