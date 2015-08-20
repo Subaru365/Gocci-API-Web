@@ -285,6 +285,7 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 
 			}else{
 			//両方更新
+				Model_User::check_name($username);
 				$result = Model_User::update_profile(
 					$user_id, $username, $profile_img);
 			}
