@@ -179,7 +179,7 @@ class Model_Cognito extends Model
                 "$provider" => "$token",
             ],
         ]);
-        return $result['identity_id'];
+        return $result['IdentityId'];
     }
 
 
