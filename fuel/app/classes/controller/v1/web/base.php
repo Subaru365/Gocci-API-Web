@@ -8,7 +8,6 @@ class Controller_V1_Web_Base extends Controller
 {
 	// jwt check
 	
-	/*
 	public function before()
 	{
 		$jwt = @$_SERVER["HTTP_AUTHORIZATION"] ?  @$_SERVER["HTTP_AUTHORIZATION"] : "";
@@ -31,7 +30,7 @@ class Controller_V1_Web_Base extends Controller
 			exit;
 		}
 	}
-	*/
+	
 
 	// decode
     public static function decode($jwt)
@@ -88,7 +87,7 @@ class Controller_V1_Web_Base extends Controller
 			JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
 		);
 
-		echo "$json";
+		echo $json;
 	}
 
 	public static function getallheaders()
