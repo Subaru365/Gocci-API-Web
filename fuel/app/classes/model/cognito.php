@@ -25,22 +25,6 @@ class Model_Cognito extends Model
             ],
         ]);
 
-        $identity_id = $result['IdentityId'];
-
-		//CognitoSync Dataset 外部処理
-        $ch = curl_init();
-
-        curl_setopt($ch, CURLOPT_URL,
-            'http://localhost/v1/mobile/background/dataset/'
-                .'?identity_id='. "$identity_id"
-                .'&username='   . "$username"
-                .'&os='         . "$os"
-                .'&model='      . "$model"
-                .'&register_id='. "$register_id"
-        );
-        curl_exec($ch);
-        curl_close($ch);
-
 		return $result;
 	}
 
@@ -90,62 +74,6 @@ class Model_Cognito extends Model
 	}
 
 
-    //DataSet
-	public static function dataset(
-		$identity_id, $username, $os, $model, $register_id)
-	{
-        $IdentityPoolId = Config::get('_cognito.IdentityPoolId');
-
-		$client = new CognitoSyncClient([
-            'region'  => 'us-east-1',
-            'version' => 'latest'
-        ]);
-
-		//SyncSessionToken取得
-        $result = $client->listRecords([
-            'DatasetName'    => 'user_info',
-            'IdentityId'     => "$identity_id",
-            'IdentityPoolId' => "$IdentityPoolId",
-        ]);
-
-        $sync_session_token = $result['SyncSessionToken'];
-
-
-        $result = $client->updateRecords([
-            'DatasetName'    => 'user_info',
-            'IdentityId'     => "$identity_id",
-            'IdentityPoolId' => "$IdentityPoolId",
-            'RecordPatches'  => [
-                [
-                    'Key' => 'username',
-                    'Op' => 'replace',
-                    'SyncCount' => 0,
-                    'Value' => "$username",
-                ],
-                [
-                    'Key' => 'os',
-                    'Op' => 'replace',
-                    'SyncCount' => 0,
-                    'Value' => "$os",
-                ],
-                [
-                    'Key' => 'model',
-                    'Op' => 'replace',
-                    'SyncCount' => 0,
-                    'Value' => "$model",
-                ],
-                [
-                    'Key' => 'register_id',
-                    'Op' => 'replace',
-                    'SyncCount' => 0,
-                    'Value' => "$register_id",
-                ],
-            ],
-            'SyncSessionToken' => "$sync_session_token",
-        ]);
-	}
-
-
     public static function delete_identity_id($identity_id)
     {
         $client = new CognitoIdentityClient([
@@ -179,7 +107,7 @@ class Model_Cognito extends Model
                 "$provider" => "$token",
             ],
         ]);
-        return $result['identity_id'];
+        return $result['IdentityId'];
     }
 
 
@@ -203,20 +131,6 @@ class Model_Cognito extends Model
         ]);
 
         $identity_id = $result['IdentityId'];
-
-        //CognitoSync Dataset 外部処理
-        $ch = curl_init();
-
-        curl_setopt($ch, CURLOPT_URL,
-            'http://localhost/v1/mobile/background/dataset/'
-                .'?identity_id='. "$identity_id"
-                .'&username='   . "$username"
-                .'&os='         . "$os"
-                .'&model='      . "$model"
-                .'&register_id='. "$register_id"
-        );
-        curl_exec($ch);
-        curl_close($ch);
 
         return $result;
     }
