@@ -7,6 +7,8 @@
 class Controller_V1_Web_Base extends Controller
 {
 	// jwt check
+	
+	/*
 	public function before()
 	{
 		$jwt = @$_SERVER["HTTP_AUTHORIZATION"] ?  @$_SERVER["HTTP_AUTHORIZATION"] : "";
@@ -15,6 +17,10 @@ class Controller_V1_Web_Base extends Controller
 			$data      = self::decode($jwt);
 			$user_data = session::get('data');
 			$obj       = json_decode($user_data);
+			if (empty($obj)) {
+				self::unauth(); 
+			} 
+
 			$user_id   = $obj->{'user_id'};
 			session::set('user_id', $user_id);
 			$username  = $obj->{'username'};
@@ -25,6 +31,7 @@ class Controller_V1_Web_Base extends Controller
 			exit;
 		}
 	}
+	*/
 
 	// decode
     public static function decode($jwt)
@@ -36,8 +43,7 @@ class Controller_V1_Web_Base extends Controller
             // error_log('ログイン成功');
 
         } catch (Exception $e){
-        	
-            die("[ERROR] Invalid jwt. Detail: " . $e->getMessage() . "\n");
+            $decoded = "";
         }
         return $decoded;
     }
@@ -72,6 +78,7 @@ class Controller_V1_Web_Base extends Controller
         );
 
 		echo $status;
+		exit();
 	}
 
 	public static function output_json($data)
