@@ -17,6 +17,7 @@ class Controller_V1_Web_Auth extends Controller
         try
         {
             $identity_id = Model_Cognito::get_identity_id($provider, $token);
+
             $user_data   = Model_User::get_auth($identity_id);
             $user_id     = $user_data['user_id'];
             $username    = $user_data['username'];
@@ -37,9 +38,6 @@ class Controller_V1_Web_Auth extends Controller
                 $badge_num,
                 $jwt
             );
-
-            $sort_key  = 'all';
-            $data = Model_Post::get_data($user_id, $sort_key, $sort_key);
         }
 
         // データベース登録エラー
@@ -64,6 +62,10 @@ class Controller_V1_Web_Auth extends Controller
         $key = 'i_am_a_secret_key';
         try {
             $decoded = JWT::decode($jwt, $key, array('HS256'));
+            print_r($decoded);
+
+            // user_idを取得する
+
             error_log('ログイン成功');
 
         } catch (Exception $e){
@@ -85,7 +87,7 @@ class Controller_V1_Web_Auth extends Controller
 
         $jwt = JWT::encode($token, $key);
 
-        return $jwt;    
+        return $jwt;
     }
 
     public static function output_json($data)

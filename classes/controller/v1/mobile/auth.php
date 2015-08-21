@@ -81,6 +81,7 @@ class Controller_V1_Mobile_Auth extends Controller
         $keyword     = 'ログイン';
         $identity_id = Input::get('identity_id');
 
+
         try
         {
             $user_data   = Model_User::get_auth($identity_id);
@@ -90,6 +91,62 @@ class Controller_V1_Mobile_Auth extends Controller
             $badge_num   = $user_data['badge_num'];
 
             $token = Model_Cognito::get_token($user_id, $identity_id);
+
+            Model_Login::post_login($user_id);
+
+            self::success(
+                $keyword,
+                $user_id,
+                $username,
+                $profile_img,
+                $identity_id,
+                $badge_num,
+                $token
+            );
+        }
+
+        // データベース登録エラー
+        catch(\Database_Exception $e)
+        {
+            self::failed(
+                $keyword,
+                $user_id,
+                $username,
+                $profile_img,
+                $identity_id,
+                $badge_num
+            );
+
+            error_log($e);
+        }
+    }
+
+
+    public static function action_sns_login()
+    {
+        $keyword     = 'ログイン';
+        $identity_id = Input::get('identity_id');
+        $username    = Input::get('username');
+        $os          = Input::get('os');
+        $model       = Input::get('model');
+        $register_id = Input::get('register_id');
+
+
+        try
+        {
+            $user_data   = Model_User::get_auth($identity_id);
+            $user_id     = $user_data['user_id'];
+            $username    = $user_data['username'];
+            $profile_img = $user_data['profile_img'];
+            $badge_num   = $user_data['badge_num'];
+
+            $token = Model_Cognito::get_token($user_id, $identity_id);
+
+            $old_endpoint_arn = Model_Device::get_arn($user_id);
+            Model_Sns::delete_endpoint($old_endpoint_arn);
+
+            $new_endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
+            Model_Device::update_data($user_id, $os, $model, $register_id, $endpoint_arn);
 
             Model_Login::post_login($user_id);
 
