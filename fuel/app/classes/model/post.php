@@ -72,7 +72,6 @@ class Model_Post extends Model
 
 			$post_data[$i]['mp4_movie']   = Model_Transcode::decode_mp4_movie($post_data[$i]['movie']);
 			$post_data[$i]['movie']       = Model_Transcode::decode_hls_movie($post_data[$i]['movie']);
-
 			$post_data[$i]['thumbnail']   = Model_Transcode::decode_thumbnail($post_data[$i]['thumbnail']);
 			$post_data[$i]['profile_img'] = Model_Transcode::decode_profile_img($post_data[$i]['profile_img']);
 			$post_data[$i]['share'] = 'mp4/' . "$movie" . '.mp4';
@@ -91,6 +90,25 @@ class Model_Post extends Model
 			$post_data[$i]['post_date']   = Model_Date::get_data($post_date);
 		}
 		return $post_data;
+	}
+
+
+	public static function get_memo($post_id)
+	{
+		$query = DB::select('user_id', 'username', 'profile_img', 'memo', 'post_date')
+		->from('posts')
+
+		->join('users', 'INNER')
+		->on('post_user_id', '=', 'user_id')
+
+		->where('post_id', "$post_id");
+
+		$value = $query->execute()->as_array();
+
+		$key = array('comment_user_id', 'username', 'profile_img', 'comment', 'comment_date');
+		$post_comment = array_combine($key, $value[0]);
+
+		return $post_comment;
 	}
 
 
