@@ -9,20 +9,6 @@ use Aws\Sns\SnsClient;
 
 class Controller_V1_Mobile_Background extends Controller
 {
-    //CognitoSync Dataset
-    public function action_dataset()
-    {
-        $identity_id = Input::get('identity_id');
-        $username    = Input::get('username');
-        $os          = Input::get('os');
-        $model       = Input::get('model');
-        $register_id = Input::get('register_id');
-
-        Model_Cognito::dataset(
-            $identity_id, $username, $os, $model, $register_id);
-    }
-
-
     //SNS Push
     public function action_publish()
     {
