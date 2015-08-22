@@ -87,7 +87,7 @@ class Model_Cognito extends Model
     }
 
 
-    public static function delete_identity_id($user_id, $identity_id, $provider, $token)
+    public static function delete_sns($user_id, $identity_id, $provider, $token)
     {
         $developer_provider = Config::get('_cognito.developer_provider');
 
