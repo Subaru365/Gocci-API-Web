@@ -12,11 +12,11 @@ class Model_User extends Model
 
         if (!empty($result)) {
         //username使用済み
-            Controller_V1_Mobile_Base::output_none();
-            $username = $result[0]['username'];
             error_log("$username" . 'は既に使用されています。');
-            exit;
+            $username = '変更に失敗しました';
         }
+
+
     }
 
 
@@ -46,6 +46,22 @@ class Model_User extends Model
         $login_flag = $query->execute()->as_array();
 
         return $login_flag[0]['login_flag'];
+    }
+
+
+    //user_id取得
+    public static function get_id($username)
+    {
+        $query = DB::select('user_id')->from('users')
+        ->where('username', "$username");
+
+        $user_id = $query->execute()->as_array();
+
+        if (empty($user_id)) {
+            $user_id = '見つかりませんでした';
+        }
+
+        return $user_id;
     }
 
 
@@ -248,6 +264,23 @@ class Model_User extends Model
 
         return $query;
     }
+
+
+    //SNS連携
+    public static function delete_sns_flag($user_id, $provider)
+    {
+        if ($provider == 'graph.facebook.com') {
+            $flag = 'facebook_flag';
+        } else {
+            $flag = 'twitter_flag';
+        }
+
+        $query = DB::update('users')
+        ->value("$flag", '0')
+        ->where('user_id', "$user_id")
+        ->execute();
+    }
+
 
 
 

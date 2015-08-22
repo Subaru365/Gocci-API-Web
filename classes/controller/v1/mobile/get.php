@@ -237,5 +237,17 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 
     	$status = $this->output_json($data);
 	}
+
+
+	public function action_user_search()
+	{
+		$user_id = session::get('user_id');
+		$target_user_name = Input::get('username');
+
+		$target_user_id = Model_User::get_id($target_user_name);
+		$user_data = Model_User::get_data($user_id, $target_user_id);
+
+		$status = $this->output_json($user_data);
+	}
 }
 
