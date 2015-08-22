@@ -299,8 +299,10 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 			$profile_img = $user_data['profile_img'];
 
 
-			if (empty($new_username) && empty($new_profile_img)) {
-			//更新なし
+			if (!empty($new_username) && !empty($new_profile_img)) {
+			//双方更新
+				$profile_img = Model_User::update_profile_img($user_id, $new_profile_img);
+				$username = Model_User::update_name($user_id, $new_username);
 
 			}elseif (!empty($new_profile_img)) {
 			//プロフィール画像更新
@@ -309,11 +311,6 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 			}elseif (!empty($new_username)) {
 			//ユーザーネーム更新
 				$username = Model_User::update_name($user_id, $new_username);
-
-			}else{
-			//両方更新
-				$username = Model_User::update_profile($user_id, $new_username, $new_profile_img);
-				$profile_img = $new_profile_img;
 			}
 
 			$data = array(
