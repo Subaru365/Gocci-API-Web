@@ -87,6 +87,24 @@ class Model_Cognito extends Model
     }
 
 
+    public static function delete_identity_id($user_id, $identity_id, $provider, $token)
+    {
+        $developer_provider = Config::get('_cognito.developer_provider');
+
+        $client = new CognitoIdentityClient([
+            'region'  => 'us-east-1',
+            'version' => 'latest'
+        ]);
+
+        $result = $client->unlinkIdentity([
+            'IdentityId' => "$identity_id",
+            'Logins' => ["$developer_provider" => "$user_id"],
+            'LoginsToRemove' => ["$provider" => "$token"],
+        ]);
+    }
+
+
+
 
     //=========================================================================//
 

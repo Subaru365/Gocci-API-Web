@@ -28,13 +28,30 @@ class Controller_V1_Mobile_Background extends Controller
     //Post有効化
     public function action_post_publish()
     {
+        $message = '投稿が完了しました！';
+
         $user_id = Input::get('user_id');
         $movie   = Input::get('movie');
 
         Model_Post::post_publish($movie);
-        Model_Sns::post_complete($user_id);
+        Model_Sns::post_publish($user_id, $message);
 
         echo '確認ありがとう！';
+    }
+
+
+    //Post有効化
+    public function action_post_reject()
+    {
+        $message = 'ごめんなさい！料理の動画を撮って下さい。';
+
+        $user_id = Input::get('user_id');
+        $movie   = Input::get('movie');
+
+        Model_Post::post_reject($movie);
+        Model_Sns::post_publish($user_id, $message);
+
+        echo '拒否しました。確認ありがとう！';
     }
 
 

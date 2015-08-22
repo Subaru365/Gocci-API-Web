@@ -44,6 +44,29 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 		}
 	}
 
+	public function action_sns_unlink()
+	{
+		$keyword     = 'SNS連携解除';
+		$user_id     = session::get('user_id');
+		$provider    = Input::get('provider');
+		$token       = Input::get('token');
+
+		try
+		{
+			$identity_id = Model_User::get_identity_id($user_id);
+			Model_User::delete_sns_flag($user_id, $provider);
+			Model_Cognito::delete_sns($user_id, $identity_id, $provider, $token);
+
+			self::success($keyword);
+		}
+
+		catch(\Database_Exception $e)
+		{
+			self::failed($keyword);
+			error_log($e);
+		}
+	}
+
 
 	//Gochi!
 	public function action_gochi()
@@ -280,12 +303,12 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 
 			}elseif (empty($profile_img)) {
 			//ユーザーネーム更新
-				Model_User::check_name($username);
+				$username = Model_User::check_name($username);
 				Model_User::update_name($user_id, $username);
 
 			}else{
 			//両方更新
-				Model_User::check_name($username);
+				$username = Model_User::check_name($username);
 				$result = Model_User::update_profile(
 					$user_id, $username, $profile_img);
 			}
