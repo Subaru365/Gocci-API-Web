@@ -16,7 +16,7 @@ class Model_User extends Model
             $username = '変更に失敗しました';
         }
 
-
+        return $username;
     }
 
 
