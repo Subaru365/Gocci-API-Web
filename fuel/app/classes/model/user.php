@@ -242,12 +242,16 @@ class Model_User extends Model
     //ユーザー名変更
     public static function update_name($user_id, $username)
     {
-        $query = DB::update('users')
-        ->value('username', "$username")
-        ->where('user_id', "$user_id")
-        ->execute();
+        $username = self::check_name($username);
 
-        return $query;
+        if ($username != '変更に失敗しました') {
+            $query = DB::update('users')
+            ->value('username', "$username")
+            ->where('user_id', "$user_id")
+            ->execute();
+        }
+
+        return $username;
     }
 
 
@@ -255,14 +259,16 @@ class Model_User extends Model
     public static function update_profile($user_id, $username, $profile_img)
     {
         $query = DB::update('users')
-        ->set(array(
-            'username'    => "$username",
-            'profile_img' => "$profile_img"
-        ))
-        ->where('user_id', "$user_id")
+        ->value('profile_img', "$profile_img");
+
+        if ($username != '変更に失敗しました') {
+            $query->value('username', "$username");
+        }
+
+        $query->where('user_id', "$user_id")
         ->execute();
 
-        return $query;
+        return $username;
     }
 
 
