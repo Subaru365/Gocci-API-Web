@@ -98,8 +98,8 @@ class Model_Cognito extends Model
 
         $result = $client->unlinkIdentity([
             'IdentityId' => "$identity_id",
-            'Logins' => ["$developer_provider" => "$user_id"],
-            'LoginsToRemove' => ["$provider" => "$token"],
+            'Logins' => ["$provider" => "$token"],
+            'LoginsToRemove' => ["$provider"],
         ]);
     }
 
