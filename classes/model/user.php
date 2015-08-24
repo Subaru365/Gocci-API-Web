@@ -61,7 +61,7 @@ class Model_User extends Model
             $user_id = '見つかりませんでした';
         }
 
-        return $user_id;
+        return $user_id[0]['user_id'];
     }
 
 
