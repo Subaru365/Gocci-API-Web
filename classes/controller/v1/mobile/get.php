@@ -108,6 +108,19 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	}
 
 
+	//Followline
+	public function action_followline()
+	{
+		$sort_key  = 'follow';
+        $user_id   = session::get('user_id');
+
+		$follow_id = Model_Follow::get_follow_id($user_id);
+		$data = Model_Post::get_data($user_id, $sort_key, $follow_id);
+
+	   	$status = $this->output_json($data);
+	}
+
+
 	//Comment Page
     public function action_comment()
     {
@@ -157,11 +170,8 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 		$user_id 		= session::get('user_id');
 		$target_user_id = Input::get('target_user_id');
 
-
 		$user_data = Model_User::get_data($user_id, $target_user_id);
-
-        $post_data = Model_Post::get_data(
-        	$target_user_id, $sort_key, $target_user_id, $limit);
+        $post_data = Model_Post::get_data($user_id, $sort_key, $target_user_id, $limit);
 
 	   	$data = array(
 	   		"header" => $user_data,

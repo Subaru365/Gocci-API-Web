@@ -59,6 +59,8 @@ class Model_User extends Model
 
         if (empty($user_id)) {
             $user_id = '見つかりませんでした';
+            
+            exit;
         }
 
         return $user_id[0]['user_id'];
