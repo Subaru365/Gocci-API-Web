@@ -126,7 +126,6 @@ class Controller_V1_Mobile_Auth extends Controller
     {
         $keyword     = 'ログイン';
         $identity_id = Input::get('identity_id');
-        $username    = Input::get('username');
         $os          = Input::get('os');
         $model       = Input::get('model');
         $register_id = Input::get('register_id');

@@ -44,6 +44,29 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 		}
 	}
 
+	public function action_sns_unlink()
+	{
+		$keyword     = 'SNS連携解除';
+		$user_id     = session::get('user_id');
+		$provider    = Input::get('provider');
+		$token       = Input::get('token');
+
+		try
+		{
+			$identity_id = Model_User::get_identity_id($user_id);
+			Model_User::delete_sns_flag($user_id, $provider);
+			Model_Cognito::delete_sns($user_id, $identity_id, $provider, $token);
+
+			self::success($keyword);
+		}
+
+		catch(\Database_Exception $e)
+		{
+			self::failed($keyword);
+			error_log($e);
+		}
+	}
+
 
 	//Gochi!
 	public function action_gochi()
@@ -265,34 +288,30 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 	public function action_update_profile()
 	{
 		$keyword = 'プロフィールを変更';
-		$user_id     = session::get('user_id');
-		$username    = Input::get('username');
-		$profile_img = Input::get('profile_img');
+		$user_id = session::get('user_id');
+		$new_username    = Input::get('username');
+		$new_profile_img = Input::get('profile_img');
 
 		try
 		{
-			if (empty($username + $profile_img)) {
-			//更新なし
-
-			}elseif (empty($username)) {
-			//プロフィール画像更新
-				Model_User::update_profile_img($user_id, $profile_img);
-
-			}elseif (empty($profile_img)) {
-			//ユーザーネーム更新
-				Model_User::check_name($username);
-				Model_User::update_name($user_id, $username);
-
-			}else{
-			//両方更新
-				Model_User::check_name($username);
-				$result = Model_User::update_profile(
-					$user_id, $username, $profile_img);
-			}
-
 			$user_data   = Model_User::get_profile($user_id);
 			$username    = $user_data['username'];
 			$profile_img = $user_data['profile_img'];
+
+
+			if (!empty($new_username) && !empty($new_profile_img)) {
+			//双方更新
+				$profile_img = Model_User::update_profile_img($user_id, $new_profile_img);
+				$username = Model_User::update_name($user_id, $new_username);
+
+			}elseif (!empty($new_profile_img)) {
+			//プロフィール画像更新
+				$profile_img = Model_User::update_profile_img($user_id, $new_profile_img);
+
+			}elseif (!empty($new_username)) {
+			//ユーザーネーム更新
+				$username = Model_User::update_name($user_id, $new_username);
+			}
 
 			$data = array(
 				'code' 	      => 200,
