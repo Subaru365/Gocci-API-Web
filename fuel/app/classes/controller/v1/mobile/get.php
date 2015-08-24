@@ -34,6 +34,31 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	}
 
 
+	public function action_timeline_refine()
+	{
+		$sort_key = 'all_refine';
+        $user_id  = session::get('user_id');
+        $sort_id  = Input::get('category_id');
+
+		$data = Model_Post::get_data($user_id, $sort_key, $sort_id);
+
+	   	$status = $this->output_json($data);
+	}
+
+
+	public function action_timeline_refine_next()
+	{
+		$sort_key = 'all_refine_next';
+        $user_id  = session::get('user_id');
+        $sort_id  = Input::get('category_id');
+        $call_num = Input::get('call');
+
+		$data = Model_Post::get_data($user_id, $sort_key, $sort_id);
+
+	   	$status = $this->output_json($data);
+	}
+
+
 	//Popular Page
 	public function action_popular()
     {
@@ -87,7 +112,6 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
     public function action_comment()
     {
     	$sort_key = 'post';
-
     	$user_id  = session::get('user_id');
         $post_id  = Input::get('post_id');
 

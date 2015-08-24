@@ -43,7 +43,7 @@ class Controller_V1_Mobile_Background extends Controller
     //Post有効化
     public function action_post_reject()
     {
-        $message = 'ごめんなさい！料理の動画を撮って下さい。';
+        $message = 'ごめんなさい！料理の動画を撮って下さい';
 
         $user_id = Input::get('user_id');
         $movie   = Input::get('movie');
