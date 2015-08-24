@@ -12,11 +12,11 @@ class Model_User extends Model
 
         if (!empty($result)) {
         //username使用済み
-            Controller_V1_Mobile_Base::output_none();
-            $username = $result[0]['username'];
             error_log("$username" . 'は既に使用されています。');
-            exit;
+            $username = '変更に失敗しました';
         }
+
+        return $username;
     }
 
 
@@ -46,6 +46,22 @@ class Model_User extends Model
         $login_flag = $query->execute()->as_array();
 
         return $login_flag[0]['login_flag'];
+    }
+
+
+    //user_id取得
+    public static function get_id($username)
+    {
+        $query = DB::select('user_id')->from('users')
+        ->where('username', "$username");
+
+        $user_id = $query->execute()->as_array();
+
+        if (empty($user_id)) {
+            $user_id = '見つかりませんでした';
+        }
+
+        return $user_id[0]['user_id'];
     }
 
 
@@ -226,12 +242,16 @@ class Model_User extends Model
     //ユーザー名変更
     public static function update_name($user_id, $username)
     {
-        $query = DB::update('users')
-        ->value('username', "$username")
-        ->where('user_id', "$user_id")
-        ->execute();
+        $username = self::check_name($username);
 
-        return $query;
+        if ($username != '変更に失敗しました') {
+            $query = DB::update('users')
+            ->value('username', "$username")
+            ->where('user_id', "$user_id")
+            ->execute();
+        }
+
+        return $username;
     }
 
 
@@ -239,15 +259,34 @@ class Model_User extends Model
     public static function update_profile($user_id, $username, $profile_img)
     {
         $query = DB::update('users')
-        ->set(array(
-            'username'    => "$username",
-            'profile_img' => "$profile_img"
-        ))
-        ->where('user_id', "$user_id")
+        ->value('profile_img', "$profile_img");
+
+        if ($username != '変更に失敗しました') {
+            $query->value('username', "$username");
+        }
+
+        $query->where('user_id', "$user_id")
         ->execute();
 
-        return $query;
+        return $username;
     }
+
+
+    //SNS連携
+    public static function delete_sns_flag($user_id, $provider)
+    {
+        if ($provider == 'graph.facebook.com') {
+            $flag = 'facebook_flag';
+        } else {
+            $flag = 'twitter_flag';
+        }
+
+        $query = DB::update('users')
+        ->value("$flag", '0')
+        ->where('user_id', "$user_id")
+        ->execute();
+    }
+
 
 
 

@@ -70,7 +70,7 @@ class Model_Sns extends Model
         $username  = Model_User::get_name($user_id);
         $target_arn = Model_Device::get_arn($target_user_id);
 
-        $message = "$username" . 'さんから' . "$keyword" . 'されました。';
+        $message = "$username" . 'さんから' . "$keyword" . 'されました！';
 
         $client = new SnsClient([
             'region'  => 'ap-northeast-1',
@@ -84,9 +84,8 @@ class Model_Sns extends Model
 	}
 
 
-	public static function post_complete($user_id)
+	public static function post_publish($user_id, $message)
 	{
-		$message = '投稿が完了しました。';
 		$target_arn = Model_Device::get_arn($user_id);
 
 		$client = new SnsClient([

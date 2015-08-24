@@ -41,14 +41,17 @@ class Model_Post extends Model
 			$sort = $sort_id * $limit;
 			$query->offset("$sort");
 
+		}elseif ($sort_key == 'all_refine') {
+			$query->where('category_id', "$sort_id");
+
 		}elseif ($sort_key == 'post') {
-			$query->where('posts.post_id', "$sort_id");
+			$query->where('post_id', "$sort_id");
 
 		}elseif ($sort_key == 'rest') {
-			$query->where('posts.post_rest_id', "$sort_id");
+			$query->where('post_rest_id', "$sort_id");
 
 		}elseif ($sort_key == 'user') {
-			$query->where('posts.post_user_id', "$sort_id");
+			$query->where('post_user_id', "$sort_id");
 
 		}else{
 			error_log('Model_Post:$sort_keyが不正です。');
