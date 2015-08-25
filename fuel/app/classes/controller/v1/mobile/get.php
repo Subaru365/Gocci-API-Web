@@ -24,7 +24,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	//Timeline更新
 	public function action_timeline_next()
 	{
-		$sort_key = 'next';
+		$sort_key = 'all_next';
         $user_id  = session::get('user_id');
         $call_num = Input::get('call');
 
@@ -115,7 +115,15 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
         $user_id   = session::get('user_id');
 
 		$follow_id = Model_Follow::get_follow_id($user_id);
-		$data = Model_Post::get_data($user_id, $sort_key, $follow_id);
+		print_r($follow_id);
+
+		$num = count($follow_id);
+
+		for ($i=0; $i < $num; $i++) {
+			$id[$i] = $follow_id[$i]['follow_p_user_id'];
+		}
+
+		$data = Model_Post::get_data($user_id, $sort_key, $id);
 
 	   	$status = $this->output_json($data);
 	}
