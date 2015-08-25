@@ -8,16 +8,16 @@ use Aws\Sns\SnsClient;
 class Controller_Test extends Controller
 {
 
+	//Followline
 	public function action_index()
 	{
-		$identity_id = Input::get('identity_id');
+		$sort_key  = 'follow';
+        $user_id   = Input::get('user_id');
 
-		$user_data   = Model_User::get_auth($identity_id);
-            $user_id     = $user_data['user_id'];
-            $username    = $user_data['username'];
-            $profile_img = $user_data['profile_img'];
-            $badge_num   = $user_data['badge_num'];
+		$follow_id = Model_Follow::get_follow_id($user_id);
+		$data = Model_Post::get_data($user_id, $sort_key, $follow_id);
 
-        echo $username;
+	   	$status = $this->output_json($data);
 	}
+
 }

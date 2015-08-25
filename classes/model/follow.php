@@ -5,9 +5,9 @@ class Model_Follow extends Model
 	//followしているuser_idリスト
 	public static function get_follow_id($user_id)
 	{
-		$query = DB::select('p_user_id')
+		$query = DB::select('follow_p_user_id')
 		->from('follows')
-		->where('a_user_id', "$user_id");
+		->where('follow_a_user_id', "$user_id");
 
 		$follow_id = $query->execute()->as_array();
 
@@ -15,7 +15,7 @@ class Model_Follow extends Model
 			Controller_V1_Mobile_Base::output_none();
 		}
 
-		return $follow_id[0]['p_user_id'];
+		return $follow_id;
 	}
 
 
