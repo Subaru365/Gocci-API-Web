@@ -1,24 +1,24 @@
 <?php
 /**
- * 
+ *
  *
  */
 
 class Controller_V1_Web_Base extends Controller
 {
 	// jwt check
-	/*
+	
 	public function before()
 	{
 		$jwt = @$_SERVER["HTTP_AUTHORIZATION"] ?  @$_SERVER["HTTP_AUTHORIZATION"] : "";
-		
+
 		if(isset($jwt)) {
 			$data      = self::decode($jwt);
 			$user_data = session::get('data');
 			$obj       = json_decode($user_data);
 			if (empty($obj)) {
-				self::unauth(); 
-			} 
+				self::unauth();
+			}
 
 			$user_id   = $obj->{'user_id'};
 			session::set('user_id', $user_id);
@@ -30,7 +30,7 @@ class Controller_V1_Web_Base extends Controller
 			exit;
 		}
 	}
-	*/
+
 	// decode
     public static function decode($jwt)
     {
@@ -59,10 +59,10 @@ class Controller_V1_Web_Base extends Controller
 
         $jwt = JWT::encode($token, $key);
 
-        return $jwt;    
+        return $jwt;
     }
 
-	// Not JWT 
+	// Not JWT
 	private static function unauth()
 	{
 		$status = array(
