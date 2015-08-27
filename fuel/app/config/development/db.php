@@ -6,6 +6,7 @@
 return array(
 	'default' => array(
     	'connection' => array(
+<<<<<<< HEAD
     		/*
         	'dsn' => 'mysql:host=gocci-master.cywycqfdnnfs.ap-northeast-1.rds.amazonaws.com;dbname=gocci',
         	'username' => 'inase_gocci',
@@ -19,3 +20,11 @@ return array(
 	),
 );
 
+=======
+        	'dsn' => 'mysql:host=gocci-master.cywycqfdnnfs.ap-northeast-1.rds.amazonaws.com;dbname=gocci',
+        	'username' => 'inase_gocci',
+        	'password' => 'jtg4lZwUittW8Gfr',
+		),
+	),
+);
+>>>>>>> 68a94ff3286b6e4aad9f27d5a868dcb0082c4aa6

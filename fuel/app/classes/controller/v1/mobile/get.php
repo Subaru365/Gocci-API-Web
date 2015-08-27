@@ -38,13 +38,20 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	//Popular Page
 	public function action_popular()
     {
-    	$sort_key    = 'posts';
+    	$sort_key    = 'post';
         $user_id     = session::get('user_id');
         $call        = Input::get('call', 0);
         $category_id = Input::get('category_id', 0);
 
 		$post_id = Model_Gochi::get_rank();
-		$data = Model_Post::get_data($user_id, $sort_key, $post_id, $call, $category_id);
+
+		$num = count($post_id);
+
+		for ($i=0; $i < $num; $i++) {
+			$tmp[$i] = Model_Post::get_data(
+				$user_id, $sort_key, $post_id[$i]['post_id'], $call, $category_id);
+			$data[$i] =  $tmp[$i][0];
+		}
 
 	   	self::output_json($data);
 	}
@@ -53,12 +60,18 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	//Popular Page [廃止予定]
 	public function action_popular_next()
     {
-    	$sort_key = 'posts';
+    	$sort_key = 'post';
         $user_id  = session::get('user_id');
         $call     = Input::get('call');
 
 		$post_id = Model_Gochi::get_rank($call);
-		$data = Model_Post::get_data($user_id, $sort_key, $post_id, 0, $category_id);
+		$num = count($post_id);
+
+		for ($i=0; $i < $num; $i++) {
+			$tmp[$i] = Model_Post::get_data(
+				$user_id, $sort_key, $post_id[$i]['post_id'], $call, $category_id);
+			$data[$i] =  $tmp[$i][0];
+		}
 
 	   	self::output_json($data);
 	}
