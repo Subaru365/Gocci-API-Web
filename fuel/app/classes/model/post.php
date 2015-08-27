@@ -39,6 +39,9 @@ class Model_Post extends Model
 			//何もしない。全て出力する。
 
 		}elseif ($sort_key == 'post') {
+			$query->where('post_id', $sort_id);
+
+		}elseif ($sort_key == 'post') {
 			$query->where('post_id', 'in', $sort_id);
 
 		}elseif ($sort_key == 'rest') {
