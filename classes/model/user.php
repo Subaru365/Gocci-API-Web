@@ -270,6 +270,16 @@ class Model_User extends Model
     }
 
 
+    //Logout
+    public static function update_logout($user_id)
+    {
+        $query = DB::update('users')
+        ->value('login_flag', '0')
+        ->where('user_id', "$user_id")
+        ->execute();
+    }
+
+
     //SNS連携
     public static function delete_sns_flag($user_id, $provider)
     {

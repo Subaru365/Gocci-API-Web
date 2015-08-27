@@ -41,7 +41,7 @@ class Model_Post extends Model
 		}elseif ($sort_key == 'post') {
 			$query->where('post_id', $sort_id);
 
-		}elseif ($sort_key == 'post') {
+		}elseif ($sort_key == 'posts') {
 			$query->where('post_id', 'in', $sort_id);
 
 		}elseif ($sort_key == 'rest') {
