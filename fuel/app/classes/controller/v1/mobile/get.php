@@ -8,103 +8,74 @@ error_reporting(-1);
 
 class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 {
-
 	//Timeline Page
 	public function action_timeline()
     {
-    	$sort_key  = 'all';
-        $user_id = session::get('user_id');
+    	$sort_key    = 'all';
+        $user_id     = session::get('user_id');
+        $call        = Input::get('call', 0);
+        $category_id = Input::get('category_id', 0);
 
-		$data = Model_Post::get_data($user_id, $sort_key, $sort_key);
+		$data = Model_Post::get_data($user_id, $sort_key, 0, $call, $category_id);
 
-	   	$status = $this->output_json($data);
+	   	self::output_json($data);
 	}
 
 
-	//Timeline更新
+	//Timeline更新 [廃止予定]
 	public function action_timeline_next()
 	{
-		$sort_key = 'next';
+		$sort_key = 'all_next';
         $user_id  = session::get('user_id');
-        $call_num = Input::get('call');
+        $call     = Input::get('call');
 
-		$data = Model_Post::get_data($user_id, $sort_key, $call_num);
+		$data = Model_Post::get_data($user_id, $sort_key, 0, $call);
 
-	   	$status = $this->output_json($data);
-	}
-
-
-	public function action_timeline_refine()
-	{
-		$sort_key = 'all_refine';
-        $user_id  = session::get('user_id');
-        $sort_id  = Input::get('category_id');
-
-		$data = Model_Post::get_data($user_id, $sort_key, $sort_id);
-
-	   	$status = $this->output_json($data);
-	}
-
-
-	public function action_timeline_refine_next()
-	{
-		$sort_key = 'all_refine_next';
-        $user_id  = session::get('user_id');
-        $sort_id  = Input::get('category_id');
-        $call_num = Input::get('call');
-
-		$data = Model_Post::get_data($user_id, $sort_key, $sort_id);
-
-	   	$status = $this->output_json($data);
+	   	self::output_json($data);
 	}
 
 
 	//Popular Page
 	public function action_popular()
     {
-    	$sort_key = 'post';
-        $user_id  = session::get('user_id');
+    	$sort_key    = 'post';
+        $user_id     = session::get('user_id');
+        $call        = Input::get('call', 0);
+        $category_id = Input::get('category_id', 0);
 
 		$post_id = Model_Gochi::get_rank();
+		$data = Model_Post::get_data($user_id, $sort_key, $post_id, $call, $category_id);
 
-
-		$num = count($post_id);
-
-		for ($i=0; $i < $num; $i++) {
-			$tmp[$i] = Model_Post::get_data(
-				$user_id, $sort_key, $post_id[$i]['post_id']);
-
-			$data[$i] =  $tmp[$i][0];
-		}
-
-	   	$status = $this->output_json($data);
+	   	self::output_json($data);
 	}
 
 
-	//Popular Page
+	//Popular Page [廃止予定]
 	public function action_popular_next()
     {
     	$sort_key = 'post';
         $user_id  = session::get('user_id');
-        $call_num = Input::get('call');
+        $call     = Input::get('call');
 
-		$post_id = Model_Gochi::get_rank($call_num);
+		$post_id = Model_Gochi::get_rank($call);
+		$data = Model_Post::get_data($user_id, $sort_key, $post_id, 0, $category_id);
 
-		$num = count($post_id);
+	   	self::output_json($data);
+	}
 
-		for ($i=0; $i < $num; $i++) {
 
-			$tmp[$i] = Model_Post::get_data(
-				$user_id, $sort_key, $post_id[$i]['post_id']);
+	//Followline
+	public function action_followline()
+	{
+		$sort_key    = 'user';
+        $user_id     = session::get('user_id');
+        $call        = Input::get('call', 0);
+        $category_id = Input::get('category_id', 0);
 
-			$data[$i] =  $tmp[$i][0];
-		}
+		$follow_user_id = Model_Follow::get_follow_id($user_id);
+		$data = Model_Post::get_data($user_id, $sort_key, $follow_user_id, $call, $category_id);
 
-		if ($num == 0) {
-			$data = array();
-		}
-
-	   	$status = $this->output_json($data);
+	   	self::output_json($data);
 	}
 
 
@@ -115,7 +86,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
     	$user_id  = session::get('user_id');
         $post_id  = Input::get('post_id');
 
-		$post_data = Model_Post::get_data($user_id, $sort_key, $post_id);
+		$post_data    = Model_Post::get_data($user_id, $sort_key, $post_id);
 	   	$comment_data = Model_Comment::get_data($post_id);
 
 	   	$data = array(
@@ -123,52 +94,48 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	   		"comments" 	=> $comment_data
 	   	);
 
-	   	$status = $this->output_json($data);
+	   	self::output_json($data);
 	}
 
 
 	//Restaurant Page
 	public function action_rest()
     {
-    	$sort_key  = 'rest';
-    	$user_id = session::get('user_id');
-    	$rest_id = Input::get('rest_id');
+    	$sort_key = 'rest';
+    	$user_id  = session::get('user_id');
+    	$rest_id  = Input::get('rest_id');
 
-		$rest_data = Model_Restaurant::get_data($rest_id);
-		$rest_data['0']['want_flag'] = Model_Want::get_flag($user_id, $rest_id);
-		$rest_data['0']['cheer_num'] = Model_Post::get_rest_cheer_num($rest_id);
-
+		$rest_data = Model_Restaurant::get_data($user_id, $rest_id);
 		$post_data = Model_Post::get_data($user_id, $sort_key, $rest_id);
 
 	   	$data = array(
-	   		"restaurants" => $rest_data[0],
+	   		"restaurants" => $rest_data,
 	   		"posts" => $post_data
 	   	);
 
-	   	$status = $this->output_json($data);
+	   	self::output_json($data);
 	}
 
 
 	//User Page
 	public function action_user()
 	{
-		$sort_key  = 'user';
-		$limit     = '99';
+		$sort_key       = 'user';
 		$user_id 		= session::get('user_id');
 		$target_user_id = Input::get('target_user_id');
+		$call   		= Input::get('call');
+		$category_id    = Input::get('category_id');
 
 
 		$user_data = Model_User::get_data($user_id, $target_user_id);
-
-        $post_data = Model_Post::get_data(
-        	$target_user_id, $sort_key, $target_user_id, $limit);
+        $post_data = Model_Post::get_data($user_id, $sort_key, $target_user_id);
 
 	   	$data = array(
 	   		"header" => $user_data,
 	   		"posts"  => $post_data
 	   	);
 
-		$status = $this->output_json($data);
+	   	self::output_json($data);
 	}
 
 
@@ -180,8 +147,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
     	$data = Model_Notice::get_data($user_id);
 
 	   	Model_User::reset_badge($user_id);
-
-	   	$status = $this->output_json($data);
+	   	self::output_json($data);
 	}
 
 
@@ -193,7 +159,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 
 		$data = Model_Restaurant::get_near($lon, $lat);
 
-    	$status = $this->output_json($data);
+	   	self::output_json($data);
 	}
 
 
@@ -205,7 +171,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 
 		$data = Model_Follow::get_follow($user_id, $target_user_id);
 
-    	$status = $this->output_json($data);
+	   	self::output_json($data);
 	}
 
 
@@ -217,7 +183,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 
 		$data = Model_Follow::get_follower($user_id, $target_user_id);
 
-    	$status = $this->output_json($data);
+	   	self::output_json($data);
 	}
 
 
@@ -228,7 +194,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 
 		$data = Model_Want::get_want($target_user_id);
 
-    	$status = $this->output_json($data);
+	   	self::output_json($data);
 	}
 
 
@@ -239,7 +205,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 
 		$data = Model_Post::get_user_cheer($target_user_id);
 
-    	$status = $this->output_json($data);
+	   	self::output_json($data);
 	}
 
 
@@ -259,7 +225,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 			$data[$i]['follow_flag'] = $follow_flag;
 		}
 
-    	$status = $this->output_json($data);
+	   	self::output_json($data);
 	}
 
 
@@ -271,7 +237,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 		$target_user_id = Model_User::get_id($target_user_name);
 		$user_data = Model_User::get_data($user_id, $target_user_id);
 
-		$status = $this->output_json($user_data);
+	   	self::output_json($data);
 	}
 }
 

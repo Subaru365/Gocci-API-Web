@@ -2,7 +2,24 @@
 
 class Model_Follow extends Model
 {
+	//followしているuser_idリスト
+	public static function get_follow_id($user_id)
+	{
+		$query = DB::select('follow_p_user_id')
+		->from('follows')
+		->where('follow_a_user_id', "$user_id");
 
+		$follow_id = $query->execute()->as_array();
+
+		if (empty($follow_id)) {
+			Controller_V1_Mobile_Base::output_none();
+		}
+
+		return $follow_id;
+	}
+
+
+	//followしているユーザー情報
 	public static function get_follow($user_id, $target_user_id)
 	{
 		$query = DB::select(
@@ -22,14 +39,14 @@ class Model_Follow extends Model
 				Model_Transcode::decode_profile_img($follow_list[$i]['profile_img']);
 
 			$follow_list[$i]['follow_flag'] =
-				Model_Follow::get_flag($user_id, $follow_list[$i]['user_id']);
+				self::get_flag($user_id, $follow_list[$i]['user_id']);
 		}
 
 		return $follow_list;
 	}
 
 
-
+	//フォローされてるユーザー情報
 	public static function get_follower($user_id, $target_user_id)
 	{
 		$query = DB::select(
@@ -49,7 +66,7 @@ class Model_Follow extends Model
 				Model_Transcode::decode_profile_img($follower_list[$i]['profile_img']);
 
 			$follower_list[$i]['follow_flag'] =
-				Model_Follow::get_flag($user_id, $follower_list[$i]['user_id']);
+				self::get_flag($user_id, $follower_list[$i]['user_id']);
 		}
 
 		return $follower_list;

@@ -27,60 +27,43 @@ class Controller_V1_Mobile_Auth extends Controller
 
         try
         {
-            Model_User::check_name($username);
+            $result = Model_User::check_name($username);
+
+            if (!empty($result)) {
+                Controller_V1_Mobile_Base::output_none();
+                error_log("$username" . 'は既に使用されています。');
+                exit;
+            }
+
             Model_Device::check_register_id($register_id);
 
-            $cognito_data = Model_Cognito::post_data(
-                $user_id,
-                $username,
-                $os,
-                $model,
-                $register_id
-            );
 
+            $cognito_data = Model_Cognito::post_data($user_id);
             $identity_id  = $cognito_data['IdentityId'];
             $token        = $cognito_data['Token'];
 
             $profile_img  = Model_User::post_data($username, $identity_id);
-
             $endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
 
-            Model_Device::post_data(
-                $user_id, $os, $model, $register_id, $endpoint_arn);
+            Model_Device::post_data($user_id, $os, $model, $register_id, $endpoint_arn);
 
-            self::success(
-                $keyword,
-                $user_id,
-                $username,
-                $profile_img,
-                $identity_id,
-                $badge_num,
-                $token
-            );
+            self::success($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $token);
         }
 
         // データベース登録エラー
         catch(\Database_Exception $e)
         {
-            self::failed(
-                $keyword,
-                $user_id,
-                $username,
-                $profile_img,
-                $identity_id,
-                $badge_num
-            );
-
+            self::failed($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num);
             error_log($e);
         }
     }
+
 
     // ログイン
     public function action_login()
     {
         $keyword     = 'ログイン';
         $identity_id = Input::get('identity_id');
-
 
         try
         {
@@ -93,30 +76,13 @@ class Controller_V1_Mobile_Auth extends Controller
             $token = Model_Cognito::get_token($user_id, $identity_id);
 
             Model_Login::post_login($user_id);
-
-            self::success(
-                $keyword,
-                $user_id,
-                $username,
-                $profile_img,
-                $identity_id,
-                $badge_num,
-                $token
-            );
+            self::success($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $token);
         }
 
         // データベース登録エラー
         catch(\Database_Exception $e)
         {
-            self::failed(
-                $keyword,
-                $user_id,
-                $username,
-                $profile_img,
-                $identity_id,
-                $badge_num
-            );
-
+            self::failed($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num);
             error_log($e);
         }
     }
@@ -149,15 +115,7 @@ class Controller_V1_Mobile_Auth extends Controller
 
             Model_Login::post_login($user_id);
 
-            self::success(
-                $keyword,
-                $user_id,
-                $username,
-                $profile_img,
-                $identity_id,
-                $badge_num,
-                $token
-            );
+            self::success($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $token);
         }
 
         // データベース登録エラー
@@ -264,15 +222,7 @@ class Controller_V1_Mobile_Auth extends Controller
             Model_Device::update_data(
                 $user_id, $os, $model, $register_id, $endpoint_arn);
 
-            self::success(
-                $keyword,
-                $user_id,
-                $username,
-                $profile_img,
-                $identity_id,
-                $badge_num,
-                $token
-            );
+            self::success($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $token);
         }
 
         // データベース登録エラー
@@ -325,15 +275,7 @@ class Controller_V1_Mobile_Auth extends Controller
                 Model_Device::post_data(
                     $user_id, $os, $model, $register_id, $endpoint_arn);
 
-                self::success(
-                    $keyword,
-                    $user_id,
-                    $username,
-                    $profile_img,
-                    $identity_id,
-                    $badge_num,
-                    $token
-                );
+                self::success($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $token);
             }
 
             // データベース登録エラー
@@ -395,15 +337,7 @@ class Controller_V1_Mobile_Auth extends Controller
                 );
 
                 // success出力へ
-                self::success(
-                    $keyword,
-                    $user_id,
-                    $username,
-                    $profile_img,
-                    $identity_id,
-                    $badge_num,
-                    $token
-                );
+                self::success($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $token);
             }
 
             // データベース登録エラー

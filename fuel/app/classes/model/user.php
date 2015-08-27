@@ -9,14 +9,7 @@ class Model_User extends Model
         ->where('username', "$username");
 
         $result = $query->execute()->as_array();
-
-        if (!empty($result)) {
-        //username使用済み
-            error_log("$username" . 'は既に使用されています。');
-            $username = '変更に失敗しました';
-        }
-
-        return $username;
+        return $result;
     }
 
 
@@ -59,6 +52,8 @@ class Model_User extends Model
 
         if (empty($user_id)) {
             $user_id = '見つかりませんでした';
+
+            exit;
         }
 
         return $user_id[0]['user_id'];
@@ -132,8 +127,7 @@ class Model_User extends Model
     //ログインユーザー情報取得
     public static function get_auth($identity_id)
     {
-        $query = DB::select(
-            'user_id', 'username', 'profile_img', 'badge_num')
+        $query = DB::select('user_id', 'username', 'profile_img', 'badge_num')
         ->from ('users')
         ->where('identity_id', "$identity_id");
 
@@ -242,15 +236,19 @@ class Model_User extends Model
     //ユーザー名変更
     public static function update_name($user_id, $username)
     {
-        $username = self::check_name($username);
+        $result = self::check_name($username);
 
-        if ($username != '変更に失敗しました') {
+        if (!empty($result)) {
+        //username使用済み
+            error_log("$username" . 'は既に使用されています。');
+            $username = '変更に失敗しました';
+
+        }else{
             $query = DB::update('users')
             ->value('username', "$username")
             ->where('user_id', "$user_id")
             ->execute();
         }
-
         return $username;
     }
 
