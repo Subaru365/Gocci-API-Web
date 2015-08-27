@@ -34,4 +34,4 @@ desktop.ini
 
 
 #inase Custm
-/fuel/app/config/development/*
+/fuel/app/bootstrap.php
