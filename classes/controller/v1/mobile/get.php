@@ -38,7 +38,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	//Popular Page
 	public function action_popular()
     {
-    	$sort_key    = 'post';
+    	$sort_key    = 'posts';
         $user_id     = session::get('user_id');
         $call        = Input::get('call', 0);
         $category_id = Input::get('category_id', 0);
@@ -53,7 +53,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	//Popular Page [廃止予定]
 	public function action_popular_next()
     {
-    	$sort_key = 'post';
+    	$sort_key = 'posts';
         $user_id  = session::get('user_id');
         $call     = Input::get('call');
 
@@ -96,7 +96,6 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 
 	   	self::output_json($data);
 	}
-
 
 	//Restaurant Page
 	public function action_rest()
