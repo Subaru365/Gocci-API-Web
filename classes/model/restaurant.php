@@ -13,7 +13,7 @@ class Model_Restaurant extends Model
 	}
 
 
-	public static function get_data($rest_id)
+	public static function get_data($user_id, $rest_id)
 	{
 		$query = DB::select(
 			'rest_id', 'restname', 'locality', 'lat',
@@ -24,7 +24,10 @@ class Model_Restaurant extends Model
 
 		$rest_data = $query->execute()->as_array();
 
-		return $rest_data;
+		$rest_data[0]['want_flag'] = Model_Want::get_flag($user_id, $rest_id);
+		$rest_data[0]['cheer_num'] = Model_Post::get_rest_cheer_num($rest_id);
+
+		return $rest_data[0];
 	}
 
 
