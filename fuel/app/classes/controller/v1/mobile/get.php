@@ -247,7 +247,21 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 		$target_user_name = Input::get('username');
 
 		$target_user_id = Model_User::get_id($target_user_name);
-		$user_data = Model_User::get_data($user_id, $target_user_id);
+
+		if (!empty($target_user_id)) {
+			$data = array(
+				'code' 	  => 200,
+				'message' => 'ユーザーを見つけました',
+				'user_id' => "$target_user_id"
+		);
+
+		}else{
+			$data = array(
+				'code' 	  => 500,
+				'message' => 'ユーザーが見つかりませんでした',
+				'user_id' => '0'
+			);
+		}
 
 	   	self::output_json($data);
 	}

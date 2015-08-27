@@ -51,9 +51,7 @@ class Model_User extends Model
         $user_id = $query->execute()->as_array();
 
         if (empty($user_id)) {
-            $user_id = '見つかりませんでした';
-
-            exit;
+            $user_id[0]['user_id'] = '';
         }
 
         return $user_id[0]['user_id'];
