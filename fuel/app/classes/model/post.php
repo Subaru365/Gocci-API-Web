@@ -3,7 +3,8 @@ class Model_Post extends Model
 {
 
 	//"POST"取得
-	public static function get_data($user_id, $sort_key, $sort_id, $limit = 20)
+	public static function get_data(
+		$user_id, $sort_key, $sort_id, $call = 0, $category_id = 0, $limit = 20)
 	{
 		$query = DB::select(
 			'post_id', 'movie', 'thumbnail', 'category', 'tag', 'value',
@@ -29,8 +30,7 @@ class Model_Post extends Model
 
 		->order_by('post_date','desc')
 
-		->limit("$limit");
-
+		->limit($limit);
 
 
 		//$sort_keyによる絞り込み
@@ -38,40 +38,33 @@ class Model_Post extends Model
 		if ($sort_key == 'all') {
 			//何もしない。全て出力する。
 
-		}elseif ($sort_key == 'all_next') {
-			$sort = $sort_id * $limit;
-			$query->offset("$sort");
-
-		}elseif ($sort_key == 'all_refine') {
-			$query->where('category_id', "$sort_id");
-
-		}elseif ($sort_key == 'all_refine_next') {
-			$query->where('category_id', "$sort_id");
-
-			$sort = $sort_id * $limit;
-			$query->offset("$sort");
-
-		}elseif ($sort_key == 'follow') {
-			$query->where('post_user_id', 'in', $sort_id);
-
 		}elseif ($sort_key == 'post') {
-			$query->where('post_id', "$sort_id");
+			$query->where('post_id', 'in', $sort_id);
 
 		}elseif ($sort_key == 'rest') {
-			$query->where('post_rest_id', "$sort_id");
+			$query->where('post_rest_id', $sort_id);
 
 		}elseif ($sort_key == 'user') {
-			$query->where('post_user_id', "$sort_id");
+			$query->where('user_id', 'in', $sort_id);
 
 		}else{
-			error_log('Model_Post:$sort_keyが不正です。');
+			error_log("Model_Post:${sort_key}が不正です。");
 			exit;
 		}
 
+		//refine
+		if ($category_id != 0) {
+			$query->where('category_id', $category_id);
+		}
+
+		//next
+		if ($call != 0) {
+			$call_num = $call * $limit;
+			$query->offset($call_num);
+		}
 
 		$post_data = $query->execute()->as_array();
 		$post_num  = count($post_data);
-
 
 
 		//---------------------------------------------------------------------//
@@ -253,7 +246,6 @@ class Model_Post extends Model
 		->where('post_id', "$post_id");
 
 		$result = $query->execute();
-
 		return $result;
 	}
 }

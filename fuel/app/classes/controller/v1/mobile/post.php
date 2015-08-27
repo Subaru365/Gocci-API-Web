@@ -100,10 +100,11 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 	//Comment
 	public function action_comment()
 	{
-		$keyword = 'コメント';
-		$user_id = session::get('user_id');
-		$post_id = Input::get('post_id');
-		$comment = Input::get('comment');
+		$keyword    = 'コメント';
+		$user_id    = session::get('user_id');
+		$post_id    = Input::get('post_id');
+		$comment    = Input::get('comment');
+		$to_user_id = Input::get('to_user_id');
 
 		try
 		{
@@ -111,8 +112,15 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 				$user_id, $post_id, $comment);
 
 			if ($user_id != $target_user_id) {
-				$record = Model_Notice::post_data(
-					$keyword, $user_id, $target_user_id, $post_id);
+				Model_Notice::post_data($keyword, $user_id, $target_user_id, $post_id);
+			}
+
+			if (!empty($to_user_id)) {
+				$num = count($to_user_id);
+
+				for ($i=0; $i < $num; $i++) {
+					Model_Notice::post_data($keyword, $user_id, $to_user_id, $post_id);
+				}
 			}
 
 			self::success($keyword);
