@@ -80,7 +80,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	//Followline
 	public function action_followline()
 	{
-		$sort_key    = 'user';
+		$sort_key    = 'users';
         $user_id     = session::get('user_id');
         $call        = Input::get('call', 0);
         $category_id = Input::get('category_id', 0);
