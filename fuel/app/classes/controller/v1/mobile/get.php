@@ -25,7 +25,7 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	//Timeline更新 [廃止予定]
 	public function action_timeline_next()
 	{
-		$sort_key = 'all_next';
+		$sort_key = 'all';
         $user_id  = session::get('user_id');
         $call     = Input::get('call');
 
