@@ -218,4 +218,16 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         $status = $this->output_json($data);
     }
 
+    // User Search
+    public function action_user_search()
+    {
+        $user_id         = session::get('user_id');
+        $targetUserName  = Input::get('username');
+        $targetUserId    = Model_User::get_id($targetUserName);
+        $userData        = Model_User::get_data($user_id, $targetUserId);
+
+        $status          = $this->output_json($userData);
+    }
+
+
 }
