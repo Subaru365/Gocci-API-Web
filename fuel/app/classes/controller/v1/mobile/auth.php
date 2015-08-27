@@ -37,7 +37,6 @@ class Controller_V1_Mobile_Auth extends Controller
 
             Model_Device::check_register_id($register_id);
 
-
             $cognito_data = Model_Cognito::post_data($user_id);
             $identity_id  = $cognito_data['IdentityId'];
             $token        = $cognito_data['Token'];
