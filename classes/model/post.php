@@ -105,6 +105,16 @@ class Model_Post extends Model
 	}
 
 
+	public static function get_user($post_id)
+	{
+		$query = DB::select('post_user_id')->from('posts')
+		->where('post_id', "$post_id");
+
+		$post_user_id = $query->execute()->as_array();
+		return $post_user_id[0]['post_user_id'];
+	}
+
+
 	public static function get_memo($post_id)
 	{
 		$query = DB::select('user_id', 'username', 'profile_img', 'memo', 'post_date')

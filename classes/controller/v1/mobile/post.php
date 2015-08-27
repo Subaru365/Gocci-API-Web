@@ -104,25 +104,25 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 		$user_id    = session::get('user_id');
 		$post_id    = Input::get('post_id');
 		$comment    = Input::get('comment');
-		$to_user_id = Input::get('to_user_id');
+		$re_user_id = Input::get('re_user_id');
 
 		try
 		{
-			$target_user_id = Model_Comment::post_comment(
-				$user_id, $post_id, $comment);
+			$comment_id = Model_Comment::post_comment($user_id, $post_id, $comment);
+			$target_user_id = Model_Post::get_user($post_id);
 
 			if ($user_id != $target_user_id) {
 				Model_Notice::post_data($keyword, $user_id, $target_user_id, $post_id);
 			}
 
-			if (!empty($to_user_id)) {
-				$num = count($to_user_id);
+			if (!empty($re_user_id)) {
+				$num = count($re_user_id);
 
 				for ($i=0; $i < $num; $i++) {
-					Model_Notice::post_data($keyword, $user_id, $to_user_id, $post_id);
+					Model_Re::post_data($comment_id, $re_user_id[$i]);
+					Model_Notice::post_data($keyword, $user_id, $re_user_id[$i], $post_id);
 				}
 			}
-
 			self::success($keyword);
 		}
 

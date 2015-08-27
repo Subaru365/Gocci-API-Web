@@ -5,20 +5,21 @@ class Model_Comment extends Model
 	public static function get_data($post_id)
 	{
 		$query = DB::select(
-			'comments.comment_user_id', 'users.username',
-			'users.profile_img', 'comments.comment',
-			'comments.comment_date')
+			'comment_id', 'comment_user_id', 'username',
+			'profile_img', 'comment', 'comment_date')
 		->from('comments')
 
-		->where('comments.comment_post_id', "$post_id")
-
 		->join('users', 'INNER')
-		->on('comments.comment_user_id', '=', 'users.user_id');
+		->on('comment_user_id', '=', 'user_id')
+
+		->where('comment_post_id', "$post_id");
 
 		$comment_data = $query->execute()->as_array();
 
+		//投稿者のコメントを$comment_data[0]に格納
 		$post_comment = Model_Post::get_memo($post_id);
 		array_unshift($comment_data, $post_comment);
+
 
 		$comment_num  = count($comment_data);
 
@@ -30,6 +31,11 @@ class Model_Comment extends Model
 			//日付情報を現在との差分に書き換え
 			$comment_data[$i]['comment_date'] =
 				Model_Date::get_data($comment_data[$i]['comment_date']);
+		}
+
+		for ($i=1; $i < $comment_num; $i++) {
+			$comment_data[$i]['re_user_id'] =
+				Model_Re::get_data($comment_data[$i]['comment_id']);
 		}
 
 		return $comment_data;
@@ -60,11 +66,6 @@ class Model_Comment extends Model
 		))
 		->execute();
 
-		$query = DB::select('post_user_id')->from('posts')
-		->where('post_id', "$post_id");
-
-		$post_user_id = $query->execute()->as_array();
-
-		return $post_user_id[0]['post_user_id'];
+		return $query[0];
 	}
 }
