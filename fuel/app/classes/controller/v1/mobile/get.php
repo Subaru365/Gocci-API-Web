@@ -135,8 +135,8 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 		$sort_key       = 'user';
 		$user_id 		= session::get('user_id');
 		$target_user_id = Input::get('target_user_id');
-		$call   		= Input::get('call');
-		$category_id    = Input::get('category_id');
+		$call   		= Input::get('call', 0);
+		$category_id    = Input::get('category_id', 0);
 
 
 		$user_data = Model_User::get_data($user_id, $target_user_id);

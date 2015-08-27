@@ -48,6 +48,9 @@ class Model_Post extends Model
 			$query->where('post_rest_id', $sort_id);
 
 		}elseif ($sort_key == 'user') {
+			$query->where('user_id', $sort_id);
+
+		}elseif ($sort_key == 'users') {
 			$query->where('user_id', 'in', $sort_id);
 
 		}else{
