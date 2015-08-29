@@ -18,6 +18,11 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 			Model_User::update_pass($user_id, $pass);
 			self::success($keyword);
 		}
+		catch(\Database_Exception $e)
+		{
+			self::failed($keyword);
+			error_log($e);
+		}
 	}
 
 
@@ -130,6 +135,7 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 			}
 
 			if (!empty($re_user_id)) {
+				$re_user_id = explode(',', $re_user_id);
 				$num = count($re_user_id);
 
 				for ($i=0; $i < $num; $i++) {

@@ -127,16 +127,34 @@ class Controller_V1_Mobile_Auth extends Controller
     public static function action_pass_login()
     {
         $keyword     = 'パスワードでログイン';
-        $identity_id = Input::get('username');
-        $password    = Input::get('pass');
+        $username    = Input::get('username');
+        $pass        = Input::get('pass');
         $os          = Input::get('os');
         $model       = Input::get('model');
         $register_id = Input::get('register_id');
 
         try
         {
-            if (!empty($password)) {
-                $user_id = Model_User::check_pass($user_name, $password);
+            if (!empty($pass)) {
+                $user_data   = Model_User::check_pass($username, $pass);
+                $user_id     = $user_data[0]['user_id'];
+                $identity_id = $user_data[0]['identity_id'];
+
+                $token = Model_Cognito::get_token($user_id, $identity_id);
+
+                $old_endpoint_arn = Model_Device::get_arn($user_id);
+                Model_Sns::delete_endpoint($old_endpoint_arn);
+
+                $new_endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
+                Model_Device::update_data($user_id, $os, $model, $register_id, $endpoint_arn);
+
+                Model_Login::post_login($user_id);
+                self::success($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $token);
+
+
+            }else{
+                Controller_V1_Mobile_Base::output_none();
+                error_log('パスワード未入力です');
             }
         }
 
