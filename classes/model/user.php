@@ -15,18 +15,19 @@ class Model_User extends Model
 
     public static function check_pass($username, $password)
     {
-        $query = DB::select('user_id', 'password')->from('users')
+        $query = DB::select('user_id', 'identity_id', 'password')->from('users')
         ->where('username', "$username");
 
         $result = $query->execute()->as_array();
 
-        $status = self::verify_pass($result[0]['password']);
+        $status = self::verify_pass($password, $result[0]['password']);
 
         if ($status) {
-            return $result[0]['user_id'];
+            return $result;
 
         }else{
-            return false;
+            Controller_V1_Mobile_Base::output_none();
+            exit;
         }
     }
 
@@ -333,12 +334,13 @@ class Model_User extends Model
     }
 
 
-    private static function verify_pass($pass)
+    private static function verify_pass($pass, $hash_pass)
     {
         if (password_verify($pass, $hash_pass)) {
-            return true;
+            return 'true';
         }else{
-            return false;
+            return 'false';
+            error_log('パスワードが一致しません');
         }
     }
 
