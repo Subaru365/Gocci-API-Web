@@ -43,7 +43,6 @@ class Controller_V1_Mobile_Auth extends Controller
 
             $profile_img  = Model_User::post_data($username, $identity_id);
             $endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
-
             Model_Device::post_data($user_id, $os, $model, $register_id, $endpoint_arn);
 
             self::success($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $token);
@@ -95,7 +94,6 @@ class Controller_V1_Mobile_Auth extends Controller
         $model       = Input::get('model');
         $register_id = Input::get('register_id');
 
-
         try
         {
             $user_data   = Model_User::get_auth($identity_id);
@@ -103,6 +101,7 @@ class Controller_V1_Mobile_Auth extends Controller
             $username    = $user_data['username'];
             $profile_img = $user_data['profile_img'];
             $badge_num   = $user_data['badge_num'];
+
 
             $token = Model_Cognito::get_token($user_id, $identity_id);
 
@@ -113,25 +112,42 @@ class Controller_V1_Mobile_Auth extends Controller
             Model_Device::update_data($user_id, $os, $model, $register_id, $endpoint_arn);
 
             Model_Login::post_login($user_id);
-
             self::success($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $token);
         }
 
         // データベース登録エラー
         catch(\Database_Exception $e)
         {
-            self::failed(
-                $keyword,
-                $user_id,
-                $username,
-                $profile_img,
-                $identity_id,
-                $badge_num
-            );
-
+            self::failed($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num);
             error_log($e);
         }
     }
+
+
+    public static function action_pass_login()
+    {
+        $keyword     = 'パスワードでログイン';
+        $identity_id = Input::get('username');
+        $password    = Input::get('pass');
+        $os          = Input::get('os');
+        $model       = Input::get('model');
+        $register_id = Input::get('register_id');
+
+        try
+        {
+            if (!empty($password)) {
+                $user_id = Model_User::check_pass($user_name, $password);
+            }
+        }
+
+        // データベース登録エラー
+        catch(\Database_Exception $e)
+        {
+            self::failed($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num);
+            error_log($e);
+        }
+    }
+
 
     // DBデータ入力成功
     private static function success(
@@ -212,14 +228,10 @@ class Controller_V1_Mobile_Auth extends Controller
             $token        = $cognito_data['Token'];
 
             $profile_img  = Model_S3::input($user_id, $profile_img);
-
-            $profile_img  = Model_User::update_data(
-                $user_id, $username, $profile_img, $identity_id);
-
+            $profile_img  = Model_User::update_data($user_id, $username, $profile_img, $identity_id);
             $endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
 
-            Model_Device::update_data(
-                $user_id, $os, $model, $register_id, $endpoint_arn);
+            Model_Device::update_data($user_id, $os, $model, $register_id, $endpoint_arn);
 
             self::success($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $token);
         }

@@ -7,6 +7,20 @@ header('Content-Type: application/json; charset=UTF-8');
 */
 class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 {
+	public function action_password()
+	{
+		$keyword = 'パスワードを設定';
+		$user_id = session::get('user_id');
+		$pass    = Input::get('pass');
+
+		try
+		{
+			Model_User::update_pass($user_id, $pass);
+			self::success($keyword);
+		}
+	}
+
+
 	//SNS Link
 	public function action_sns()
 	{

@@ -13,6 +13,24 @@ class Model_User extends Model
     }
 
 
+    public static function check_pass($username, $password)
+    {
+        $query = DB::select('user_id', 'password')->from('users')
+        ->where('username', "$username");
+
+        $result = $query->execute()->as_array();
+
+        $status = self::verify_pass($result[0]['password']);
+
+        if ($status) {
+            return $result[0]['user_id'];
+
+        }else{
+            return false;
+        }
+    }
+
+
     public static function check_img($profile_img)
     {
         $query = DB::select('user_id', 'username')->from('users')
@@ -202,6 +220,20 @@ class Model_User extends Model
     }
 
 
+    //
+    public static function update_pass($user_id, $pass)
+    {
+        $encryption_pass = self::encryption_pass($pass);
+
+        $query = DB::update('users')
+        ->value('password', "$encryption_pass")
+        ->where('user_id', "$user_id")
+        ->execute();
+
+        return $query;
+    }
+
+
     //SNS連携
     public static function update_sns_flag($user_id, $provider)
     {
@@ -294,7 +326,21 @@ class Model_User extends Model
     }
 
 
+    private static function encryption_pass($pass)
+    {
+        $hash_pass = password_hash($pass, PASSWORD_BCRYPT);
+        return $hash_pass;
+    }
 
+
+    private static function verify_pass($pass)
+    {
+        if (password_verify($pass, $hash_pass)) {
+            return true;
+        }else{
+            return false;
+        }
+    }
 
 
     //Conversion
