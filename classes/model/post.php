@@ -4,7 +4,7 @@ class Model_Post extends Model
 
 	//"POST"取得
 	public static function get_data(
-		$user_id, $sort_key, $sort_id, $call = 0, $category_id = 0, $limit = 20)
+		$user_id, $sort_key, $sort_id, $call = 0, $category_id = 0, $value_id = 0, $limit = 20)
 	{
 		$query = DB::select(
 			'post_id', 'movie', 'thumbnail', 'category', 'tag', 'value',
@@ -58,10 +58,35 @@ class Model_Post extends Model
 			exit;
 		}
 
+
 		//refine
+		//=======
+
+		//カテゴリー絞り込み
 		if ($category_id != 0) {
 			$query->where('category_id', $category_id);
 		}
+
+
+		//価格絞り込み
+		if ($value_id != 0) {
+			if ($value_id == 1) {
+				$query->where('value', 'between', array(1, 700));
+			}
+			if ($value_id == 2) {
+				$query->where('value', 'between', array(700, 1500));
+			}
+			if ($value_id == 3) {
+				$query->where('value', 'between', array(1500, 3000));
+			}
+			if ($value_id == 4) {
+				$query->where('value', 'between', array(3000, 5000));
+			}
+			if ($value_id == 5) {
+				//制限なし
+			}
+		}
+
 
 		//next
 		if ($call != 0) {

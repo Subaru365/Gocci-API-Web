@@ -38,7 +38,7 @@ class Model_Gochi extends Model
 
 
 	//gochi順に投稿を格納する
-	public static function get_rank($call = 0, $limit = 20)
+	public static function get_rank($category_id = 0, $value = 0, $call = 0, $limit = 20)
 	{
 		//対象となる投稿の期間($interval)
 		$now_date = date("Y-m-d",strtotime("+1 day"));
@@ -58,6 +58,7 @@ class Model_Gochi extends Model
 		->order_by('post_date', 'desc')
 
 		->limit("$limit");
+
 
 		if ($call != 0) {
 			$call_num = $call * $limit;
