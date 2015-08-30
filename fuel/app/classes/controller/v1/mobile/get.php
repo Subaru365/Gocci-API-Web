@@ -15,8 +15,9 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
         $user_id     = session::get('user_id');
         $call        = Input::get('call', 0);
         $category_id = Input::get('category_id', 0);
+        $value_id    = Input::get('value_id', 0);
 
-		$data = Model_Post::get_data($user_id, $sort_key, 0, $call, $category_id);
+		$data = Model_Post::get_data($user_id, $sort_key, 0, $call, $category_id, $value_id);
 
 	   	self::output_json($data);
 	}
@@ -42,14 +43,16 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
         $user_id     = session::get('user_id');
         $call        = Input::get('call', 0);
         $category_id = Input::get('category_id', 0);
+        $value_id    = Input::get('value_id', 0);
 
-		$post_id = Model_Gochi::get_rank();
+
+		$post_id = Model_Gochi::get_rank($category_id, $value, $call);
 
 		$num = count($post_id);
 
 		for ($i=0; $i < $num; $i++) {
 			$tmp[$i] = Model_Post::get_data(
-				$user_id, $sort_key, $post_id[$i]['post_id'], $call, $category_id);
+				$user_id, $sort_key, $post_id[$i]['post_id'], $call);
 			$data[$i] =  $tmp[$i][0];
 		}
 
@@ -64,7 +67,8 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
         $user_id  = session::get('user_id');
         $call     = Input::get('call');
 
-		$post_id = Model_Gochi::get_rank($call);
+
+		$post_id = Model_Gochi::get_rank(0, 0, $call);
 		$num = count($post_id);
 
 		for ($i=0; $i < $num; $i++) {
@@ -84,9 +88,11 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
         $user_id     = session::get('user_id');
         $call        = Input::get('call', 0);
         $category_id = Input::get('category_id', 0);
+        $value_id    = Input::get('value_id', 0);
+
 
 		$follow_user_id = Model_Follow::get_follow_id($user_id);
-		$data = Model_Post::get_data($user_id, $sort_key, $follow_user_id, $call, $category_id);
+		$data = Model_Post::get_data($user_id, $sort_key, $follow_user_id, $call, $category_id, $value_id);
 
 	   	self::output_json($data);
 	}
