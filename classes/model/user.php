@@ -15,7 +15,8 @@ class Model_User extends Model
 
     public static function check_pass($username, $password)
     {
-        $query = DB::select('user_id', 'identity_id', 'password')->from('users')
+        $query = DB::select('user_id', 'profile_img', 'identity_id', 'badge_num', 'password')
+        ->from('users')
         ->where('username', "$username");
 
         $result = $query->execute()->as_array();

@@ -138,7 +138,10 @@ class Controller_V1_Mobile_Auth extends Controller
             if (!empty($pass)) {
                 $user_data   = Model_User::check_pass($username, $pass);
                 $user_id     = $user_data[0]['user_id'];
+                $profile_img = $user_data[0]['profile_img'];
                 $identity_id = $user_data[0]['identity_id'];
+                $badge_num   = $user_data[0]['badge_num'];
+
 
                 $token = Model_Cognito::get_token($user_id, $identity_id);
 
