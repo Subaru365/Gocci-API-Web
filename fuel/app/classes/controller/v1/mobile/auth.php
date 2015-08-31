@@ -109,7 +109,7 @@ class Controller_V1_Mobile_Auth extends Controller
             Model_Sns::delete_endpoint($old_endpoint_arn);
 
             $new_endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
-            Model_Device::update_data($user_id, $os, $model, $register_id, $endpoint_arn);
+            Model_Device::update_data($user_id, $os, $model, $register_id, $new_endpoint_arn);
 
             Model_Login::post_login($user_id);
             self::success($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $token);
