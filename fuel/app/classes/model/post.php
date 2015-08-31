@@ -4,7 +4,7 @@ class Model_Post extends Model
 
 	//"POST"取得
 	public static function get_data(
-		$user_id, $sort_key, $sort_id, $call = 0, $category_id = 0, $value_id = 0, $limit = 20)
+		$user_id, $sort_key, $sort_id, $option = 0, $limit = 20)
 	{
 		$query = DB::select(
 			'post_id', 'movie', 'thumbnail', 'category', 'tag', 'value',
@@ -54,25 +54,26 @@ class Model_Post extends Model
 			$query->where('user_id', 'in', $sort_id);
 
 		}else{
-			error_log("Model_Post:${sort_key}が不正です。");
+			error_log("Model_Post:${sort_key}が不正です");
 			exit;
 		}
 
-		$order_id = 0;
 
-		//order
-		//=======
+		//---------------------------------------------------------------------//
+		//$option
 
-		if ($order_id == 0) {
+
+		//並び順
+		if ($option['order_id'] == 0) {
 		//時系列
 			$query->order_by('post_date','desc');
 
-		}elseif ($order_id == 1) {
+		}elseif ($option['order_id'] == 1) {
 		//近い順
 			$query->order_by(DB::expr('GLength(GeomFromText(CONCAT(' . "'" . 'LineString(' .
 			"$lon" . ' ' . "$lat" . ",'" . ', X(lon_lat), ' . "' '," . ' Y(lon_lat),' . "')'" . ')))'));
 
-		}elseif ($order_id == 2) {
+		}elseif ($option['order_id'] == 2) {
 		//Gochi!ランキング
 			$query->join('gochis', 'LEFT OUTER')
 			->on('post_id', '=', 'gochi_post_id')
@@ -82,46 +83,43 @@ class Model_Post extends Model
 		}
 
 
-		//refine
-		//=======
-
 		//カテゴリー絞り込み
-		if ($category_id != 0) {
-			$query->where('category_id', $category_id);
+		if ($option['category_id'] != 0) {
+			$query->where('category_id', $option['category_id']);
 		}
 
 
 		//価格絞り込み
-		if ($value_id != 0) {
-			if ($value_id == 1) {
+		if ($option['value_id'] != 0) {
+			if ($option['value_id'] == 1) {
 				$query->where('value', 'between', array(1, 700));
 			}
-			if ($value_id == 2) {
+			if ($option['value_id'] == 2) {
 				$query->where('value', 'between', array(500, 1500));
 			}
-			if ($value_id == 3) {
+			if ($option['value_id'] == 3) {
 				$query->where('value', 'between', array(1500, 5000));
 			}
-			if ($value_id == 4) {
+			if ($option['value_id'] == 4) {
 				$query->where('value', '>', 3000);
 			}
 		}
 
 
 		//next
-		if ($call != 0) {
-			$call_num = $call * $limit;
+		if ($option['call'] != 0) {
+			$call_num = $option['call'] * $limit;
 			$query->offset($call_num);
 		}
 
 		$post_data = $query->execute()->as_array();
-		$post_num  = count($post_data);
 
 
 		//---------------------------------------------------------------------//
-
 		//付加情報格納(like_num, comment_num, want_flag, follow_flag, like_flag)
 
+
+		$post_num  = count($post_data);
 
 		for ($i=0; $i < $post_num; $i++) {
 

@@ -11,17 +11,17 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	//Timeline Page
 	public function action_timeline()
     {
-    	$sort_key    = 'all';
-        $user_id     = session::get('user_id');
-        $call        = Input::get('call', 0);
+    	$sort_key = 'all';
+        $user_id  = session::get('user_id');
 
-        $order_id    = Input::get('order_id', 0);
-        $category_id = Input::get('category_id', 0);
-        $value_id    = Input::get('value_id', 0);
+        $option = array(
+        	'call'        => Input::get('call', 0),
+        	'order_id'    => Input::get('order_id', 0),
+        	'category_id' => Input::get('category_id', 0),
+        	'value_id'    => Input::get('value_id', 0)
+        );
 
-
-		$data = Model_Post::get_data($user_id, $sort_key, 0, $call, $category_id, $value_id);
-
+		$data = Model_Post::get_data($user_id, $sort_key, 0, $option);
 	   	self::output_json($data);
 	}
 
@@ -29,17 +29,18 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	//Followline
 	public function action_followline()
 	{
-		$sort_key    = 'users';
-        $user_id     = session::get('user_id');
-        $call        = Input::get('call', 0);
+		$sort_key = 'users';
+        $user_id  = session::get('user_id');
 
-        $order_id    = Input::get('order_id', 0);
-        $category_id = Input::get('category_id', 0);
-        $value_id    = Input::get('value_id', 0);
-
+        $option = array(
+        	'call'        => Input::get('call', 0),
+        	'order_id'    => Input::get('order_id', 0),
+        	'category_id' => Input::get('category_id', 0),
+        	'value_id'    => Input::get('value_id', 0)
+        );
 
 		$follow_user_id = Model_Follow::get_follow_id($user_id);
-		$data = Model_Post::get_data($user_id, $sort_key, $follow_user_id, $call, $category_id, $value_id);
+		$data = Model_Post::get_data($user_id, $sort_key, $follow_user_id, $option);
 
 	   	self::output_json($data);
 	}
@@ -50,9 +51,9 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	{
 		$sort_key = 'all';
         $user_id  = session::get('user_id');
-        $call     = Input::get('call');
+        $option   = array('call' => Input::get('call', 0));
 
-		$data = Model_Post::get_data($user_id, $sort_key, 0, $call);
+		$data = Model_Post::get_data($user_id, $sort_key, 0, $option);
 
 	   	self::output_json($data);
 	}
@@ -63,18 +64,21 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
     {
     	$sort_key    = 'post';
         $user_id     = session::get('user_id');
-        $call        = Input::get('call', 0);
-        $category_id = Input::get('category_id', 0);
-        $value_id    = Input::get('value_id', 0);
 
+        $option = array(
+        	'call'        => Input::get('call', 0),
+        	'order_id'    => Input::get('order_id', 0),
+        	'category_id' => Input::get('category_id', 0),
+        	'value_id'    => Input::get('value_id', 0)
+        );
 
-		$post_id = Model_Gochi::get_rank($category_id, $value, $call);
+		$post_id = Model_Gochi::get_rank($option['category_id'], $option['value'], $option['call']);
 
 		$num = count($post_id);
 
 		for ($i=0; $i < $num; $i++) {
 			$tmp[$i] = Model_Post::get_data(
-				$user_id, $sort_key, $post_id[$i]['post_id'], $call);
+				$user_id, $sort_key, $post_id[$i]['post_id'], $option);
 			$data[$i] =  $tmp[$i][0];
 		}
 
@@ -87,15 +91,15 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
     {
     	$sort_key = 'post';
         $user_id  = session::get('user_id');
-        $call     = Input::get('call');
+        $option   = array('call' => Input::get('call', 0));
 
 
-		$post_id = Model_Gochi::get_rank(0, 0, $call);
+		$post_id = Model_Gochi::get_rank(0, 0, $option['call']);
 		$num = count($post_id);
 
 		for ($i=0; $i < $num; $i++) {
 			$tmp[$i] = Model_Post::get_data(
-				$user_id, $sort_key, $post_id[$i]['post_id'], $call, $category_id);
+				$user_id, $sort_key, $post_id[$i]['post_id'], $option);
 			$data[$i] =  $tmp[$i][0];
 		}
 
