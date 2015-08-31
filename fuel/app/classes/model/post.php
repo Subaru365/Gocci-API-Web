@@ -28,7 +28,7 @@ class Model_Post extends Model
 
 		->where('post_status_flag', '1')
 
-		->order_by('post_date','desc')
+		//->order_by('post_date','desc')
 
 		->limit($limit);
 
@@ -58,6 +58,29 @@ class Model_Post extends Model
 			exit;
 		}
 
+		$order_id = 0;
+
+		//order
+		//=======
+
+		if ($order_id == 0) {
+		//時系列
+			$query->order_by('post_date','desc');
+
+		}elseif ($order_id == 1) {
+		//近い順
+			$query->order_by(DB::expr('GLength(GeomFromText(CONCAT(' . "'" . 'LineString(' .
+			"$lon" . ' ' . "$lat" . ",'" . ', X(lon_lat), ' . "' '," . ' Y(lon_lat),' . "')'" . ')))'));
+
+		}elseif ($order_id == 2) {
+		//Gochi!ランキング
+			$query->join('gochis', 'LEFT OUTER')
+			->on('post_id', '=', 'gochi_post_id')
+
+			->order_by(DB::expr('COUNT(gochi_id)'), 'desc')
+			->order_by('post_date', 'desc');
+		}
+
 
 		//refine
 		//=======
@@ -74,16 +97,13 @@ class Model_Post extends Model
 				$query->where('value', 'between', array(1, 700));
 			}
 			if ($value_id == 2) {
-				$query->where('value', 'between', array(700, 1500));
+				$query->where('value', 'between', array(500, 1500));
 			}
 			if ($value_id == 3) {
-				$query->where('value', 'between', array(1500, 3000));
+				$query->where('value', 'between', array(1500, 5000));
 			}
 			if ($value_id == 4) {
-				$query->where('value', 'between', array(3000, 5000));
-			}
-			if ($value_id == 5) {
-				//制限なし
+				$query->where('value', '>', 3000);
 			}
 		}
 
@@ -152,7 +172,10 @@ class Model_Post extends Model
 
 		$value = $query->execute()->as_array();
 
-		$key = array('comment_user_id', 'username', 'profile_img', 'comment', 'comment_date');
+		$re_user = array();
+		array_push ($value[0], $re_user);
+
+		$key = array('comment_user_id', 'username', 'profile_img', 'comment', 'comment_date', 're_user');
 		$post_comment = array_combine($key, $value[0]);
 
 		return $post_comment;
