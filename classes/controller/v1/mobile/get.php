@@ -55,7 +55,15 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	{
 		$sort_key = 'all';
         $user_id  = session::get('user_id');
-        $option   = array('call' => Input::get('call', 0));
+
+        $option = array(
+        	'call'        => Input::get('call', 0),
+        	'order_id'    => Input::get('order_id', 0),
+        	'category_id' => Input::get('category_id', 0),
+        	'value_id'    => Input::get('value_id', 0),
+        	'lon'         => Input::get('lon', 0),
+        	'lat'         => Input::get('lat', 0)
+        );
 
 		$data = Model_Post::get_data($user_id, $sort_key, 0, $option);
 
@@ -66,26 +74,30 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	//Popular Page [廃止予定]
 	public function action_popular()
     {
-    	$sort_key    = 'post';
-        $user_id     = session::get('user_id');
+    	$sort_key = 'all';
+        $user_id  = session::get('user_id');
 
         $option = array(
         	'call'        => Input::get('call', 0),
-        	'order_id'    => Input::get('order_id', 0),
+        	'order_id'    => Input::get('order_id', 2),
         	'category_id' => Input::get('category_id', 0),
-        	'value_id'    => Input::get('value_id', 0)
+        	'value_id'    => Input::get('value_id', 0),
+        	'lon'         => Input::get('lon', 0),
+        	'lat'         => Input::get('lat', 0)
         );
 
-		$post_id = Model_Gochi::get_rank($option['category_id'], $option['value'], $option['call']);
 
-		$num = count($post_id);
+		//$post_id = Model_Gochi::get_rank($option['category_id'], $option['value_id'], $option['call']);
 
-		for ($i=0; $i < $num; $i++) {
-			$tmp[$i] = Model_Post::get_data(
-				$user_id, $sort_key, $post_id[$i]['post_id'], $option);
-			$data[$i] =  $tmp[$i][0];
-		}
+		// $num = count($post_id);
 
+		// for ($i=0; $i < $num; $i++) {
+		// 	$tmp[$i] = Model_Post::get_data(
+		// 		$user_id, $sort_key, $post_id[$i]['post_id'], $option);
+		// 	$data[$i] =  $tmp[$i][0];
+		// }
+
+        $data = Model_Post::get_data($user_id, $sort_key, 0, $option);
 	   	self::output_json($data);
 	}
 
@@ -93,20 +105,29 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
 	//Popular Page [廃止予定]
 	public function action_popular_next()
     {
-    	$sort_key = 'post';
+    	$sort_key = 'all';
         $user_id  = session::get('user_id');
-        $option   = array('call' => Input::get('call', 0));
+
+        $option = array(
+        	'call'        => Input::get('call', 0),
+        	'order_id'    => Input::get('order_id', 2),
+        	'category_id' => Input::get('category_id', 0),
+        	'value_id'    => Input::get('value_id', 0),
+        	'lon'         => Input::get('lon', 0),
+        	'lat'         => Input::get('lat', 0)
+        );
 
 
-		$post_id = Model_Gochi::get_rank(0, 0, $option['call']);
-		$num = count($post_id);
+		//$post_id = Model_Gochi::get_rank(0, 0, $option['call']);
 
-		for ($i=0; $i < $num; $i++) {
-			$tmp[$i] = Model_Post::get_data(
-				$user_id, $sort_key, $post_id[$i]['post_id'], $option);
-			$data[$i] =  $tmp[$i][0];
-		}
+		//$num = count($post_id);
+		// for ($i=0; $i < $num; $i++) {
+		// 	$tmp[$i] = Model_Post::get_data(
+		// 		$user_id, $sort_key, $post_id[$i]['post_id'], $option);
+		// 	$data[$i] =  $tmp[$i][0];
+		// }
 
+        $data = Model_Post::get_data($user_id, $sort_key, 0, $option);
 	   	self::output_json($data);
 	}
 

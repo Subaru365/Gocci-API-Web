@@ -28,8 +28,6 @@ class Model_Post extends Model
 
 		->where('post_status_flag', '1')
 
-		//->order_by('post_date','desc')
-
 		->limit($limit);
 
 
@@ -40,9 +38,6 @@ class Model_Post extends Model
 
 		}elseif ($sort_key == 'post') {
 			$query->where('post_id', $sort_id);
-
-		}elseif ($sort_key == 'posts') {
-			$query->where('post_id', 'in', $sort_id);
 
 		}elseif ($sort_key == 'rest') {
 			$query->where('post_rest_id', $sort_id);
@@ -60,10 +55,10 @@ class Model_Post extends Model
 
 
 		//---------------------------------------------------------------------//
-		//$option
+		//$option ソート機能
 
 
-		//並び順
+		//並び替え
 		if ($option['order_id'] == 0) {
 		//時系列
 			$query->order_by('post_date','desc');
@@ -87,8 +82,7 @@ class Model_Post extends Model
 			->where	   ('gochi_date', 'BETWEEN', array("$interval", "$now_date"))
 
 			->group_by('gochi_post_id')
-			->order_by(DB::expr('COUNT(gochi_post_id)'), 'desc')
-			->order_by('post_date', 'desc');
+			->order_by(DB::expr('COUNT(gochi_post_id)'), 'desc');
 		}
 
 
@@ -121,6 +115,8 @@ class Model_Post extends Model
 			$query->offset($call_num);
 		}
 
+
+		$query ->order_by('post_date','desc');
 		$post_data = $query->execute()->as_array();
 
 
