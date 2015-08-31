@@ -18,7 +18,9 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
         	'call'        => Input::get('call', 0),
         	'order_id'    => Input::get('order_id', 0),
         	'category_id' => Input::get('category_id', 0),
-        	'value_id'    => Input::get('value_id', 0)
+        	'value_id'    => Input::get('value_id', 0),
+        	'lon'         => Input::get('lon', 0),
+        	'lat'         => Input::get('lat', 0)
         );
 
 		$data = Model_Post::get_data($user_id, $sort_key, 0, $option);
@@ -36,7 +38,9 @@ class Controller_V1_Mobile_Get extends Controller_V1_Mobile_Base
         	'call'        => Input::get('call', 0),
         	'order_id'    => Input::get('order_id', 0),
         	'category_id' => Input::get('category_id', 0),
-        	'value_id'    => Input::get('value_id', 0)
+        	'value_id'    => Input::get('value_id', 0),
+        	'lon'         => Input::get('lon', 0),
+        	'lat'         => Input::get('lat', 0)
         );
 
 		$follow_user_id = Model_Follow::get_follow_id($user_id);

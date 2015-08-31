@@ -40,6 +40,11 @@ class Controller_V1_Mobile_Base extends Controller
         echo '{}';
     }
 
+    //None []
+    public static function output_square_brackets()
+    {
+        echo '[]';
+    }
 
     //JSON Encode
 	public static function output_json($data)

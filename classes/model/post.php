@@ -68,17 +68,26 @@ class Model_Post extends Model
 		//時系列
 			$query->order_by('post_date','desc');
 
+
 		}elseif ($option['order_id'] == 1) {
 		//近い順
-			$query->order_by(DB::expr('GLength(GeomFromText(CONCAT(' . "'" . 'LineString(' .
-			"$lon" . ' ' . "$lat" . ",'" . ', X(lon_lat), ' . "' '," . ' Y(lon_lat),' . "')'" . ')))'));
+			$query->order_by(DB::expr("GLength(GeomFromText(CONCAT('LineString(${option['lon']} ${option['lat']},', X(lon_lat),' ', Y(lon_lat),')')))"));
+
 
 		}elseif ($option['order_id'] == 2) {
 		//Gochi!ランキング
-			$query->join('gochis', 'LEFT OUTER')
-			->on('post_id', '=', 'gochi_post_id')
 
-			->order_by(DB::expr('COUNT(gochi_id)'), 'desc')
+			//対象となる投稿の期間($interval)
+			$now_date = date("Y-m-d",strtotime("+1 day"));
+			$interval = date("Y-m-d",strtotime("-1 month"));
+
+			$query->join('gochis', 'RIGHT')
+			->on('gochi_post_id', '=', 'post_id')
+
+			->where	   ('gochi_date', 'BETWEEN', array("$interval", "$now_date"))
+
+			->group_by('gochi_post_id')
+			->order_by(DB::expr('COUNT(gochi_post_id)'), 'desc')
 			->order_by('post_date', 'desc');
 		}
 

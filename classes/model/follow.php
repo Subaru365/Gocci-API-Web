@@ -12,7 +12,7 @@ class Model_Follow extends Model
 		$follow_id = $query->execute()->as_array();
 
 		if (empty($follow_id)) {
-			Controller_V1_Mobile_Base::output_none();
+			Controller_V1_Mobile_Base::output_square_brackets();
 			error_log("user_id:${user_id}のフォロワーはいません");
 			exit;
 		}
