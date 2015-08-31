@@ -13,6 +13,8 @@ class Model_Follow extends Model
 
 		if (empty($follow_id)) {
 			Controller_V1_Mobile_Base::output_none();
+			error_log("user_id:${user_id}のフォロワーはいません");
+			exit;
 		}
 
 		return $follow_id;
