@@ -21,15 +21,9 @@ class Model_User extends Model
 
         $result = $query->execute()->as_array();
 
-        $status = self::verify_pass($password, $result[0]['password']);
+        self::verify_pass($password, $result[0]['password']);
 
-        if ($status) {
-            return $result;
-
-        }else{
-            Controller_V1_Mobile_Base::output_none();
-            exit;
-        }
+        return $result;
     }
 
 
@@ -338,10 +332,11 @@ class Model_User extends Model
     private static function verify_pass($pass, $hash_pass)
     {
         if (password_verify($pass, $hash_pass)) {
-            return 'true';
+            //認証OK
         }else{
-            return 'false';
             error_log('パスワードが一致しません');
+            Controller_V1_Mobile_Base::output_none();
+            exit;
         }
     }
 
