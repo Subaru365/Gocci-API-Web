@@ -34,7 +34,7 @@ class Model_Comment extends Model
 		}
 
 		for ($i=1; $i < $comment_num; $i++) {
-			$comment_data[$i]['re_user_id'] =
+			$comment_data[$i]['re_user'] =
 				Model_Re::get_data($comment_data[$i]['comment_id']);
 		}
 
