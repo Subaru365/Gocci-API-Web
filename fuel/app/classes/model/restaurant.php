@@ -4,8 +4,7 @@ class Model_Restaurant extends Model
 	public static function get_near($lon, $lat)
 	{
 		$query = DB::select('rest_id', 'restname')->from('restaurants')
-		->order_by(DB::expr('GLength(GeomFromText(CONCAT(' . "'" . 'LineString(' .
-			"$lon" . ' ' . "$lat" . ",'" . ', X(lon_lat), ' . "' '," . ' Y(lon_lat),' . "')'" . ')))'))
+		->order_by(DB::expr("GLength(GeomFromText(CONCAT('LineString(${lon} ${lat},', X(lon_lat),' ', Y(lon_lat),')')))"))
 		->limit(30);
 
 		$near_data = $query->execute()->as_array();
