@@ -15,7 +15,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
 	    $limit    = 10;
 
 	    $data     = Model_Post::get_data($user_id, $sort_key, $sort_key,$limit);
-	   	$status   = $this->output_json($data);	   	
+	   	$status   = $this->output_json($data);
     }
 
     // Timeline loading
@@ -26,7 +26,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
 
         $page_num = Input::get('page');
         $data     = Model_Post::get_data($user_id, $sort_key, $page_num);
-        
+
         $status   = $this->output_json($data);
 
     }
@@ -37,7 +37,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         $sort_key = 'post';
         $user_id  = session::get('user_id');
         $post_id  = Model_Gochi::get_rank();
-        
+
         $num      = count($post_id);
 
         for ($i=0;$i<$num;$i++) {
@@ -67,13 +67,13 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
             );
             $data[$i] = $tmp[$i][0];
         }
-        
+
         if ($num === 0) {
             $data = array();
         }
 
         $status   = $this->output_json($data);
-    } 
+    }
 
     // Comment Page
     public function action_comment()
@@ -84,7 +84,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         $post_id      = Input::get('post_id');
         // $user_id      = 1;
         $post_data    = Model_Post::get_data($user_id, $sort_key, $post_id);
- 
+
         $Comment_data = Model_Comment::get_data($post_id);
 
         $data = [
@@ -111,7 +111,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         $data = [
             "restaurants" => $rest_data[0],
             "posts"       => $post_data
-        ]; 
+        ];
 
         $status = $this->output_json($data);
     }
@@ -120,8 +120,12 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     public function action_user()
     {
         $sort_key       = 'user';
-        $limit          = '99';
+        $limit          = 10;
         $user_id        = session::get('user_id');
+				if (empty($user_id)) {
+					echo 'User_idは存在しません';
+					exit();
+				}
         $target_user_id = Input::get('target_user_id');
 
         $user_data      = Model_User::get_data($user_id, $target_user_id);
@@ -147,7 +151,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         // What is this code mean?
         Model_User::rest_badge($user_id);
 
-        $status  = $this->output_json($data); 
+        $status  = $this->output_json($data);
     }
 
     // Near
@@ -164,7 +168,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
 
         $data           = Model_Follow::get_follow($user_id, $target_user_id);
 
-        $status         = $this->output_json($data); 
+        $status         = $this->output_json($data);
     }
 
     // Follower List
@@ -174,7 +178,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         $target_user_id = Input::get('target_user_id');
 
         $data           = Model_Follow::get_follower($user_id, $target_user_id);
-        $status         = $this->output_json($data); 
+        $status         = $this->output_json($data);
     }
 
     // 行きたい登録 List
@@ -228,6 +232,4 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
 
         $status          = $this->output_json($userData);
     }
-
-
 }
