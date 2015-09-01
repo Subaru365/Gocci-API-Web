@@ -7,7 +7,6 @@
 class Controller_V1_Web_Base extends Controller
 {
 	// jwt check
-	
 	public function before()
 	{
 		$jwt = @$_SERVER["HTTP_AUTHORIZATION"] ?  @$_SERVER["HTTP_AUTHORIZATION"] : "";
@@ -25,7 +24,7 @@ class Controller_V1_Web_Base extends Controller
 			$username  = $obj->{'username'};
 			session::set('username', $username);
 		} else {
-			elf::unauth();
+			self::unauth();
 			error_log('UnAuthorized Accsess..');
 			exit;
 		}
@@ -102,5 +101,4 @@ class Controller_V1_Web_Base extends Controller
 	    }
 	    return $headers;
 	}
-
 }
