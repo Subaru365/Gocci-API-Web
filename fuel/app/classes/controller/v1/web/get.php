@@ -12,7 +12,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     	$username = session::get('username');
 
 	    $sort_key = 'all';
-	    $limit    = 10;
+	    $limit    = 20;
 
 	    $data     = Model_Post::get_data($user_id, $sort_key, $sort_key,$limit);
 
@@ -31,11 +31,21 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     // Timeline loading
     public function action_timeline_loading()
     {
-        $sort_key = 'next';
-        $user_id  = session::get('user_id');
+        $sort_key = 'all';
+        // $user_id  = session::get('user_id');
+				$user_id = 1;
         $page_num = Input::get('page');
+				$limit    = 20;
         $data     = Model_Post::get_data($user_id, $sort_key, $page_num);
 
+				for ($i = 0; $i<$limit; $i++) {
+					$post_id = $data[$i]['post_id'];
+					$Comment_data = Model_Comment::get_data($post_id);
+					$data[$i] = [
+			        "post"     => $data[$i],
+			        "comments" => $Comment_data
+			    ];
+				}
         $status   = $this->output_json($data);
 
     }
