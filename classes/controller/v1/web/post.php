@@ -3,6 +3,13 @@ header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
 error_reporting(-1);
+/*
+header('Content-Type: application/json; charset=UTF-8');
+header("Access-Control-Allow-Origin", "*");
+header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
+*/
+# header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
 
 class Controller_V1_Web_Post extends Controller_V1_Web_Base
 {
@@ -18,11 +25,13 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 				$user_id, $post_id
 			);
 
+			/*
 			if ((int)$user_id !== (int)$target_user_id) {
 				$record = Model_Notice::post_data(
 					$keyword, $user_id, $target_user_id, $post_id
 				);
 			}
+			*/
 
 			self::success($keyword);
 
@@ -46,11 +55,13 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 				$user_id, $post_id, $comment
 			);
 
+			/*
 			if ((int)$user_id !== (int)$target_user_id) {
 				$record = Model_Notice::post_data(
 					$keyword, $user_id, $target_user_id, $post_id
 				);
 			}
+			*/
 
 			self::success($keyword);
 		} catch(\Database_Exception $e) {

@@ -40,7 +40,7 @@ class Controller_V1_Mobile_Post extends Controller_V1_Mobile_Base
 			if ($profile_img != 'none')
 			{
 				$profile_img = Model_S3::input($user_id, $profile_img);
-				Model_User::update_profile_img($user_id, $profile_img);
+				$profile_img = Model_User::update_profile_img($user_id, $profile_img);
 			}
 
 			$identity_id = Model_User::get_identity_id($user_id);
