@@ -1,5 +1,5 @@
 <?php
-header('Content-Type: application/json; charset=UTF-8');
+// header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
 /**
  * Auth api
@@ -16,6 +16,10 @@ class Controller_V1_Web_Auth extends Controller
 
         try
         {
+            if (empty($provider) && empty($token) || empty($provider) or empty($token) ) {
+              print 'error:403';
+              exit;
+            }
             $identity_id = Model_Cognito::get_identity_id($provider, $token);
 
             $user_data   = Model_User::get_auth($identity_id);

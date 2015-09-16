@@ -33,29 +33,28 @@ class Model_Device extends Model
     }
 
 
-	public static function get_arn($user_id)
-	{
-		$query = DB::select('endpoint_arn')->from('devices')
-		->where('device_user_id', "$user_id");
+  	public static function get_arn($user_id)
+  	{
+        $query = DB::select('endpoint_arn')->from('devices')
+        ->where('device_user_id', "$user_id");
 
-		$endpoint_arn = $query -> execute()->as_array();
-		return $endpoint_arn[0]['endpoint_arn'];
-	}
+        $endpoint_arn = $query -> execute()->as_array();
+        return $endpoint_arn[0]['endpoint_arn'];
+  	}
 
 
-     public static function post_data(
-     	$user_id, $os, $model, $register_id, $endpoint_arn)
-     {
+    public static function post_data($user_id, $os, $model, $register_id, $endpoint_arn)
+    {
      	$query = DB::insert('devices')
-        ->set(array(
-            'device_user_id' => "$user_id",
-            'os'             => "$os",
-            'model'          => "$model",
-            'register_id'    => "$register_id",
-     		'endpoint_arn'   => "$endpoint_arn"
+      ->set(array(
+          'device_user_id' => "$user_id",
+          'os'             => "$os",
+          'model'          => "$model",
+          'register_id'    => "$register_id",
+       		'endpoint_arn'   => "$endpoint_arn"
         ))
         ->execute();
-     }
+    }
 
 
     public static function update_register_id($user_id, $register_id, $endpoint_arn)
@@ -85,14 +84,33 @@ class Model_Device extends Model
        ->execute();
 
        return $query;
-     }
+    }
 
 
     public static function delete_device($user_id)
     {
-       $query = DB::delete('devices')
-       ->where('device_user_id', "$user_id")
-       ->execute();
+        $query = DB::delete('devices')
+        ->where('device_user_id', "$user_id")
+        ->execute();
+    }
+
+
+    //==================================================//
+    //Conversion
+
+    public static function check_conversion($register_id)
+    {
+        $query = DB::select('device_id')
+        ->from('devices')
+        ->where('register_id', "$register_id");
+
+        $device_id = $query->execute()->as_array();
+
+        if (!empty($device_id)) {
+          //登録あり→エラー
+          Controller_V1_Mobile_Base::output_none();
+          exit;
+        }
     }
 }
 
