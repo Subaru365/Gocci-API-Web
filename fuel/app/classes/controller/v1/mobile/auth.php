@@ -282,6 +282,7 @@ class Controller_V1_Mobile_Auth extends Controller
         $register_id = Input::get('register_id');
 
         $user_id     = Model_User::check_conversion($username);
+        Model_Device::check_conversion($register_id);
 
         // 初期化ユーザー
         if (empty($user_id)) {
