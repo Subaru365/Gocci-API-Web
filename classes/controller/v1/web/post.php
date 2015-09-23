@@ -276,4 +276,5 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 
 		self::output_json($data);
 	}
+
 }
