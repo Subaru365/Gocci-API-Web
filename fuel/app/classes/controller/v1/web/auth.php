@@ -1,4 +1,8 @@
 <?php
+header('Content-Type: application/json; charset=UTF-8');
+header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
+header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
+
 // header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
 /**
@@ -59,6 +63,42 @@ class Controller_V1_Web_Auth extends Controller
             error_log($e);
         }
     }
+
+    // passwordログイン
+  	public function action_pass_login()
+  	{
+  		// username
+  		$username  = Input::post('username');
+
+  		// password
+  		$password  = Input::post('password');
+  		$hash_pass = password_hash($password, PASSWORD_BCRYPT);
+
+  		// os
+  		$os = Input::post('os');
+
+  		// model [web]
+  		$model = Input::post('model');
+
+  		// register_id
+  		$register_id = Input::post('register_id');
+
+  		try {
+  			// JWT認証
+  			// $token =
+
+  			// DBインサート
+
+  			// sucess
+
+  		} catch (Exception $e) {
+  			// JWT Exception
+
+  			// Not access
+
+  		}
+  	}
+
 
     // decode
     public static function decode()
