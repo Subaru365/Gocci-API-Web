@@ -6,19 +6,17 @@ use Aws\Sns\SnsClient;
 */
 class Model_Sns extends Model
 {
-	public static function set_endpoint($user_id, $register_id, $os)
+	public static function set_endpoint($user_data)
 	{
 		//AWS SNSに端末を登録
-        $brand = explode('_', $os);
+        if ($user_data['os'] == 'android') {
+            $endpoint_arn = self::set_android($user_data);
 
-        if ($brand[0] == 'android') {
-            $endpoint_arn = self::set_android($user_id, $register_id);
-
-        }elseif ($brand[0] == 'iOS') {
-			$endpoint_arn = self::set_iOS($user_id, $register_id);
+        }elseif ($user_data['os'] == 'iOS') {
+			$endpoint_arn = self::set_iOS($user_data);
 
 		}else{
-            error_log('Model_Sns: endpoint_arn 未発行');
+            error_log("Model_Sns: $user_data['os']が不正です。");
             exit;
         }
 
@@ -26,9 +24,9 @@ class Model_Sns extends Model
 	}
 
 
-	private static function set_android($user_id, $register_id)
+	private static function set_android($user_data)
 	{
-		$android_Arn = Config::get('_sns.android_ApplicationArn');
+		$android_arn = Config::get('_sns.android_ApplicationArn');
 
 		$client = new SnsClient([
 			'region'  => 'ap-northeast-1',
@@ -36,18 +34,18 @@ class Model_Sns extends Model
 		]);
 
 		$result = $client->createPlatformEndpoint([
-    		'CustomUserData' => 'user_id / ' . "$user_id",
-    		'PlatformApplicationArn' => "$android_Arn",
-    		'Token' => "$register_id",
+    		'CustomUserData' => "user_id / $user_data['user_id']",
+    		'PlatformApplicationArn' => "$android_arn",
+    		'Token' => "$user_data['register_id']",
     	]);
 
     	return $result['EndpointArn'];
 	}
 
 
-	private static function set_iOS($user_id, $register_id)
+	private static function set_iOS($user_data)
 	{
-		$iOS_Arn = Config::get('_sns.iOS_ApplicationArn');
+		$iOS_arn = Config::get('_sns.iOS_ApplicationArn');
 
 		$client = new SnsClient([
 			'region'  => 'ap-northeast-1',
@@ -55,9 +53,9 @@ class Model_Sns extends Model
 		]);
 
 		$result = $client->createPlatformEndpoint([
-    		'CustomUserData' => 'user_id / ' . "$user_id",
-    		'PlatformApplicationArn' => "$iOS_Arn",
-    		'Token' => "$register_id",
+    		'CustomUserData' => "user_id / $user_data['user_id']",
+    		'PlatformApplicationArn' => "$iOS_arn",
+    		'Token' => "$user_data['register_id']",
     	]);
 
     	return $result['EndpointArn'];

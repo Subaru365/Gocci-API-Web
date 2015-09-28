@@ -6,30 +6,6 @@
 
 class Controller_V1_Web_Base extends Controller
 {
-	// jwt check
-
-	public function before()
-	{
-		$jwt = @$_SERVER["HTTP_AUTHORIZATION"] ?  @$_SERVER["HTTP_AUTHORIZATION"] : "";
-
-		if(isset($jwt)) {
-			$data      = self::decode($jwt);
-			$user_data = session::get('data');
-			$obj       = json_decode($user_data);
-			if (empty($obj)) {
-				self::unauth();
-			}
-
-			$user_id   = $obj->{'user_id'};
-			session::set('user_id', $user_id);
-			$username  = $obj->{'username'};
-			session::set('username', $username);
-		} else {
-			self::unauth();
-			error_log('UnAuthorized Accsess..');
-			exit;
-		}
-	}
 	// decode
     public static function decode($jwt)
     {
@@ -62,7 +38,7 @@ class Controller_V1_Web_Base extends Controller
     }
 
 	// Not JWT
-	private static function unauth()
+	public static function unauth()
 	{
 		$status = array(
 			'code'   => '401',
@@ -101,4 +77,34 @@ class Controller_V1_Web_Base extends Controller
 	    }
 	    return $headers;
 	}
+
+  public static function notfounduser()
+  {
+    $status = array(
+      'code'   => '401',
+      'status' => 'Userが存在しません'
+    );
+
+    $status = json_encode(
+      $status,
+        JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+      );
+      echo $status;
+      exit;
+  }
+
+  public static function notid()
+  {
+    $status = array(
+      'code'   => '401',
+      'status' => 'usernameを入力してください'
+    );
+
+    $status = json_encode(
+      $status,
+        JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+      );
+      echo $status;
+      exit;
+  }
 }

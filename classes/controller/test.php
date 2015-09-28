@@ -7,12 +7,11 @@ use Aws\Sns\SnsClient;
 */
 class Controller_Test extends Controller
 {
-	//Followline
-	public function action_index()
+	public static function action_index()
 	{
-		$user_data = Input::get();
-		//print_r($user_data);
+		$result	= Model_V2_Db_User::get_user_id_last();
+		$result ++;
 
-		Model_Validation::check_signup($user_data);
+        return $result;
 	}
 }

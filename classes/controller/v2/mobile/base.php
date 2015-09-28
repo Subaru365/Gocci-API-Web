@@ -19,20 +19,6 @@ class Controller_V2_Mobile_Base extends Controller
 		}
 	}
 
-
- //    //None {}
- //    public static function output_none()
- //    {
- //        echo '{}';
- //    }
-
- //    //None []
- //    public static function output_square_brackets()
- //    {
- //        echo '[]';
- //    }
-
-
     public static function output_success($specific_data)
     {
         $api_data = array(
@@ -66,8 +52,8 @@ class Controller_V2_Mobile_Base extends Controller
         $api_data = array(
             'version'   => 2.0,
             'code'      => $error_code,
-            'subject'   => Model_Error::get_subject($error_code),
-            'message'   => Model_Error::get_message($error_code),
+            'subject'   => Model_V2_Error::get_subject($error_code),
+            'message'   => Model_V2_Error::get_message($error_code),
             'data'      => array()
         );
 

@@ -9,21 +9,14 @@ class Model_User extends Model
         ->where('username', "$username");
 
         $result = $query->execute()->as_array();
-        return $result;
-    }
 
+        if (!empty($result)) {
+        //username使用済み
+            error_log("$username" . 'は既に使用されています。');
+            $username = '変更に失敗しました';
+        }
 
-    public static function check_pass($username, $password)
-    {
-        $query = DB::select('user_id', 'profile_img', 'identity_id', 'badge_num', 'password')
-        ->from('users')
-        ->where('username', "$username");
-
-        $result = $query->execute()->as_array();
-
-        self::verify_pass($password, $result[0]['password']);
-
-        return $result;
+        return $username;
     }
 
 
@@ -65,10 +58,10 @@ class Model_User extends Model
         $user_id = $query->execute()->as_array();
 
         if (empty($user_id)) {
-            $user_id[0]['user_id'] = '';
+            $user_id = '';
+        } else {
+            return $user_id[0]['user_id'];
         }
-
-        return $user_id[0]['user_id'];
     }
 
 
@@ -139,7 +132,8 @@ class Model_User extends Model
     //ログインユーザー情報取得
     public static function get_auth($identity_id)
     {
-        $query = DB::select('user_id', 'username', 'profile_img', 'badge_num')
+        $query = DB::select(
+            'user_id', 'username', 'profile_img', 'badge_num')
         ->from ('users')
         ->where('identity_id', "$identity_id");
 
@@ -216,20 +210,6 @@ class Model_User extends Model
     }
 
 
-    //
-    public static function update_pass($user_id, $pass)
-    {
-        $encryption_pass = self::encryption_pass($pass);
-
-        $query = DB::update('users')
-        ->value('password', "$encryption_pass")
-        ->where('user_id', "$user_id")
-        ->execute();
-
-        return $query;
-    }
-
-
     //SNS連携
     public static function update_sns_flag($user_id, $provider)
     {
@@ -262,19 +242,15 @@ class Model_User extends Model
     //ユーザー名変更
     public static function update_name($user_id, $username)
     {
-        $result = self::check_name($username);
+        $username = self::check_name($username);
 
-        if (!empty($result)) {
-        //username使用済み
-            error_log("$username" . 'は既に使用されています。');
-            $username = '変更に失敗しました';
-
-        }else{
+        if ($username != '変更に失敗しました') {
             $query = DB::update('users')
             ->value('username', "$username")
             ->where('user_id', "$user_id")
             ->execute();
         }
+
         return $username;
     }
 
@@ -296,16 +272,6 @@ class Model_User extends Model
     }
 
 
-    //Logout
-    public static function update_logout($user_id)
-    {
-        $query = DB::update('users')
-        ->value('login_flag', '0')
-        ->where('user_id', "$user_id")
-        ->execute();
-    }
-
-
     //SNS連携
     public static function delete_sns_flag($user_id, $provider)
     {
@@ -322,23 +288,7 @@ class Model_User extends Model
     }
 
 
-    private static function encryption_pass($pass)
-    {
-        $hash_pass = password_hash($pass, PASSWORD_BCRYPT);
-        return $hash_pass;
-    }
 
-
-    private static function verify_pass($pass, $hash_pass)
-    {
-        if (password_verify($pass, $hash_pass)) {
-            //認証OK
-        }else{
-            error_log('パスワードが一致しません');
-            Controller_V1_Mobile_Base::output_none();
-            exit;
-        }
-    }
 
 
     //Conversion

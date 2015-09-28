@@ -1,30 +1,57 @@
 <?php
+/**
+* CognitoIdentity Model
+*/
 
 use Aws\CognitoIdentity\CognitoIdentityClient;
 use Aws\CognitoSync\CognitoSyncClient;
 
-/**
-* CognitoIdentity Model
-*/
 class Model_V2_Aws_Cognito extends Model
 {
-    //IdentityID新規発行
-	public static function set_data($user_id)
-	{
-		$config = Config::get('_cognito');
-
-        $client = new CognitoIdentityClient([
+    private static function set_client()
+    {
+        $client = new CognitoIdentityClient
+        ([
             'region'    => 'us-east-1',
             'version'   => 'latest'
         ]);
+        return $client;
+    }
 
-        $result = $client->getOpenIdTokenForDeveloperIdentity([
+
+    //IdentityID新規発行
+	public static function set_data()
+	{
+        $client = self::client();
+		$config = Config::get('_cognito');
+
+        $result = $this->client->getOpenIdTokenForDeveloperIdentity
+        ([
             'IdentityPoolId'    => "$config[IdentityPoolId]",
-            'Logins'            => ["$config[developer_provider]" => "$user_id",],
+            'Logins'            => [
+                "$config[developer_provider]" => session::get('user_id'),
+            ]
         ]);
-
 		return $result;
 	}
+
+
+    //identity_idからtokenを取得
+    public static function get_token($identity_id)
+    {
+        $client = self::set_client();
+        $config = Config::get('_cognito');
+
+        $result = $client->getOpenIdTokenForDeveloperIdentity([
+            'IdentityId'        => "$identity_id",
+            'IdentityPoolId'    => "$config[IdentityPoolId]",
+            'Logins'            => [
+                "$config[developer_provider]" => session::get('user_id'),
+            ]
+        ]);
+        return $result['Token'];
+    }
+
 
     //=========================================================================//
 
@@ -49,29 +76,6 @@ class Model_V2_Aws_Cognito extends Model
 
         return $result;
     }
-
-
-	//identity_idからtokenを取得
-	public static function get_token($user_id, $identity_id)
-	{
-        $cognito_data = Config::get('_cognito');
-
-		$client = new CognitoIdentityClient([
-			'region'  => 'us-east-1',
-    		'version' => 'latest'
-		]);
-
-        $result = $client->getOpenIdTokenForDeveloperIdentity([
-            'IdentityId'     => "$identity_id",
-            'IdentityPoolId' => "$cognito_data[IdentityPoolId]",
-            'Logins'         => [
-                "$cognito_data[developer_provider]" => "$user_id",
-            ],
-        ]);
-
-		return $result['Token'];
-	}
-
 
     public static function delete_identity_id($identity_id)
     {

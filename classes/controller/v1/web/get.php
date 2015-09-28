@@ -6,8 +6,34 @@ error_reporting(-1);
 
 class Controller_V1_Web_Get extends Controller_V1_Web_Base
 {
+	// jwt check
+	public function create_token()
+	{
+		$jwt = @$_SERVER["HTTP_AUTHORIZATION"] ?  @$_SERVER["HTTP_AUTHORIZATION"] : "";
+
+		if(isset($jwt)) {
+			$data      = self::decode($jwt);
+			$user_data = session::get('data');
+			$obj       = json_decode($user_data);
+			if (empty($obj)) {
+				self::unauth();
+			}
+
+			$user_id   = $obj->{'user_id'};
+			session::set('user_id', $user_id);
+			$username  = $obj->{'username'};
+			session::set('username', $username);
+		} else {
+			self::unauth();
+			error_log('UnAuthorized Accsess..');
+			exit;
+		}
+	}
+
 	public function action_timeline()
-    {
+  {
+			self::create_token();
+
     	$user_id  = session::get('user_id');
     	$username = session::get('username');
 
@@ -31,6 +57,8 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     // Timeline loading
     public function action_timeline_loading()
     {
+				self::create_token();
+
         $sort_key = 'all';
         // $user_id  = session::get('user_id');
 				$user_id = 1;
@@ -51,28 +79,33 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     }
 
     // Popular Page
+		/*
     public function action_popular()
     {
+				self::create_token();
         $sort_key = 'post';
         // $user_id  = session::get('user_id');
-				$user_id = 4;
+				// $user_id = 4;
         $post_id  = Model_Gochi::get_rank();
 
         $num      = count($post_id);
 
         for ($i=0;$i<$num;$i++) {
             $tmp[$i] = Model_Post::get_data(
-                $user_id, $sort_key, $post_id[$i]['post_id']);
+            $user_id, $sort_key, $post_id[$i]['post_id']);
 
             $data[$i] =  $tmp[$i][0];
         }
 
         $status = $this->output_json($data);
     }
+		*/
 
     // Popular loading
     public function action_popular_loading()
     {
+				self::create_token();
+
         $sort_key = 'post';
         $page_num = Input::get('page');
 
@@ -102,7 +135,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
 
         $user_id      = session::get('user_id');
         $post_id      = Input::get('post_id');
-        // $user_id      = 1;
+
         $post_data    = Model_Post::get_data($user_id, $sort_key, $post_id);
 
         $Comment_data = Model_Comment::get_data($post_id);
@@ -120,9 +153,10 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     {
         $sort_key  = 'rest';
         $user_id   = session::get('user_id');
+				// $user_id = "";
         $rest_id   = Input::get('rest_id');
 
-        $rest_data = Model_Restaurant::get_data($user_id);
+        $rest_data = Model_Restaurant::get_data($user_id, $rest_id);
         $rest_data[0]['want_flag'] = Model_Want::get_flag($user_id, $rest_id);
         $rest_data[0]['cheer_num'] = Model_Post::get_rest_cheer_num($rest_id);
 
@@ -137,16 +171,18 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     }
 
     // User Page
-    public function action_user()
+    // public function action_user($target_user_id)
+		public function action_user($target_username)
     {
         $sort_key       = 'user';
         $limit          = 10;
-        $user_id        = session::get('user_id');
-				if (empty($user_id)) {
-					echo 'User_idは存在しません';
-					exit();
-				}
-        $target_user_id = Input::get('target_user_id');
+
+				if (ctype_digit($target_username)) { $this->notid();}
+
+        // $user_id        = session::get('user_id');
+				$user_id = Model_User::get_id($target_username);
+				$target_user_id = $user_id;
+				if (empty($user_id)) { $this->notfounduser(); exit;}
 
         $user_data      = Model_User::get_data($user_id, $target_user_id);
         $post_data      = Model_Post::get_data(
@@ -164,6 +200,8 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     // Notice Page
     public function action_notice()
     {
+				self::create_token();
+
         $user_id = session::get('user_id');
 
         $data    = Model_Notice::get_data($user_id);
@@ -183,6 +221,8 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     // Follow
     public function action_follow()
     {
+				self::create_token();
+
         $user_id        = session::get('user_id');
         $target_user_id = Input::get('target_user_id');
 
