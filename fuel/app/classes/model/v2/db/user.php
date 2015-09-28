@@ -2,6 +2,15 @@
 
 class Model_V2_Db_User extends Model
 {
+    public static function get_user_id($username)
+    {
+        $query = DB::select('user_id')->from('users')
+        ->where('username', "$username");
+
+        $result = $query->execute()->as_array();
+        return $result;
+    }
+
     //次のuser_id取得
     public static function get_user_id_next()
     {
@@ -9,14 +18,30 @@ class Model_V2_Db_User extends Model
         ->order_by('user_id', 'desc')
         ->limit   ('1');
 
-        $result = $query->execute()->as_array();
-
-        $user_id = $result[0]['user_id'];
-        $user_id++;
+        $result     = $query->execute()->as_array();
+        $user_id    = $result[0]['user_id'];
+        $user_id ++;
 
         return $user_id;
     }
 
+    public static function get_password($username)
+    {
+        $query = DB::select('password')->from('users')
+        ->where('username', "$username");
+
+        $result = $query->execute()->as_array();
+        return $result;
+    }
+
+    public static function get_identity_id($username)
+    {
+        $query = DB::select('identity_id')->from('users')
+        ->where('username', "$username");
+
+        $result = $query->execute()->as_array();
+        return $result[0]['identity_id'];
+    }
 
     //ユーザー登録
     public static function set_data($user_data)
@@ -25,9 +50,9 @@ class Model_V2_Db_User extends Model
 
         $query = DB::insert('users')
         ->set(array(
-            'username'    => "$user_data['username']",
+            'username'    => "$user_data[username]",
             'profile_img' => "$profile_img",
-            'identity_id' => "$user_data['identity_id']"
+            'identity_id' => "$user_data[identity_id]"
         ))
         ->execute();
 
@@ -35,6 +60,21 @@ class Model_V2_Db_User extends Model
         return $profile_img;
     }
 
+
+    //ログインユーザー情報取得
+    public static function get_auth($identity_id)
+    {
+        $query = DB::select('user_id', 'username', 'profile_img', 'badge_num')
+        ->from ('users')
+        ->where('identity_id', "$identity_id");
+
+        $user_data = $query->execute()->as_array();
+
+        $user_data[0]['identity_id'] = $identity_id;
+        $user_data[0]['profile_img'] = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
+
+        return $user_data[0];
+    }
 
 
     //==========================================================================//
@@ -99,17 +139,6 @@ class Model_V2_Db_User extends Model
     }
 
 
-    //identity_id取得
-    public static function get_identity_id($user_id)
-    {
-        $query = DB::select('identity_id')->from('users')
-        ->where('user_id', "$user_id");
-
-        $identity_id = $query->execute()->as_array();
-        return $identity_id[0]['identity_id'];
-    }
-
-
     //ユーザー名取得
     public static function get_name($user_id)
     {
@@ -147,54 +176,29 @@ class Model_V2_Db_User extends Model
     }
 
 
-    //ログインユーザー情報取得
-    public static function get_auth($identity_id)
-    {
-        $query = DB::select('user_id', 'username', 'profile_img', 'badge_num')
-        ->from ('users')
-        ->where('identity_id', "$identity_id");
 
-        $user_data = $query->execute()->as_array();
+    // //ユーザーページ情報取得
+    // public static function get_data($user_id, $target_user_id)
+    // {
+    //     $query = DB::select('user_id', 'username', 'profile_img')
+    //     ->from('users')
+    //     ->where('user_id', "$target_user_id");
 
-
-        if (empty($user_data)) {
-            Controller_V1_Mobile_Base::output_none();
-            error_log('登録されてないユーザー:' . "$identity_id");
-
-            //Cognitoから消去
-            Model_Cognito::delete_identity_id($identity_id);
-            exit;
-        }
-
-        $user_data[0]['profile_img'] =
-            Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
-
-        return $user_data[0];
-    }
+    //     $user_data = $query->execute()->as_array();
 
 
-    //ユーザーページ情報取得
-    public static function get_data($user_id, $target_user_id)
-    {
-        $query = DB::select('user_id', 'username', 'profile_img')
-        ->from('users')
-        ->where('user_id', "$target_user_id");
+    //     //---------------------------------------------------------//
+    //     //付加情報格納(follow_num, fllower_num, cheer_num, status_flag)
 
-        $user_data = $query->execute()->as_array();
+    //     $user_data[0]['profile_img']  = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
+    //     $user_data[0]['follow_num']   = Model_Follow::follow_num($target_user_id);
+    //     $user_data[0]['follower_num'] = Model_Follow::follower_num($target_user_id);
+    //     $user_data[0]['cheer_num']    = Model_Post::get_user_cheer_num($target_user_id);
+    //     $user_data[0]['want_num']     = Model_Want::want_num($target_user_id);
+    //     $user_data[0]['follow_flag']  = Model_Follow::get_flag($user_id, $target_user_id);
 
-
-        //---------------------------------------------------------//
-        //付加情報格納(follow_num, fllower_num, cheer_num, status_flag)
-
-        $user_data[0]['profile_img']  = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
-        $user_data[0]['follow_num']   = Model_Follow::follow_num($target_user_id);
-        $user_data[0]['follower_num'] = Model_Follow::follower_num($target_user_id);
-        $user_data[0]['cheer_num']    = Model_Post::get_user_cheer_num($target_user_id);
-        $user_data[0]['want_num']     = Model_Want::want_num($target_user_id);
-        $user_data[0]['follow_flag']  = Model_Follow::get_flag($user_id, $target_user_id);
-
-        return $user_data[0];
-    }
+    //     return $user_data[0];
+    // }
 
 
     //ユーザー登録

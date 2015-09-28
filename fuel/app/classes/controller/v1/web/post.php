@@ -13,9 +13,35 @@ header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 
 class Controller_V1_Web_Post extends Controller_V1_Web_Base
 {
+	// jwt check
+	public static function create_token()
+	{
+		$jwt = @$_SERVER["HTTP_AUTHORIZATION"] ?  @$_SERVER["HTTP_AUTHORIZATION"] : "";
+
+		if(isset($jwt)) {
+			$data      = self::decode($jwt);
+			$user_data = session::get('data');
+			$obj       = json_decode($user_data);
+			if (empty($obj)) {
+				self::unauth();
+			}
+
+			$user_id   = $obj->{'user_id'};
+			session::set('user_id', $user_id);
+			$username  = $obj->{'username'};
+			session::set('username', $username);
+		} else {
+			self::unauth();
+			error_log('UnAuthorized Accsess..');
+			exit;
+		}
+	}
+
 	// Gochi
 	public function action_gochi()
 	{
+		self::create_token();
+		
 		$keyword = 'gochi!';
 		$user_id = session::get('user_id');
 		$post_id = Input::post('post_id');
