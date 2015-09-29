@@ -9,14 +9,7 @@ class Model_User extends Model
         ->where('username', "$username");
 
         $result = $query->execute()->as_array();
-
-        if (!empty($result)) {
-        //username使用済み
-            error_log("$username" . 'は既に使用されています。');
-            $username = '変更に失敗しました';
-        }
-
-        return $username;
+        return $result;
     }
 
 
