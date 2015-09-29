@@ -1,6 +1,4 @@
 <?php
-header('Content-Type: application/json; charset=UTF-8');
-error_reporting(-1);
 /**
  * Get api
  *
@@ -8,52 +6,40 @@ error_reporting(-1);
 
 class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 {
+	private static function get_input()
+    {
+        $user_data = array_merge (Input::get(), Input::post());
+        return $user_data;
+    }
+
+
 	//Timeline Page
 	public function action_timeline()
     {
-    	$sort_key = 'all';
-        $user_id  = session::get('user_id');
+    	//$option is [call, order_id, category_id, value_id, lon, lat]
+        $potion = self::get_input();
 
-        $option = array(
-        	'call'        => Input::get('call', 0),
-        	'order_id'    => Input::get('order_id', 0),
-        	'category_id' => Input::get('category_id', 0),
-        	'value_id'    => Input::get('value_id', 0),
-        	'lon'         => Input::get('lon', 0),
-        	'lat'         => Input::get('lat', 0)
-        );
+		$post_data = Model_V2_Router::timeline($option);
 
-		$data = Model_Post::get_data($user_id, $sort_key, 0, $option);
-	   	self::output_json($data);
+	   	self::output_json($post_data);
 	}
 
 
 	//Followline
 	public function action_followline()
 	{
-		$sort_key = 'users';
-        $user_id  = session::get('user_id');
+		//$option is [call, order_id, category_id, value_id, lon, lat]
+        $potion = self::get_input();
 
-        $option = array(
-        	'call'        => Input::get('call', 0),
-        	'order_id'    => Input::get('order_id', 0),
-        	'category_id' => Input::get('category_id', 0),
-        	'value_id'    => Input::get('value_id', 0),
-        	'lon'         => Input::get('lon', 0),
-        	'lat'         => Input::get('lat', 0)
-        );
+		$post_data = Model_V2_Router::followline($option);
 
-		$follow_user_id = Model_Follow::get_follow_id($user_id);
-		$data = Model_Post::get_data($user_id, $sort_key, $follow_user_id, $option);
-
-	   	self::output_json($data);
+	   	self::output_json($post_data);
 	}
+
 
 	//Comment Page
     public function action_comment()
     {
-    	$sort_key = 'post';
-    	$user_id  = session::get('user_id');
         $post_id  = Input::get('post_id');
 
 		$post_data    = Model_Post::get_data($user_id, $sort_key, $post_id);
