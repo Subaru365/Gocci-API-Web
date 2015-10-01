@@ -8,7 +8,7 @@ class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 {
 	private static function get_input()
     {
-        $user_data = array_merge (Input::get(), Input::post());
+        $user_data = array_merge(Input::get(), Input::post());
         return $user_data;
     }
 
@@ -17,11 +17,11 @@ class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 	public function action_timeline()
     {
     	//$option is [call, order_id, category_id, value_id, lon, lat]
-        $potion = self::get_input();
+        $option		= self::get_input();
 
-		$post_data = Model_V2_Router::timeline($option);
+		$post_data  = Model_V2_Router::timeline($option);
 
-	   	self::output_json($post_data);
+	   	self::output_success($post_data);
 	}
 
 
@@ -29,43 +29,44 @@ class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 	public function action_followline()
 	{
 		//$option is [call, order_id, category_id, value_id, lon, lat]
-        $potion = self::get_input();
+        $potion		= self::get_input();
 
-		$post_data = Model_V2_Router::followline($option);
+		$post_data	= Model_V2_Router::followline($option);
 
-	   	self::output_json($post_data);
+	   	self::output_success($post_data);
 	}
 
 
 	//Comment Page
     public function action_comment()
     {
-        $post_id  = Input::get('post_id');
+    	//$option is [post_id]
+    	$post_id 		= self::get_input();
 
-		$post_data    = Model_Post::get_data($user_id, $sort_key, $post_id);
-	   	$comment_data = Model_Comment::get_data($post_id);
+		$post_data   	= Model_V2_Router::comment_post($post_id);
+	   	$comment_data   = Model_V2_Router::comment($post_id);
 
 	   	$data = array(
-	   		"post" 		=> $post_data[0],
+	   		"post" 		=> $post_data,
 	   		"comments" 	=> $comment_data
 	   	);
 
-	   	self::output_json($data);
+	   	self::output_success($data);
 	}
+
 
 	//Restaurant Page
 	public function action_rest()
     {
-    	$sort_key = 'rest';
-    	$user_id  = session::get('user_id');
-    	$rest_id  = Input::get('rest_id');
+    	//$option is [rest_id]
+    	$rest_id	= self::get_input();
 
-		$rest_data = Model_Restaurant::get_data($user_id, $rest_id);
-		$post_data = Model_Post::get_data($user_id, $sort_key, $rest_id);
+		$rest_data 	= Model_V2_Router::rest($rest_id);
+		$post_data 	= Model_V2_Router::rest_post($rest_id);
 
 	   	$data = array(
-	   		"restaurants" => $rest_data,
-	   		"posts" => $post_data
+	   		"restaurant"	=> $rest_data,
+	   		"posts" 		=> $post_data
 	   	);
 
 	   	self::output_json($data);
@@ -75,16 +76,15 @@ class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 	//User Page
 	public function action_user()
 	{
-		$sort_key       = 'user';
-		$user_id 		= session::get('user_id');
-		$target_user_id = Input::get('target_user_id');
+		//$option is [target_user_id]
+    	$option		= self::get_input();
 
-		$user_data = Model_User::get_data($user_id, $target_user_id);
-        $post_data = Model_Post::get_data($user_id, $sort_key, $target_user_id, 0, 99);
+		$user_data  = Model_V2_Router::user($target_user_id);
+        $post_data  = Model_V2_Router::user_post($option);
 
 	   	$data = array(
-	   		"header" => $user_data,
-	   		"posts"  => $post_data
+	   		"user"	=> $user_data,
+	   		"posts" => $post_data
 	   	);
 
 	   	self::output_json($data);
@@ -94,11 +94,9 @@ class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 	//Notice Page
 	public function action_notice()
     {
-    	$user_id = session::get('user_id');
+    	$data = Model_Notice::get_data();
 
-    	$data = Model_Notice::get_data($user_id);
-
-	   	Model_User::reset_badge($user_id);
+	   	Model_User::reset_badge();
 	   	self::output_json($data);
 	}
 
@@ -106,10 +104,10 @@ class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 	//Near
 	public function action_near()
 	{
-		$lon = Input::get('lon');
-		$lat = Input::get('lat');
+		$lon 	= Input::get('lon');
+		$lat 	= Input::get('lat');
 
-		$data = Model_Restaurant::get_near($lon, $lat);
+		$data 	= Model_Restaurant::get_near($lon, $lat);
 
 	   	self::output_json($data);
 	}
@@ -118,10 +116,9 @@ class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 	//Follow
 	public function action_follow()
 	{
-		$user_id = session::get('user_id');
 		$target_user_id = Input::get('target_user_id');
 
-		$data = Model_Follow::get_follow($user_id, $target_user_id);
+		$data = Model_Follow::get_follow($target_user_id);
 
 	   	self::output_json($data);
 	}
@@ -130,10 +127,9 @@ class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 	//Follower List
 	public function action_follower()
 	{
-		$user_id = session::get('user_id');
 		$target_user_id = Input::get('target_user_id');
 
-		$data = Model_Follow::get_follower($user_id, $target_user_id);
+		$data = Model_Follow::get_follower($target_user_id);
 
 	   	self::output_json($data);
 	}
@@ -164,7 +160,6 @@ class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 	//応援ユーザーリスト
 	public function action_rest_cheer()
 	{
-		$user_id = Input::get('user_id');
 		$rest_id = Input::get('rest_id');
 
 		$data = Model_Post::get_rest_cheer($rest_id);
@@ -172,9 +167,7 @@ class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 		$num = count($data);
 
 		for ($i=0; $i < $num; $i++) {
-			$target_user_id = $data[$i]['user_id'];
-			$follow_flag = Model_Follow::get_flag($user_id, $target_user_id);
-			$data[$i]['follow_flag'] = $follow_flag;
+			$data[$i]['follow_flag'] = Model_Follow::get_flag($data[$i]['user_id']);
 		}
 
 	   	self::output_json($data);
@@ -183,7 +176,6 @@ class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 
 	public function action_user_search()
 	{
-		$user_id = session::get('user_id');
 		$target_user_name = Input::get('username');
 
 		$target_user_id = Model_User::get_id($target_user_name);

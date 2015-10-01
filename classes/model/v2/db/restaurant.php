@@ -1,6 +1,22 @@
 <?php
+
 class Model_Restaurant extends Model
 {
+	public static function get_data($rest_id)
+	{
+		$query = DB::select(
+			'rest_id', 'restname', 'locality', 'lat',
+			'lon', 'tell', 'homepage', 'rest_category'
+		)
+		->from('restaurants')
+		->where('rest_id', "$rest_id");
+
+		$rest_data = $query->execute()->as_array();
+
+		return $rest_data[0];
+	}
+
+
 	public static function get_near($lon, $lat)
 	{
 		$query = DB::select('rest_id', 'restname')->from('restaurants')
@@ -12,24 +28,6 @@ class Model_Restaurant extends Model
 	}
 
 
-	public static function get_data($user_id, $rest_id)
-	{
-		$query = DB::select(
-			'rest_id', 'restname', 'locality', 'lat',
-			'lon', 'tell', 'homepage', 'rest_category'
-		)
-		->from('restaurants')
-		->where('rest_id', "$rest_id");
-
-		$rest_data = $query->execute()->as_array();
-
-		$rest_data[0]['want_flag'] = Model_Want::get_flag($user_id, $rest_id);
-		$rest_data[0]['cheer_num'] = Model_Post::get_rest_cheer_num($rest_id);
-
-		return $rest_data[0];
-	}
-
-
 	//店舗追加
 	public static function post_add($rest_name, $lat, $lon)
 	{
@@ -38,8 +36,7 @@ class Model_Restaurant extends Model
 			'restname' => "$rest_name",
 			'lat' 	   => "$lat",
 			'lon' 	   => "$lon",
-			'lon_lat'  => DB::expr('GeomFromText(' . "'" .
-				'POINT(' . "$lon" . ' ' . "$lat" .')' . "'" . ')')
+			'lon_lat'  => DB::expr("GeomFromText('POINT(${lon} ${lat})')")
 		))
 		->execute();
 

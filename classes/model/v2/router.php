@@ -5,6 +5,9 @@
 */
 class Model_V2_Router extends Model
 {
+	//===============================================================//
+	//Auth
+
 	public static function create_user($user_data)
 	{
 		$user_data['user_id'] = Model_V2_Db_User::get_user_id_next();
@@ -38,36 +41,73 @@ class Model_V2_Router extends Model
 	}
 
 
-	//---------------------------------------------------------------------------------//
+	//=================================================================//
+	//Post
 
-
-	public static function get_post_data($option)
+	public static function timeline($option)
 	{
 		$query 		= Model_V2_Db_Post::get_data();
 
-		//$sort_keyによる絞り込み
-
-		}elseif ($sort_key == 'post') {
-			$query->where('post_id', $sort_id);
-
-		}elseif ($sort_key == 'rest') {
-			$query->where('post_rest_id', $sort_id);
-
-		}elseif ($sort_key == 'user') {
-			$query->where('user_id', $sort_id);
-
-		}elseif ($sort_key == 'users') {
-			$query->where('user_id', 'in', $sort_id);
-
-		}else{
-			error_log("Model_Post:${sort_key}が不正です");
-			exit;
-		}
-
 		$post_data  = Model_V2_Db_Post::get_sort($query, $option);
 
+		$post_data  = self::add_post_data($post_data);
+		return $post_data;
+	}
 
 
+	public static function followline($option)
+	{
+		$query 		= Model_V2_Db_Post::get_data();
+
+		$follow_user_id = Model_Follow::get_follow_id();
+		$query->where('user_id', 'in', $follow_user_id);
+
+		$post_data  = Model_V2_Db_Post::get_sort($query, $option);
+		$post_data  = self::add_post_data($post_data);
+
+		return $post_data;
+	}
+
+
+	public static function comment_post($post_id)
+	{
+		$query 		= Model_V2_Db_Post::get_data();
+		$query      ->where('post_id', $post_id);
+
+		$post_data  = $query->execute()->as_array();
+		$post_data  = self::add_post_data($post_data);
+
+		return $post_data[0];
+	}
+
+
+	public static function rest_post($rest_id)
+	{
+		$query 		= Model_V2_Db_Post::get_data();
+		$query      ->where('rest_id', $rest_id);
+
+		$post_data  = $query->execute()->as_array();
+		$post_data  = self::add_post_data($post_data);
+
+		return $post_data;
+	}
+
+
+	public static function user_post($option)
+	{
+		$query 		= Model_V2_Db_Post::get_data();
+		$query      ->where('user_id', $sort_id);
+
+		$post_data  = $query->execute()->as_array();
+		$post_data  = self::add_post_data($post_data);
+
+		return $post_data;
+	}
+
+	//-----------------------------------------------------------------//
+
+	private static function add_post_data($post_data)
+	{
 		$post_num  = count($post_data);
 
 		for ($i=0; $i < $post_num; $i++) {
@@ -90,28 +130,48 @@ class Model_V2_Router extends Model
 	}
 
 
-	private static function add_post_data($post_data)
+	//=================================================================//
+	//Other
+
+	public static function comment($post_id)
 	{
-		//付加情報格納(like_num, comment_num, want_flag, follow_flag, like_flag)
+		$memo_data		= Model_V2_Db_Post::get_memo($post_id);
+		$comment_data   = Model_V2_Db_Comment::get_data($post_id);
 
-		$post_num  = count($post_data);
+		//投稿者のmemoを$comment_dataに格納
+		array_unshift($comment_data, $post_memo);
 
-		for ($i=0; $i < $post_num; $i++) {
+		$comment_num  = count($comment_data);
 
-			$post_data[$i]['mp4_movie']		= Model_V2_Transcode::decode_mp4_movie($post_data[$i]['movie']);
-			$post_data[$i]['hls_movie']     = Model_V2_Transcode::decode_hls_movie($post_data[$i]['movie']);
-			$post_data[$i]['thumbnail']     = Model_V2_Transcode::decode_thumbnail($post_data[$i]['thumbnail']);
-			$post_data[$i]['profile_img']   = Model_V2_Transcode::decode_profile_img($post_data[$i]['profile_img']);
-
-	   		$post_data[$i]['gochi_num']		= Model_V2_Db_Gochi::get_num($post_data[$i]['post_id']);
-	   		$post_data[$i]['comment_num']   = Model_V2_Db_Comment::get_num($post_data[$i]['post_id']);
-	    	$post_data[$i]['want_flag']	    = Model_V2_Db_Want::get_flag($post_data[$i]['rest_id']);
-	    	$post_data[$i]['follow_flag']   = Model_V2_Db_Follow::get_flag($post_data[$i]['user_id'];);
-	    	$post_data[$i]['gochi_flag']    = Model_V2_Db_Gochi::get_flag($post_data[$i]['post_id']);
-			$post_data[$i]['post_date']     = Model_V2_Date::get_data($post_data[$i]['post_date']);
+		for ($i=1; $i < $comment_num; $i++) {
+			$comment_data[$i]['re_user']	= Model_Re::get_data($comment_data[$i]['comment_id']);
 		}
 
-		return $post_data;
+		return $comment_data;
 	}
 
+
+	public static function rest($rest_id)
+	{
+		$rest_data = Model_V2_Db_Restaurant::get_data($rest_id);
+
+		$rest_data['want_flag']		= Model_Want::get_flag($rest_id);
+		$rest_data['cheer_num']     = Model_Post::get_rest_cheer_num($rest_id);
+
+		return $rest_data;
+	}
+
+
+	public static function user($target_user_id)
+	{
+		$user_data	= Model_V2_Db_User::get_data($target_user_id);
+
+        $user_data['follow_num']	= Model_Follow::follow_num($target_user_id);
+        $user_data['follower_num']  = Model_Follow::follower_num($target_user_id);
+        $user_data['cheer_num']     = Model_Post::get_user_cheer_num($target_user_id);
+        $user_data['want_num']      = Model_Want::want_num($target_user_id);
+        $user_data['follow_flag']   = Model_Follow::get_flag($target_user_id);
+
+        return $user_data;
+	}
 }
