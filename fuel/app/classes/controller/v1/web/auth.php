@@ -9,7 +9,7 @@ error_reporting(-1);
  * Auth api
  *
  */
-class Controller_V1_Web_Auth extends Controller
+class Controller_V2_Web_Auth extends Controller
 {
     // ログイン
     public function action_login()
@@ -74,20 +74,11 @@ class Controller_V1_Web_Auth extends Controller
   		$password  = Input::post('password');
   		$hash_pass = password_hash($password, PASSWORD_BCRYPT);
 
-  		// os
-  		$os = Input::post('os');
-
-  		// model [web]
-  		$model = Input::post('model');
-
-  		// register_id
-  		$register_id = Input::post('register_id');
-
   		try {
   			// JWT認証
-  			// $token =
-
-  			// DBインサート
+        // usernameとpasswordの場合のtokenを作り、
+        // pass_loginの際にこの2つの組み合わせと一致するUser情報があればログインする。
+  			$jwt = self::encode($username, $hash_pass);
 
   			// sucess
 

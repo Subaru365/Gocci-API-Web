@@ -77,6 +77,21 @@ class Model_V2_Db_User extends Model
     }
 
 
+    //ユーザーページ情報取得
+    public static function get_data($user_id)
+    {
+        $query = DB::select('user_id', 'username', 'profile_img')
+        ->from('users')
+        ->where('user_id', "$user_id");
+
+        $user_data = $query->execute()->as_array();
+
+        $user_data[0]['profile_img'] = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
+
+        return $user_data[0];
+    }
+
+
     //==========================================================================//
     //OLD
 

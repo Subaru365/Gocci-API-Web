@@ -2,14 +2,11 @@
 /**
  * Auth api
  *
- * // $time_start = microtime(true);
- * // debug
- * // $timelimit = microtime(true) - $time_start;
- * // echo '格納完了：' . $timelimit . ' seconds\r\n';
+ * version 2.0
  *
  */
 
-class Controller_V2_Mobile_Auth extends Controller
+class Controller_V2_Web_Auth extends Controller
 {
     private static function get_input()
     {
@@ -30,10 +27,11 @@ class Controller_V2_Mobile_Auth extends Controller
         Controller_V2_Mobile_Base::output_success($user_data);
     }
 
-
+    // 通常login
+    // ver1でloginだったのが、ver2ではsns_loginへ変更。
     public static function action_login()
     {
-        //Input $user_data is [identity_id]
+        // Input $user_data is [identity_id]
         $user_data = self::get_input();
 
         Model_V2_Validation::check_login($user_data);
@@ -43,7 +41,7 @@ class Controller_V2_Mobile_Auth extends Controller
         Controller_V2_Mobile_Base::output_success($user_data);
     }
 
-
+    // sns login
     public static function action_sns_login()
     {
         //Input $user_data is [identity_id, os, model, register_id]
@@ -56,7 +54,7 @@ class Controller_V2_Mobile_Auth extends Controller
         Controller_V2_Mobile_Base::output_success($user_data);
     }
 
-
+    /*
     public static function action_pass_login()
     {
         //Input $user_data is [username, pass, os, model, register_id]
@@ -70,6 +68,36 @@ class Controller_V2_Mobile_Auth extends Controller
 
         Controller_V2_Mobile_Base::output_success($user_data);
     }
+    */
+
+    // passwordログイン
+  	public function action_pass_login()
+  	{
+  		// username
+  		$username  = Input::post('username');
+
+  		// password
+  		$password  = Input::post('password');
+      // passwordが空ではないか、文字数制限は出来ているか、その他チェックする
+
+      // validation okであれば、hash化する。
+  		$hash_pass = password_hash($password, PASSWORD_BCRYPT);
+
+  		try {
+  			// JWT認証
+        // usernameとpasswordの場合のtokenを作り、
+        // pass_loginの際にこの2つの組み合わせと一致するUser情報があればログインする。
+  			$jwt = self::encode($username, $hash_pass);
+
+  			// sucess
+
+  		} catch (Exception $e) {
+  			// JWT Exception
+
+  			// Not access
+
+  		}
+  	}
 
 
     public static function action_device_refresh()
@@ -83,5 +111,36 @@ class Controller_V2_Mobile_Auth extends Controller
         // $new_endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
         // Model_Device::update_data($user_id, $os, $model, $register_id, $new_endpoint_arn);
 
+    }
+
+    // decode
+    public static function decode($jwt)
+    {
+        $key = 'i_am_a_secret_key';
+        try {
+            $decoded = JWT::decode($jwt, $key, array('HS256'));
+            $decoded = session::set('data', $decoded);
+            // error_log('ログイン成功');
+
+        } catch (Exception $e){
+            $decoded = "";
+        }
+        return $decoded;
+    }
+
+    // encode
+    public static function encode($user_id, $username)
+    {
+        $key   = 'i_am_a_secret_key';
+        $json  = array('user_id' => $user_id,'username' => $username);
+        $token = json_encode($json);
+
+        if ($token === NULL) {
+            die("[Error]\n");
+        }
+
+        $jwt = JWT::encode($token, $key);
+
+        return $jwt;
     }
 }
