@@ -9,7 +9,7 @@ error_reporting(-1);
  * Auth api
  *
  */
-class Controller_V2_Web_Auth extends Controller
+class Controller_V1_Web_Auth extends Controller
 {
     // ログイン
     public function action_login()
@@ -21,12 +21,11 @@ class Controller_V2_Web_Auth extends Controller
         try
         {
             if (empty($provider) && empty($token) || empty($provider) or empty($token) ) {
-              print 'error:403';
-              exit;
+                self::error_json();
             }
             $identity_id = Model_Cognito::get_identity_id($provider, $token);
-
             $user_data   = Model_User::get_auth($identity_id);
+
             $user_id     = $user_data['user_id'];
             $username    = $user_data['username'];
             $profile_img = $user_data['profile_img'];
@@ -65,35 +64,36 @@ class Controller_V2_Web_Auth extends Controller
     }
 
     // passwordログイン
-  	public function action_pass_login()
-  	{
-  		// username
-  		$username  = Input::post('username');
+    public function action_pass_login()
+    {
+        // username
+  	$username  = Input::post('username');
 
-  		// password
-  		$password  = Input::post('password');
-  		$hash_pass = password_hash($password, PASSWORD_BCRYPT);
+  	// password
+  	$password  = Input::post('password');
+  	$hash_pass = password_hash($password, PASSWORD_BCRYPT);
 
-  		try {
-  			// JWT認証
-        // usernameとpasswordの場合のtokenを作り、
-        // pass_loginの際にこの2つの組み合わせと一致するUser情報があればログインする。
-  			$jwt = self::encode($username, $hash_pass);
+  	try {
+  	    // JWT認証
+            // usernameとpasswordの場合のtokenを作り、
+            // pass_loginの際にこの2つの組み合わせと一致するUser情報があればログインする。
+  	    $jwt = self::encode($username, $hash_pass);
+  	    
+ 	    // sucess
 
-  			// sucess
+  	} catch (Exception $e) {
 
-  		} catch (Exception $e) {
-  			// JWT Exception
+  	    // JWT Exception
 
-  			// Not access
+  	    // Not access
 
-  		}
   	}
-
+   }
 
     // decode
     public static function decode()
     {
+	// ログイン時
         $key = 'i_am_a_secret_key';
         try {
             $decoded = JWT::decode($jwt, $key, array('HS256'));
@@ -112,6 +112,7 @@ class Controller_V2_Web_Auth extends Controller
     // encode
     public static function encode($user_id, $username)
     {
+    	// token create
         $key   = 'i_am_a_secret_key';
         $json  = array('user_id' => $user_id,'username' => $username);
         $token = json_encode($json);
@@ -131,7 +132,6 @@ class Controller_V2_Web_Auth extends Controller
             $data,
             JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
         );
-
         echo "$json";
     }
 
@@ -147,7 +147,10 @@ class Controller_V2_Web_Auth extends Controller
     )
     {
         $data = [
+	    'api_version' => 3,
             'code'        => 200,
+	    'api_message' => "success",
+	    'api_data'    => $obj = new stdClass(),
             'message'     => "$keyword" . 'しました。',
             'user_id'     => "$user_id",
             'username'    => "$username",
@@ -181,5 +184,23 @@ class Controller_V2_Web_Auth extends Controller
         ];
 
         Controller_V1_Mobile_Base::output_json($data);
+    }
+ 
+    private function error_json()
+    {
+	$data = [
+		"api_version" => 3,
+		"api_code" => 1,
+		"api_message" => "Not Authorized.",
+		"api_data" => $obj = new StdClass()
+	];
+
+	$json = json_encode(
+            $data,
+            JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+        );
+
+        echo "$json";
+	exit;
     }
 }

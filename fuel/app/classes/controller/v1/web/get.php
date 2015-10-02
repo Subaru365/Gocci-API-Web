@@ -10,9 +10,9 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
 	public function create_token()
 	{
 		$jwt = @$_SERVER["HTTP_AUTHORIZATION"] ?  @$_SERVER["HTTP_AUTHORIZATION"] : "";
-
 		if(isset($jwt)) {
 			$data      = self::decode($jwt);
+			// print_r($data);
 			$user_data = session::get('data');
 			$obj       = json_decode($user_data);
 			if (empty($obj)) {
@@ -31,11 +31,10 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
 	}
 
 	public function action_timeline()
-  {
-			self::create_token();
-
-    	$user_id  = session::get('user_id');
-    	$username = session::get('username');
+  	{
+	    self::create_token();
+    	    $user_id  = session::get('user_id');
+    	    $username = session::get('username');
 
 	    $sort_key = 'all';
 	    $limit    = 20;

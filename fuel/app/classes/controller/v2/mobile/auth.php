@@ -21,8 +21,7 @@ class Controller_V2_Mobile_Auth extends Controller
     public static function action_signup()
     {
         //Input $user_data is [username, os, model, register_id]
-        $user_data = self::get_input();
-
+        $user_data = Input::get();
         Model_V2_Validation::check_signup($user_data);
 
         $user_data = Model_v2_Router::create_user($user_data);
@@ -34,8 +33,7 @@ class Controller_V2_Mobile_Auth extends Controller
     public static function action_login()
     {
         //Input $user_data is [identity_id]
-        $user_data = self::get_input();
-
+        $user_data = Input::get();
         Model_V2_Validation::check_login($user_data);
 
         $user_data = Model_V2_Router::login($user_data['identity_id']);
@@ -47,8 +45,7 @@ class Controller_V2_Mobile_Auth extends Controller
     public static function action_sns_login()
     {
         //Input $user_data is [identity_id, os, model, register_id]
-        $user_data = self::get_input();
-
+        $user_data = array_merge (Input::get(), Input::post());
         Model_V2_Validation::check_sns_login($user_data);
 
         $user_data = Model_V2_Router::login($user_data['identity_id']);
@@ -60,13 +57,10 @@ class Controller_V2_Mobile_Auth extends Controller
     public static function action_pass_login()
     {
         //Input $user_data is [username, pass, os, model, register_id]
-        $user_data = self::get_input();
-
+        $user_data = array_merge (Input::get(), Input::post());
         Model_V2_Validation::check_pass_login($user_data);
 
-        $user_data['identity_id'] = Model_V2_Db_User::get_identity_id($user_data['username']);
-
-        $user_data = Model_V2_Router::login($user_data['identity_id']);
+        $user_data = Model_V2_Router::pass_login($user_data['identity_id']);
 
         Controller_V2_Mobile_Base::output_success($user_data);
     }

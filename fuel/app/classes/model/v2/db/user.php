@@ -2,10 +2,19 @@
 
 class Model_V2_Db_User extends Model
 {
-    public static function get_user_id($username)
+    public static function check_username($username)
     {
         $query = DB::select('user_id')->from('users')
         ->where('username', "$username");
+
+        $result = $query->execute()->as_array();
+        return $result;
+    }
+
+    public static function check_identity_id($identity_id)
+    {
+        $query = DB::select('user_id')->from('users')
+        ->where('identity_id', "$identity_id");
 
         $result = $query->execute()->as_array();
         return $result;
@@ -57,6 +66,7 @@ class Model_V2_Db_User extends Model
         ->execute();
 
         $profile_img = Model_V2_Transcode::decode_profile_img($profile_img);
+
         return $profile_img;
     }
 
@@ -64,13 +74,12 @@ class Model_V2_Db_User extends Model
     //ログインユーザー情報取得
     public static function get_auth($identity_id)
     {
-        $query = DB::select('user_id', 'username', 'profile_img', 'badge_num')
+        $query = DB::select('user_id', 'username', 'identity_id', 'profile_img', 'badge_num')
         ->from ('users')
         ->where('identity_id', "$identity_id");
 
         $user_data = $query->execute()->as_array();
 
-        $user_data[0]['identity_id'] = $identity_id;
         $user_data[0]['profile_img'] = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
 
         return $user_data[0];
@@ -189,31 +198,6 @@ class Model_V2_Db_User extends Model
         $user_id = $query->execute()->as_array();
         return $user_id[0]['badge_num'];
     }
-
-
-
-    // //ユーザーページ情報取得
-    // public static function get_data($user_id, $target_user_id)
-    // {
-    //     $query = DB::select('user_id', 'username', 'profile_img')
-    //     ->from('users')
-    //     ->where('user_id', "$target_user_id");
-
-    //     $user_data = $query->execute()->as_array();
-
-
-    //     //---------------------------------------------------------//
-    //     //付加情報格納(follow_num, fllower_num, cheer_num, status_flag)
-
-    //     $user_data[0]['profile_img']  = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
-    //     $user_data[0]['follow_num']   = Model_Follow::follow_num($target_user_id);
-    //     $user_data[0]['follower_num'] = Model_Follow::follower_num($target_user_id);
-    //     $user_data[0]['cheer_num']    = Model_Post::get_user_cheer_num($target_user_id);
-    //     $user_data[0]['want_num']     = Model_Want::want_num($target_user_id);
-    //     $user_data[0]['follow_flag']  = Model_Follow::get_flag($user_id, $target_user_id);
-
-    //     return $user_data[0];
-    // }
 
 
     //ユーザー登録

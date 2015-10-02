@@ -34,9 +34,9 @@ class Model_Sns extends Model
 		]);
 
 		$result = $client->createPlatformEndpoint([
-    		'CustomUserData' => "user_id / $user_data['user_id']",
-    		'PlatformApplicationArn' => "$android_arn",
-    		'Token' => "$user_data['register_id']",
+    		'CustomUserData' 			=> "user_id / $user_data[user_id]",
+    		'PlatformApplicationArn'    => "$android_arn",
+    		'Token'                     => "$user_data[register_id]",
     	]);
 
     	return $result['EndpointArn'];
@@ -53,9 +53,9 @@ class Model_Sns extends Model
 		]);
 
 		$result = $client->createPlatformEndpoint([
-    		'CustomUserData' => "user_id / $user_data['user_id']",
-    		'PlatformApplicationArn' => "$iOS_arn",
-    		'Token' => "$user_data['register_id']",
+    		'CustomUserData' 			=> "user_id / $user_data[user_id]",
+    		'PlatformApplicationArn'    => "$iOS_arn",
+    		'Token'                     => "$user_data[register_id]",
     	]);
 
     	return $result['EndpointArn'];
@@ -80,21 +80,6 @@ class Model_Sns extends Model
         ]);
 	}
 
-
-	public static function post_publish($user_id, $message)
-	{
-		$target_arn = Model_Device::get_arn($user_id);
-
-		$client = new SnsClient([
-			'region'  => 'ap-northeast-1',
-    		'version' => '2010-03-31'
-		]);
-
-		$result = $client->publish([
-    		'Message'   => "$message",
-    		'TargetArn' => "$target_arn",
-		]);
-	}
 
 
 	public static function delete_endpoint($endpoint_arn)

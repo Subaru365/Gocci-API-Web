@@ -37,6 +37,64 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 		}
 	}
 
+	// SNS連携
+	public function action_sns()
+        {
+		$keyword        = 'SNS連携';
+		// $user_id = 
+		// $provider = Input::post('provider');
+		// $token   = Input::post('token');
+		// $profile_img = Input::post('profile_img');
+
+	        try {
+		    exit;
+		    if ($profile_img !== 'none') {
+		    	$profile_img = Model_S3::input($user_id, $profile_img);
+		    	$profile_img = Modle_User::update_profile_img($user_id, $profile_img);
+		    }
+		    $identity_id = Model_User::get_identity_id($user_id);
+		    Model_User::update_sns_flag($user_id, $provider);
+		    Model_Cognito::post_sns($user_id, $identity_id, $provider, $token);
+
+		    $data = [
+			"api_version" => 3,
+			"api_code" => 0,
+			"api_message" => $keyword . "しました",
+			"api_data" => [
+			    "profile_img" => $profile_img
+			]
+		    ];
+		    self::output_json($data);
+
+		} catch (\Database_Exception $e) {
+		    self::failed($keyword);
+		    error_log($e);
+		}
+
+        }
+
+	// sns解除
+	public function action_unlink()
+        {
+		exit;
+		$keyword = 'SNS連携解除';
+		$user_id = Input::post('provider');
+		$provider = Input::post('provider');
+		$token  = Input::post('token');
+
+		try {
+			$identity_id = Model_User::get_indentity_id($user_id);
+			Model_User::deleet_sns_flag($user_id, $provider);
+			Model_Cognito::delete_sns($user_id, $identity_id, $provider, $token);
+
+			self::success($keyword);
+
+		} catch (\Dataase_Exception $e) {
+			self::failed($keyword);
+			error_log($e);
+		}
+        }
+
 	// Gochi
 	public function action_gochi()
 	{

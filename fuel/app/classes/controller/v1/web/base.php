@@ -1,6 +1,11 @@
 <?php
+header('Content-Type: application/json; charset=UTF-8');
+header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
+header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
+error_reporting(-1);
+
 /**
- *
+ * base
  *
  */
 
@@ -24,8 +29,14 @@ class Controller_V1_Web_Base extends Controller
     // encode
     public static function encode($user_id, $username)
     {
+	// $now = time();
         $key   = 'i_am_a_secret_key';
-        $json  = array('user_id' => $user_id,'username' => $username);
+        $json  = [
+		'user_id' => $user_id,
+		'username'=> $username,
+		'iat'     => '',
+		'exp'     => 60
+	];
         $token = json_encode($json);
 
         if ($token === NULL) {
@@ -40,10 +51,12 @@ class Controller_V1_Web_Base extends Controller
 	// Not JWT
 	public static function unauth()
 	{
-		$status = array(
-			'code'   => '401',
-			'status' => 'UnAuthorized'
-		);
+		$status = [
+ 		   "api_version" => 3,
+    		   "api_code" => 1,
+    	           "api_message" => "UnAuthorized",
+	           "api_data:" => $obj = new stdClass()
+		];
 
 		$status = json_encode(
         	$status,

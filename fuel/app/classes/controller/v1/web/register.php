@@ -7,34 +7,34 @@ class Controller_V1_Web_Register extends Controller
 {
 	public function action_sign_up()
 	{
-		// username/password アカウント新規登録
-		echo "register test";
-
+		// username/password アカウント新規登
 		$username = Input::post('username');
-
 		$password = Input::post('password');
-
-		$os = Input::post('os');
-
-		$model = Input::post('model');
-
-		$register_id = Input::post('register_id');
-		// $identity_id = "";
-		// $badge_num = "";
-		// $facebook_flag = "";
-		// $twitter_flag = "";
-		// $login_flag = "";
-
+		$os = "Web";
+		// 端末ID
+		// $register_id = Input::post('register_id');
+		
+		// コグニートID
+		$identity_id = 0;
+		
 		// validation
-
+		if (empty($username) && empty($password)) {
+		    
+		    exit;
+		}
+		
 		// 登録処理
 		try
 		{
+		        // users table insert
 			$pass = password_hash($pass, PASSWORD_BCRYPT);
 			// Model_User::create_user(
 			// $username, ,$profile_img, $pass
 			// );
 			// self::success($keyword);
+
+			// devices table insert
+
 		}
 		catch(\Database_Exception $e)
 		{
