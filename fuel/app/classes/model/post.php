@@ -10,7 +10,8 @@ class Model_Post extends Model
 			'post_id', 'movie', 'thumbnail', 'category', 'tag', 'value',
 			'memo', 'post_date', 'cheer_flag',
 			'user_id', 'username', 'profile_img', 'rest_id', 'restname',
-			DB::expr('X(lon_lat), Y(lon_lat)')
+			DB::expr('X(lon_lat), Y(lon_lat)'),
+			DB::expr("GLength(GeomFromText(CONCAT('LineString(${option['lon']} ${option['lat']},', X(lon_lat),' ', Y(lon_lat),')'))) as distance")
 		)
 		->from('posts')
 
@@ -135,6 +136,9 @@ class Model_Post extends Model
 			$post_data[$i]['thumbnail']   = Model_Transcode::decode_thumbnail($post_data[$i]['thumbnail']);
 			$post_data[$i]['profile_img'] = Model_Transcode::decode_profile_img($post_data[$i]['profile_img']);
 			$post_data[$i]['share'] = 'mp4/' . "$movie" . '.mp4';
+
+			$distance = $post_data[$i]['distance'];
+			$post_data[$i]['distance'] = $distance * 112120;
 
 
 			$post_id	  = $post_data[$i]['post_id'];
