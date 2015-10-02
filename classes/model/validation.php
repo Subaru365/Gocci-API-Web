@@ -4,16 +4,18 @@
 *
 */
 
-class Model_V2_Validation extends Model
+class Model_Validation extends Model
 {
-	public static function check_signup($user_data)
+	public static function check_signup($username, $password)
 	{
 		$val = Validation::forge();
 
 		$val = self::format_username($val);
-		$val = self::format_register_id($val);
+		$val = self::format_password($val);
 
-		self::run($val, $user_data);
+		//$val = self::format_register_id($val);
+
+		self::run($val, $username, $password);
 		self::overlap_username($user_data['username']);
 		self::overlap_register_id($user_data['register_id']);
 	}
@@ -83,7 +85,7 @@ class Model_V2_Validation extends Model
 
 	private static function format_username($val)
 	{
-		$val->add('username', 'GET username')
+		$val->add('username', 'POST username')
 		    ->add_rule('required')
 		    ->add_rule('max_length', 15);
 
@@ -92,7 +94,7 @@ class Model_V2_Validation extends Model
 
 	private static function format_password($val)
 	{
-		$val->add('pass', 'GET password')
+		$val->add('pass', 'POST password')
 		    ->add_rule('required')
 		    ->add_rule('min_length', 5)
 		    ->add_rule('max_length', 20);
@@ -112,8 +114,8 @@ class Model_V2_Validation extends Model
 	private static function format_register_id($val)
 	{
 		$val->add('register_id', 'GET register_id')
-		    ->add_rule('required');
-		    //->add_rule('match_pattern', '/^[a-zA-Z0-9.-_]{40,2200}$/');
+		    ->add_rule('required')
+		    ->add_rule('match_pattern', '/^[a-zA-Z0-9.-_]{400,2200}$/');
 
 		return $val;
 	}
@@ -124,7 +126,7 @@ class Model_V2_Validation extends Model
 	//ユーザー名重複チェック
     private static function overlap_username($username)
     {
-        $result = Model_V2_Db_User::check_username($username);
+        $result = Model_V2_Db_User::get_user_id($username);
 
         if (!empty($result)) {
         	//登録済み
@@ -148,7 +150,7 @@ class Model_V2_Validation extends Model
     //identity_id未登録チェック
     private static function verify_identity_id($identity_id)
     {
-    	$result = Model_V2_Db_User::check_identity_id($identity_id);
+    	$result = Model_V2_Db_User::get_user_id($identity_id);
 
     	if (empty($result)) {
     		//登録なし

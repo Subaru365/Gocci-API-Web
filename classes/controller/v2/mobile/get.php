@@ -1,7 +1,7 @@
 <?php
 /**
  * Get api
- *
+ * v2.0
  */
 
 class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
@@ -94,31 +94,30 @@ class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 	//Notice Page
 	public function action_notice()
     {
-    	$data = Model_Notice::get_data();
+    	$notice_data = Model_V2_Router::notice();
 
-	   	Model_User::reset_badge();
-	   	self::output_json($data);
+	   	self::output_json($notice_data);
 	}
 
 
-	//Near
-	public function action_near()
-	{
-		$lon 	= Input::get('lon');
-		$lat 	= Input::get('lat');
+	// //Near
+	// public function action_near()
+	// {
+	// 	$lon 	= Input::get('lon');
+	// 	$lat 	= Input::get('lat');
 
-		$data 	= Model_Restaurant::get_near($lon, $lat);
+	// 	$data 	= Model_Restaurant::get_near($lon, $lat);
 
-	   	self::output_json($data);
-	}
+	//    	self::output_json($data);
+	// }
 
 
 	//Follow
 	public function action_follow()
 	{
-		$target_user_id = Input::get('target_user_id');
+		$target_user_id	= Input::get('target_user_id');
 
-		$data = Model_Follow::get_follow($target_user_id);
+		$follow_data	= Model_V2_Router::follow_list($target_user_id);
 
 	   	self::output_json($data);
 	}
@@ -129,7 +128,7 @@ class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 	{
 		$target_user_id = Input::get('target_user_id');
 
-		$data = Model_Follow::get_follower($target_user_id);
+		$follow_data	= Model_V2_Router::follower_list($target_user_id);
 
 	   	self::output_json($data);
 	}
@@ -140,14 +139,14 @@ class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 	{
 		$target_user_id = Input::get('target_user_id');
 
-		$data = Model_Want::get_want($target_user_id);
+		$want_data		= Model_V2_Router::want_list($target_user_id);
 
 	   	self::output_json($data);
 	}
 
 
 	//応援店舗リスト
-	public function action_user_cheer()
+	public function action_cheer()
 	{
 		$target_user_id = Input::get('target_user_id');
 
@@ -178,22 +177,8 @@ class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 	{
 		$target_user_name = Input::get('username');
 
-		$target_user_id = Model_User::get_id($target_user_name);
+		$target_user_id = Model_User::get_user_id($user_name);
 
-		if (!empty($target_user_id)) {
-			$data = array(
-				'code' 	  => 200,
-				'message' => 'ユーザーを見つけました',
-				'user_id' => "$target_user_id"
-		);
-
-		}else{
-			$data = array(
-				'code' 	  => 500,
-				'message' => 'ユーザーが見つかりませんでした',
-				'user_id' => '0'
-			);
-		}
 
 	   	self::output_json($data);
 	}

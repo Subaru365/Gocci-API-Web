@@ -14,16 +14,16 @@ class Model_V2_Router extends Model
 
 		session::set('user_id', $user_data['user_id']);
 
-	    $result						= Model_V2_Aws_Cognito::set_data();
-	    $user_data['identity_id']   = $result['IdentityId'];
-	    $user_data['token']	        = $result['token'];
+		$result						= Model_V2_Aws_Cognito::set_data();
+		$user_data['identity_id']   = $result['IdentityId'];
+		$user_data['token']	        = $result['token'];
 
-	    $user_data['profile_img']   = Model_V2_Db_User::set_data($user_data);
-	    $user_data['endpoint_arn']  = Model_V2_Aws_Sns::set_endpoint($user_data);
+		$user_data['profile_img']   = Model_V2_Db_User::set_data($user_data);
+		$user_data['endpoint_arn']  = Model_V2_Aws_Sns::set_endpoint($user_data);
 
-	    Model_Device::set_data($user_data);
+		Model_Device::set_data($user_data);
 
-	    return $user_data;
+		return $user_data;
 	}
 
 
@@ -40,6 +40,14 @@ class Model_V2_Router extends Model
         return $user_data;
 	}
 
+
+	public static function pass_login($username)
+	{
+		$identity_id 	= Model_V2_Db_User::get_identity_id($username);
+		$user_data		= self::login($identity_id);
+
+		return $user_data;
+	}
 
 	//=================================================================//
 	//Post
@@ -118,11 +126,11 @@ class Model_V2_Router extends Model
 			$post_data[$i]['profile_img']   = Model_V2_Transcode::decode_profile_img($post_data[$i]['profile_img']);
 
 			//付加情報格納(like_num, comment_num, want_flag, follow_flag, like_flag)
-	   		$post_data[$i]['gochi_num']		= Model_V2_Db_Gochi::get_num($post_data[$i]['post_id']);
-	   		$post_data[$i]['comment_num']   = Model_V2_Db_Comment::get_num($post_data[$i]['post_id']);
-	    	$post_data[$i]['want_flag']	    = Model_V2_Db_Want::get_flag($post_data[$i]['rest_id']);
-	    	$post_data[$i]['follow_flag']   = Model_V2_Db_Follow::get_flag($post_data[$i]['user_id'];);
-	    	$post_data[$i]['gochi_flag']    = Model_V2_Db_Gochi::get_flag($post_data[$i]['post_id']);
+			$post_data[$i]['gochi_num']		= Model_V2_Db_Gochi::get_num($post_data[$i]['post_id']);
+			$post_data[$i]['comment_num']   = Model_V2_Db_Comment::get_num($post_data[$i]['post_id']);
+			$post_data[$i]['want_flag']	    = Model_V2_Db_Want::get_flag($post_data[$i]['rest_id']);
+			$post_data[$i]['follow_flag']   = Model_V2_Db_Follow::get_flag($post_data[$i]['user_id']);
+			$post_data[$i]['gochi_flag']    = Model_V2_Db_Gochi::get_flag($post_data[$i]['post_id']);
 			$post_data[$i]['post_date']     = Model_V2_Date::get_data($post_data[$i]['post_date']);
 		}
 
@@ -141,7 +149,7 @@ class Model_V2_Router extends Model
 		//投稿者のmemoを$comment_dataに格納
 		array_unshift($comment_data, $post_memo);
 
-		$comment_num  = count($comment_data);
+		$comment_num 	= count($comment_data);
 
 		for ($i=1; $i < $comment_num; $i++) {
 			$comment_data[$i]['re_user']	= Model_Re::get_data($comment_data[$i]['comment_id']);
@@ -174,4 +182,51 @@ class Model_V2_Router extends Model
 
         return $user_data;
 	}
+
+
+	public static function notice()
+	{
+    	$notice_data = Model_Notice::get_data();
+	   	Model_User::reset_badge();
+	   	return $notice_data;
+	}
+
+	public static function follow_list($user_id)
+	{
+		$follow_data = Model_Follow::get_follow($user_id);
+		return $follow_data;
+	}
+
+	public static function follower_list($user_id)
+	{
+		$follower_data = Model_Follow::get_follower($user_id);
+		return $follower_data;
+	}
+
+	public static function want_list($user_id)
+	{
+		$want_data		= Model_Want::get_want($user_id);
+		return $want_data;
+	}
+
+
+	//=================================================================//
+	//Function
+
+	private static function data_conversion($data)
+	{
+		$num = count($data);
+
+		for ($i=0; $i < $num; $i++) {
+
+			$data[$i]['profile_img'] =
+				Model_Transcode::decode_profile_img($data[$i]['profile_img']);
+
+			$data[$i]['comment_date'] =
+				Model_Date::get_data($data[$i]['comment_date']);
+		}
+
+		return $data;
+	}
+
 }

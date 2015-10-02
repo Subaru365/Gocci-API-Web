@@ -1,4 +1,4 @@
-<?php
+x<?php
 
 class Model_Follow extends Model
 {
@@ -64,7 +64,7 @@ class Model_Follow extends Model
 
 
 	//フォローされてるユーザー情報
-	public static function get_follower($user_id, $target_user_id)
+	public static function get_follower($target_user_id)
 	{
 		$query = DB::select('user_id', 'username', 'profile_img')
 		->from ('follows')

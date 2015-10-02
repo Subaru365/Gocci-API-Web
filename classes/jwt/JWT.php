@@ -19,6 +19,7 @@ use \DateTime;
  * @license  http://opensource.org/licenses/BSD-3-Clause 3-clause BSD
  * @link     https://github.com/firebase/php-jwt
  */
+
 class Jwt
 {
 
@@ -27,7 +28,12 @@ class Jwt
      * we want to provide some extra leeway time to
      * account for clock skew.
      */
-    public static $leeway = 0;
+
+    // 編集するJWTファイルはこれ
+
+    // public static $leeway = 0;
+
+    public static $leeway = 1;
 
     public static $supported_algs = array(
         'HS256' => array('hash_hmac', 'SHA256'),
@@ -112,7 +118,10 @@ class Jwt
             // Check if this token has expired.
             if (isset($payload->exp) && (time() - self::$leeway) >= $payload->exp) {
                 throw new ExpiredException('Expired token');
-            }
+            } else {
+		echo 'Not Expired token';
+		exit;
+	    }
         }
 
         return $payload;

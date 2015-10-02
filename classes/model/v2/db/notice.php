@@ -37,6 +37,9 @@ class Model_Notice extends Model
     }
 
 
+    //==================================//
+
+
     //Notice登録
     public static function post_data($keyword, $a_user_id, $p_user_id, $post_id = 1)
     {

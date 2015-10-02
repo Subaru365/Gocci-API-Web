@@ -40,7 +40,7 @@ class Controller_V2_Mobile_Base extends Controller
             'code'      => 301,
             'subject'   => "[ERROR] $key Validation Error!",
             'message'   => "$message",
-            'data'      => array()
+            'data'      => 0
         );
 
         self::output_json($api_data);
@@ -54,7 +54,7 @@ class Controller_V2_Mobile_Base extends Controller
             'code'      => $error_code,
             'subject'   => Model_V2_Error::get_subject($error_code),
             'message'   => Model_V2_Error::get_message($error_code),
-            'data'      => array()
+            'data'      => 0
         );
 
         self::output_json($api_data);

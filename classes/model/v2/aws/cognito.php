@@ -22,14 +22,22 @@ class Model_V2_Aws_Cognito extends Model
     //IdentityID新規発行
 	public static function set_data()
 	{
-        $client = self::client();
-		$config = Config::get('_cognito');
+        $client = new CognitoIdentityClient
+        ([
+            'region'    => 'us-east-1',
+            'version'   => 'latest'
+        ]);
 
-        $result = $this->client->getOpenIdTokenForDeveloperIdentity
+
+//        $client = self::set_client();
+		$config  = Config::get('_cognito');
+        $user_id = session::get('user_id');
+
+        $result = $client->getOpenIdTokenForDeveloperIdentity
         ([
             'IdentityPoolId'    => "$config[IdentityPoolId]",
             'Logins'            => [
-                "$config[developer_provider]" => session::get('user_id'),
+                "$config[developer_provider]" => "$user_id",
             ]
         ]);
 		return $result;
