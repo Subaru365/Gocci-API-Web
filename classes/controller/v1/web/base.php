@@ -36,7 +36,7 @@ class Controller_V1_Web_Base extends Controller
 		'user_id' => $user_id,
 		'username'=> $username,
 		'iat'     => '',
-		'exp'     => time()
+		'exp'     => time() - 60
 	];
         $token = json_encode($json);
 

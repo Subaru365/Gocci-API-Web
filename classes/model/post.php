@@ -137,8 +137,9 @@ class Model_Post extends Model
 			$post_data[$i]['profile_img'] = Model_Transcode::decode_profile_img($post_data[$i]['profile_img']);
 			$post_data[$i]['share'] = 'mp4/' . "$movie" . '.mp4';
 
-			$distance = $post_data[$i]['distance'];
-			$post_data[$i]['distance'] = $distance * 112120;
+			$dis  		= $post_data[$i]['distance'];
+			$dis_meter	= $dis * 112120;
+			$post_data[$i]['distance'] = round($dis_meter);
 
 
 			$post_id	  = $post_data[$i]['post_id'];
