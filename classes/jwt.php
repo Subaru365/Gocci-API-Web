@@ -38,7 +38,7 @@ class Jwt
     // public static $leeway = $time;// time() + (60 * 10);
    
     // public static $leeway = 0;//60*10;    
-    public static $leeway = 60;
+    public static $leeway = 0;
 
     public static $supported_algs = array(
         'HS256' => array('hash_hmac', 'SHA256'),

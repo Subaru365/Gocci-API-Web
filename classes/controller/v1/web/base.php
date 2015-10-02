@@ -3,6 +3,7 @@ header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
 error_reporting(-1);
+date_default_timezone_set('Asia/Tokyo');
 
 /**
  * base
@@ -11,7 +12,7 @@ error_reporting(-1);
 
 class Controller_V1_Web_Base extends Controller
 {
-	// decode
+    // decode
     public static function decode($jwt)
     {
         $key = 'i_am_a_secret_key';
@@ -35,7 +36,7 @@ class Controller_V1_Web_Base extends Controller
 		'user_id' => $user_id,
 		'username'=> $username,
 		'iat'     => '',
-		'exp'     => 60
+		'exp'     => time()
 	];
         $token = json_encode($json);
 
