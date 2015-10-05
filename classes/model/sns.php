@@ -9,40 +9,36 @@ class Model_Sns extends Model
 
 	public static function post_endpoint($user_id, $register_id, $os)
 	{
-		//AWS SNSに端末を登録
-        $brand = explode('_', $os);
+	    // AWS SNSに端末を登録
+            $brand = explode('_', $os);
 
-        if ($brand[0] == 'android') {
-            $endpoint_arn = self::post_android($user_id, $register_id);
+            if ($brand[0] == 'android') {
+                $endpoint_arn = self::post_android($user_id, $register_id);
+            } elseif ($brand[0] == 'iOS') {
+		$endpoint_arn = self::post_iOS($user_id, $register_id);
+	    } else {
+                error_log('Model_Sns: endpoint_arn 未発行');
+                exit;
+            }
 
-        }elseif ($brand[0] == 'iOS') {
-			$endpoint_arn = self::post_iOS($user_id, $register_id);
-
-		}else{
-            error_log('Model_Sns: endpoint_arn 未発行');
-            exit;
-        }
-
-        return $endpoint_arn;
+            return $endpoint_arn;
 	}
-
 
 	private static function post_android($user_id, $register_id)
 	{
 		$android_Arn = Config::get('_sns.android_ApplicationArn');
 
 		$client = new SnsClient([
-			'region'  => 'ap-northeast-1',
-    		'version' => '2010-03-31'
+		    'region'  => 'ap-northeast-1',
+    		    'version' => '2010-03-31'
 		]);
 
 		$result = $client->createPlatformEndpoint([
-    		'CustomUserData' => 'user_id / ' . "$user_id",
-    		'PlatformApplicationArn' => "$android_Arn",
-    		'Token' => "$register_id",
-    	]);
-
-    	return $result['EndpointArn'];
+    			'CustomUserData' => 'user_id / ' . "$user_id",
+    			'PlatformApplicationArn' => "$android_Arn",
+    			'Token' => "$register_id",
+    		]);
+    		return $result['EndpointArn'];
 	}
 
 
@@ -52,35 +48,35 @@ class Model_Sns extends Model
 
 		$client = new SnsClient([
 			'region'  => 'ap-northeast-1',
-    		'version' => '2010-03-31'
+    			'version' => '2010-03-31'
 		]);
 
 		$result = $client->createPlatformEndpoint([
-    		'CustomUserData' => 'user_id / ' . "$user_id",
-    		'PlatformApplicationArn' => "$iOS_Arn",
-    		'Token' => "$register_id",
-    	]);
+    			'CustomUserData' => 'user_id / ' . "$user_id",
+    			'PlatformApplicationArn' => "$iOS_Arn",
+    			'Token' => "$register_id",
+    		]);
 
-    	return $result['EndpointArn'];
+    		return $result['EndpointArn'];
 	}
 
 
 	public static function post_message($keyword, $user_id, $target_user_id)
 	{
-        $username  = Model_User::get_name($user_id);
-        $target_arn = Model_Device::get_arn($target_user_id);
+        	$username  = Model_User::get_name($user_id);
+        	$target_arn = Model_Device::get_arn($target_user_id);
 
-        $message = "$username" . 'さんから' . "$keyword" . 'されました！';
+        	$message = "$username" . 'さんから' . "$keyword" . 'されました！';
 
-        $client = new SnsClient([
-            'region'  => 'ap-northeast-1',
-            'version' => '2010-03-31'
-        ]);
+        	$client = new SnsClient([
+            		'region'  => 'ap-northeast-1',
+            		'version' => '2010-03-31'
+        	]);
 
-        $result = $client->publish([
-            'Message'   => "$message",
-            'TargetArn' => "$target_arn",
-        ]);
+        	$result = $client->publish([
+            		'Message'   => "$message",
+            		'TargetArn' => "$target_arn",
+        	]);
 	}
 
 
@@ -90,12 +86,12 @@ class Model_Sns extends Model
 
 		$client = new SnsClient([
 			'region'  => 'ap-northeast-1',
-    		'version' => '2010-03-31'
+    			'version' => '2010-03-31'
 		]);
 
 		$result = $client->publish([
-    		'Message'   => "$message",
-    		'TargetArn' => "$target_arn",
+    			'Message'   => "$message",
+    			'TargetArn' => "$target_arn",
 		]);
 	}
 
@@ -104,7 +100,7 @@ class Model_Sns extends Model
 	{
 		$client = new SnsClient([
 			'region'  => 'ap-northeast-1',
-    		'version' => '2010-03-31'
+    			'version' => '2010-03-31'
 		]);
 
 		$result = $client->deleteEndpoint([

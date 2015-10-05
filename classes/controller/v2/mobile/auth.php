@@ -66,16 +66,16 @@ class Controller_V2_Mobile_Auth extends Controller
     }
 
 
-    public static function action_device_refresh()
-    {
-        //Input $user_data is [$register_id]
-        $user_data = self::get_input();
+    // public static function action_device_refresh()
+    // {
+    //     //Input $user_data is [$register_id]
+    //     $user_data = self::get_input();
 
-        // $old_endpoint_arn = Model_Device::get_arn($user_id);
-        // Model_Sns::delete_endpoint($old_endpoint_arn);
+    //     $old_endpoint_arn = Model_Device::get_arn($user_id);
+    //     Model_Sns::delete_endpoint($old_endpoint_arn);
 
-        // $new_endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
-        // Model_Device::update_data($user_id, $os, $model, $register_id, $new_endpoint_arn);
+    //     $new_endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
+    //     Model_Device::update_data($user_id, $os, $model, $register_id, $new_endpoint_arn);
 
-    }
+    // }
 }

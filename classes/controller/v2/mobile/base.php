@@ -23,6 +23,7 @@ class Controller_V2_Mobile_Base extends Controller
     {
         $api_data = array(
             'version'   => 2.0,
+            'uri'       => Uri::string(),
             'code'      => 100,
             'subject'   => '[OK]',
             'message'   => 'Success!',
@@ -37,6 +38,7 @@ class Controller_V2_Mobile_Base extends Controller
     {
         $api_data = array(
             'version'   => 2.0,
+            'uri'       => Uri::string(),
             'code'      => 301,
             'subject'   => "[ERROR] $key Validation Error!",
             'message'   => "$message",
@@ -52,6 +54,7 @@ class Controller_V2_Mobile_Base extends Controller
         $api_data = array(
             'version'   => 2.0,
             'code'      => $error_code,
+            'uri'       => Uri::string(),
             'subject'   => Model_V2_Error::get_subject($error_code),
             'message'   => Model_V2_Error::get_message($error_code),
             'data'      => 0
@@ -65,7 +68,7 @@ class Controller_V2_Mobile_Base extends Controller
 	{
 		$json = json_encode(
 			$api_data,
-			JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+			JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
 		);
 
 		echo $json;

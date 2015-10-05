@@ -186,29 +186,40 @@ class Model_V2_Router extends Model
 
 	public static function notice()
 	{
-    	$notice_data = Model_Notice::get_data();
+    	$notice_data	= Model_V2_Notice::get_data();
 	   	Model_User::reset_badge();
 	   	return $notice_data;
 	}
 
 	public static function follow_list($user_id)
 	{
-		$follow_data = Model_Follow::get_follow($user_id);
+		$follow_data 	= Model_V2_Follow::get_follow($user_id);
 		return $follow_data;
 	}
 
 	public static function follower_list($user_id)
 	{
-		$follower_data = Model_Follow::get_follower($user_id);
+		$follower_data 	= Model_V2_Follow::get_follower($user_id);
 		return $follower_data;
 	}
 
 	public static function want_list($user_id)
 	{
-		$want_data		= Model_Want::get_want($user_id);
+		$want_data		= Model_V2_Want::get_want($user_id);
 		return $want_data;
 	}
 
+	public static function cheer_list($user_id)
+	{
+		$cheer_data 	= Model_V2_Post::get_user_cheer($user_id);
+		return $cheer_data;
+	}
+
+	public static function search_user($username)
+	{
+		$user_id 		 = Model_V2_User::check_username($username);
+		return $user_id;
+	}
 
 	//=================================================================//
 	//Function
@@ -228,5 +239,4 @@ class Model_V2_Router extends Model
 
 		return $data;
 	}
-
 }

@@ -12,7 +12,7 @@ class Model_Device extends Model
 
 
         if (!empty($device_data)) {
-        //登録あり→消去
+            //登録あり→消去
             $old_user_id  = $device_data[0]['device_user_id'];
             $endpoint_arn = $device_data[0]['endpoint_arn'];
 
@@ -51,7 +51,7 @@ class Model_Device extends Model
           'os'             => "$os",
           'model'          => "$model",
           'register_id'    => "$register_id",
-       		'endpoint_arn'   => "$endpoint_arn"
+       	  'endpoint_arn'   => "$endpoint_arn"
         ))
         ->execute();
     }
