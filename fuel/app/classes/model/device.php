@@ -38,8 +38,11 @@ class Model_Device extends Model
         $query = DB::select('endpoint_arn')->from('devices')
         ->where('device_user_id', "$user_id");
 
-        $endpoint_arn = $query -> execute()->as_array();
-        return $endpoint_arn[0]['endpoint_arn'];
+        $result = $query -> execute()->as_array();
+
+        if (!empty($result)) {
+            Model_Sns::delete_endpoint($result[0]['endpoint_arn']);
+        }
   	}
 
 
