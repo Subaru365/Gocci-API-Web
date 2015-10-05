@@ -104,10 +104,9 @@ class Controller_V1_Mobile_Auth extends Controller
 
             $token = Model_Cognito::get_token($user_id, $identity_id);
 
-            Model_Device::check_register_id($register_id);
+            //Model_Device::check_register_id($register_id);
 
-            $old_endpoint_arn = Model_Device::get_arn($user_id);
-            Model_Sns::delete_endpoint($old_endpoint_arn);
+            Model_Device::get_arn($user_id);
 
             $new_endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
             Model_Device::update_data($user_id, $os, $model, $register_id, $new_endpoint_arn);
@@ -146,8 +145,7 @@ class Controller_V1_Mobile_Auth extends Controller
 
                 $token = Model_Cognito::get_token($user_id, $identity_id);
 
-                $old_endpoint_arn = Model_Device::get_arn($user_id);
-                Model_Sns::delete_endpoint($old_endpoint_arn);
+                Model_Device::get_arn($user_id);
 
                 $new_endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
                 Model_Device::update_data($user_id, $os, $model, $register_id, $new_endpoint_arn);
