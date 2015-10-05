@@ -2,10 +2,40 @@
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
+header('X-Content-Type-Options: nosniff');
 error_reporting(-1);
 
 class Controller_V1_Web_Get extends Controller_V1_Web_Base
 {
+	public function action_test_timeline()
+    {
+	$jwt = Input::get('jwt');
+        if(isset($jwt)) {
+                $data      = self::decode($jwt);
+                $user_data = session::get('data');
+                $obj       = json_decode($user_data);
+                if (empty($obj)) {
+                    self::unauth();
+                }
+            } else {
+                  self::unauth();
+                  error_log('UnAuthorized Accsess..');
+                  exit;
+            }
+
+    }
+
+
+
+	public function before()
+        {
+	    // SCRIPT要素で埋め込まれないための対策
+	    if (! isset($_SERVER['HTTP_X_REQUESTED_WITH']) ||
+		$_SERVER['HTTP_X_REQUEST_WITH'] !== 'XMLHttpRequest') {
+		// Ajaxリクエストではないため403を出す
+		// exit;
+	    }
+	}
 	// jwt check
 	public function create_token()
 	{
@@ -171,21 +201,19 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
 
     // User Page
     // public function action_user($target_user_id)
-		public function action_user($target_username)
+    public function action_user($target_username)
     {
         $sort_key       = 'user';
         $limit          = 10;
 
-				if (ctype_digit($target_username)) { $this->notid();}
-
+	if (ctype_digit($target_username)) { $this->notid();}
         // $user_id        = session::get('user_id');
-				$user_id = Model_User::get_id($target_username);
-				$target_user_id = $user_id;
-				if (empty($user_id)) { $this->notfounduser(); exit;}
-
-        $user_data      = Model_User::get_data($user_id, $target_user_id);
-        $post_data      = Model_Post::get_data(
-            $target_user_id, $sort_key, $target_user_id, $limit
+		$user_id = Model_User::get_id($target_username);
+		$target_user_id = $user_id;
+		if (empty($user_id)) { $this->notfounduser(); exit;}
+        	$user_data      = Model_User::get_data($user_id, $target_user_id);
+        	$post_data      = Model_Post::get_data(
+            	$target_user_id, $sort_key, $target_user_id, $limit
         );
 
         $data = [

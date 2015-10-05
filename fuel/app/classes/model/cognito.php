@@ -9,10 +9,9 @@ use Aws\CognitoSync\CognitoSyncClient;
 class Model_Cognito extends Model
 {
     //IdentityID取得 DataSet [User_Info]
-	public static function post_data($user_id)
-	{
-		$cognito_data = Config::get('_cognito');
-
+    public static function post_data($user_id)
+    {
+        $cognito_data = Config::get('_cognito');
         $client = new CognitoIdentityClient([
             'region'  => 'us-east-1',
             'version' => 'latest'

@@ -138,7 +138,6 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 			$target_user_id = Model_Comment::post_comment(
 				$user_id, $post_id, $comment
 			);
-
 			/*
 			if ((int)$user_id !== (int)$target_user_id) {
 				$record = Model_Notice::post_data(
@@ -149,7 +148,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 
 			self::success($keyword);
 		} catch(\Database_Exception $e) {
-			slef::failed($keyword);
+			self::failed($keyword);
 			error_log($e);
 		}
 	}

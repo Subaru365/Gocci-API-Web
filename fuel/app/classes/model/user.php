@@ -2,6 +2,18 @@
 
 class Model_User extends Model
 {
+    public static function check_name_pass($username, $password)
+    {
+	// username/passwordの両方が空の場合
+	if (empty($username) && empty($password)) {
+	    Controller_V1_Web_Base::error_json('Username and password do not enter.');
+	} else if (empty($username) || empty($password)) {
+	    // usernameもしくはpasswordが空の場合
+	    Controller_V1_Web_Base::error_json('Username or password do not enter.');
+	}
+
+    }
+
     //ユーザー名チェック
     public static function check_name($username)
     {
@@ -9,7 +21,50 @@ class Model_User extends Model
         ->where('username', "$username");
 
         $result = $query->execute()->as_array();
-        return $result;
+
+	if (!empty($result[0]['username'])) {
+	    Controller_V1_Web_Base::error_json("username already registered.");
+	    // 既に登録されているusername
+	} else {
+	   // まだ登録されていないusername
+	  return $username; 
+        }
+        
+    }
+
+    
+    public static function empty_name($username)
+    {
+	
+	if (empty($username)) {
+	   // TRUEだとusernameは空である
+	   return Controller_V1_Web_Base::error_json("Please enter your user name.");
+	} else {
+	   return $username;
+	}
+    }
+
+    public static function empty_password($password)
+    {
+	if (empty($password)) {
+	    return Controller_V1_Web_Base::error_json("Please enter your password.");
+	} else {
+	    return $password;
+	}
+
+    }
+    
+    public static function format_name_check($username)
+    {
+	//$username = '';
+	// 文字数チェック
+	if (preg_match('/^[a-z\d_]{4,20}$/i', $username)) {
+   	     // 4 - 20文字以内
+	     return $username;
+	} else {
+    	     return Controller_V1_Web_Base::error_json("ユーザーネームは4文字から20文字以内です");
+	}
+
     }
 
 
@@ -161,6 +216,17 @@ class Model_User extends Model
         return $user_data[0];
     }
 
+    // username/passwordからidentity_idを取得する【web】
+    public static function get_web_identity_id($username, $password)
+    {
+	$query = DB::select('identity_id')
+		->from('users')
+		->where('username', $username)
+		->and_where('password', $password);
+
+	$identity_id = $query->execute()->as_array();
+
+    }
 
     //ユーザーページ情報取得
     public static function get_data($user_id, $target_user_id)
@@ -203,6 +269,25 @@ class Model_User extends Model
         return $profile_img;
     }
 
+    // username/password登録
+    public static function insert_data($username, $identity_id,$password)
+    {
+	$profile_img = '0_tosty_' . mt_rand(1, 7);
+
+        $query = DB::insert('users')
+        ->set(array(
+            'username'    => $username,
+            'profile_img' => $profile_img,
+            'identity_id' => $identity_id,
+	    'password'    => $password,
+        ))
+        ->execute();
+
+        $profile_img = Model_Transcode::decode_profile_img($profile_img);
+        return $profile_img;	
+
+
+    }
 
     //通知数リセット
     public static function reset_badge($user_id)
@@ -390,4 +475,16 @@ class Model_User extends Model
         $profile_img = Model_Transcode::decode_profile_img($profile_img);
         return $profile_img;
     }
+
+    // web: username/password check
+    public static function pass_login_validate($username, $passsword)
+    {
+	$val = Validation::forge();
+	$val->add_field('username', 'ユーザーネーム', 'required');
+	$val->add_field('password', 'パスワード', 'required');
+
+
+    }
+
+
 }

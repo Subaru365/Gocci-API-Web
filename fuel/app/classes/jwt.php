@@ -20,24 +20,13 @@ use \DateTime;
  * @link     https://github.com/firebase/php-jwt
  */
 
-// 動作するjwt  
 class Jwt
 {
     /**
      * When checking nbf, iat or expiration times,
      * we want to provide some extra leeway time to
      * account for clock skew.
-     */
-    // public static $leeway = 1;
-    // public static $leeway = 60;
-    // 1時間 = 3600
-    
-     
-    // public $time = time();
-    // public $time = $time + 60 * 10;
-    // public static $leeway = $time;// time() + (60 * 10);
-   
-    // public static $leeway = 0;//60*10;    
+     */  
     public static $leeway = 0;
 
     public static $supported_algs = array(
@@ -124,19 +113,12 @@ class Jwt
 	    
             if (isset($payload->exp) && (time() - self::$leeway) >= $payload->exp) {
                 // throw new ExpiredException('Expired token');
-		$status = [
-                   "api_version" => 3,
-                   "api_code" => 1,
-                   "api_message" => "Expired token",
-                   "api_data:" => $obj = new stdClass()
-                ];
-
-                $status = json_encode(
-                $status,
-       		     JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
-        	);		
+		
+		$api_message = "Expired Token";
+		self::output_error_json($api_version = 3,$api_code = 1,$api_message, $api_data);		
 		echo $status;
 		exit;
+
             } else {
 		// 帰ってきてる 0の場合
 		// echo 'not expired';
@@ -145,6 +127,22 @@ class Jwt
         }
 
         return $payload;
+    }
+
+    public static function output_error_json($api_version,$api_code,$api_message, $api_data)
+    {
+        $status = [
+                "api_version" => $api_version,
+                "api_code"    => $api_code,
+                "api_message" => $api_message,
+                "api_date:"   => $obj = new stdClass()
+        ];
+        $status = json_encode(
+                $status,
+                JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+        );
+        return $status;
+
     }
 
     /**

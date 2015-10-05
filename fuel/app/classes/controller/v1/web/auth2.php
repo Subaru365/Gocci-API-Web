@@ -11,7 +11,6 @@ error_reporting(-1);
  */
 class Controller_V1_Web_Auth extends Controller
 {
-    /*
     public function action_test_login()
     {
 	// testなので、usernameだけ
@@ -20,7 +19,6 @@ class Controller_V1_Web_Auth extends Controller
 	// JWT生成
         echo $jwt = self::encode($user_id, $username);
     }
-    */
 
     // SNSログイン(Facebook/Twitter)
     public function action_login()
@@ -42,7 +40,10 @@ class Controller_V1_Web_Auth extends Controller
             $profile_img = $user_data['profile_img'];
             $badge_num   = $user_data['badge_num'];
 
-	    // JWT生成
+	    print_r($user_id);
+	    print_R($username);
+	    exit;
+            // JWT生成
             $jwt = self::encode($user_id, $username);
 
             Model_Login::post_login($user_id);
@@ -87,10 +88,6 @@ class Controller_V1_Web_Auth extends Controller
   	$password  = Input::post('password');
   	// $hash_pass = password_hash($password, PASSWORD_BCRYPT);
 
-        if (empty($username) && empty($password) || empty($username) or empty($password) ) {
-                self::error_json();	
-        }
-
   	try {
 	    /*
 	    Model_User::check_name($username);
@@ -118,26 +115,22 @@ class Controller_V1_Web_Auth extends Controller
 	    }
 
 
-	    // usernameとpasswordの組み合わせが正しいuserが存在するか
-
+	    // usernameとpasswordの組み合わせが正しいuserが存在するか  
+	   
 	    // identity_id取得
 	    // identity_idからuser_dataを取得
- 	    // Model_User::get_web_identity_id($username, $hash_pass)
-
-	    print_R($user_id);
-            print_R($username);
-	    exit;
-
+ 	    Model_User::get_web_identity_id($username, $hash_pass)
+	
   	    // JWT認証
  	    $jwt = self::encode($user_id, $username);
-
+  	    
 	    Model_Login::post_login($user_id);
  	    // sucess
 	    $api_data = [
 
 	    ];
 
-
+	  
   	} catch (Exception $e) {
 
   	    // JWT Exception
@@ -262,7 +255,7 @@ class Controller_V1_Web_Auth extends Controller
 
         Controller_V1_Mobile_Base::output_json($data);
     }
-
+ 
     private function error_json()
     {
 	$data = [

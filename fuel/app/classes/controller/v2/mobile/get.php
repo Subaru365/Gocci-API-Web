@@ -150,35 +150,34 @@ class Controller_V2_Mobile_Get extends Controller_V2_Mobile_Base
 	{
 		$target_user_id = Input::get('target_user_id');
 
-		$data = Model_Post::get_user_cheer($target_user_id);
+		$cheer_data     = Model_V2_Router::cheer_list($target_user_id);
 
-	   	self::output_json($data);
+	   	self::output_json($cheer_data);
 	}
 
 
-	//応援ユーザーリスト
-	public function action_rest_cheer()
-	{
-		$rest_id = Input::get('rest_id');
+	// //応援ユーザーリスト
+	// public function action_rest_cheer()
+	// {
+	// 	$rest_id = Input::get('rest_id');
 
-		$data = Model_Post::get_rest_cheer($rest_id);
+	// 	$data = Model_Post::get_rest_cheer($rest_id);
 
-		$num = count($data);
+	// 	$num = count($data);
 
-		for ($i=0; $i < $num; $i++) {
-			$data[$i]['follow_flag'] = Model_Follow::get_flag($data[$i]['user_id']);
-		}
+	// 	for ($i=0; $i < $num; $i++) {
+	// 		$data[$i]['follow_flag'] = Model_Follow::get_flag($data[$i]['user_id']);
+	// 	}
 
-	   	self::output_json($data);
-	}
+	//    	self::output_json($data);
+	// }
 
 
 	public function action_user_search()
 	{
-		$target_user_name = Input::get('username');
+		$target_username = Input::get('username');
 
-		$target_user_id = Model_User::get_user_id($user_name);
-
+		$user_id 		  = Model_V2_Router::search_user($target_username)
 
 	   	self::output_json($data);
 	}

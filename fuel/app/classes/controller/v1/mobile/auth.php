@@ -1,5 +1,4 @@
 <?php
-
 header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
 /**
@@ -104,6 +103,8 @@ class Controller_V1_Mobile_Auth extends Controller
 
 
             $token = Model_Cognito::get_token($user_id, $identity_id);
+
+            Model_Device::check_register_id($register_id);
 
             $old_endpoint_arn = Model_Device::get_arn($user_id);
             Model_Sns::delete_endpoint($old_endpoint_arn);
