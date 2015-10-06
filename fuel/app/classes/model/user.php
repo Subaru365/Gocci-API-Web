@@ -22,20 +22,22 @@ class Model_User extends Model
 
         $result = $query->execute()->as_array();
 
-	if (!empty($result[0]['username'])) {
-	    Controller_V1_Web_Base::error_json("username already registered.");
-	    // 既に登録されているusername
-	} else {
-	   // まだ登録されていないusername
-	  return $username; 
-        }
-        
+        // if (!empty($result[0]['username'])) {
+        //     Controller_V1_Web_Base::error_json("username already registered.");
+        //     // 既に登録されているusername
+
+        // } else {
+        //     // まだ登録されていないusername
+        //     return $username;
+        // }
+
+        return $result;
     }
 
-    
+
     public static function empty_name($username)
     {
-	
+
 	if (empty($username)) {
 	   // TRUEだとusernameは空である
 	   return Controller_V1_Web_Base::error_json("Please enter your user name.");
@@ -53,7 +55,7 @@ class Model_User extends Model
 	}
 
     }
-    
+
     public static function format_name_check($username)
     {
 	//$username = '';
@@ -284,7 +286,7 @@ class Model_User extends Model
         ->execute();
 
         $profile_img = Model_Transcode::decode_profile_img($profile_img);
-        return $profile_img;	
+        return $profile_img;
 
 
     }
