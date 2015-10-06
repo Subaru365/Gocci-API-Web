@@ -23,8 +23,7 @@ class Controller_V1_Web_Register extends Controller_V1_Web_Base
 		$register_id = $user_id; // webに端末IDは存在しない
 
 		Controller_V1_Web_Base::post_check();
-		// $username = "kaz1";
-	        // $password = "1234";
+		
 		try {
 		    // usernameとpasswordが両方空か
 		    Model_User::check_name_pass($username, $password);
@@ -32,12 +31,12 @@ class Controller_V1_Web_Register extends Controller_V1_Web_Base
 		    // 既に使用されていないか
 		    $username = Model_User::check_name($username);
 
-		    // usernameは空ではないか
-	
+		    // usernameは空ではないか	
 		    $username = Model_User::empty_name($username);
 		    
 		    // usernameの文字数が制限以内か
 		    $username = Model_User::format_name_check($username);
+
 		    // usernameに不適切な文字列が含まれていないか
 		  
 		    // passwordは入力されているか
@@ -64,6 +63,5 @@ class Controller_V1_Web_Register extends Controller_V1_Web_Base
 		    // self::failed($keyword);
 		    // error_log($e);
 		}
-
 	}
 }
