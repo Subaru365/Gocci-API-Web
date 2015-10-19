@@ -78,4 +78,36 @@ class Model_Notice extends Model
         curl_exec($ch);
         curl_close($ch);
     }
+
+    // web notice
+    public static function web_notice_insert($keyword, $a_user_id, $p_user_id, $post_id = 1)
+    {
+	if ($keyword == 'gochi!') {
+                  $notice = 'like';
+
+        }elseif ($keyword == 'コメント') {
+                $notice = 'comment';
+
+        }elseif ($keyword == 'フォロー') {
+            $notice = 'follow';
+
+        }else{
+                $notice = 'announce';
+        }
+
+        $query = DB::insert('notices')
+        ->set(array(
+                  'notice_a_user_id' => "$a_user_id",
+                  'notice_p_user_id' => "$p_user_id",
+                  'notice'           => "$notice",
+                  'notice_post_id'   => "$post_id"
+        ))
+        ->execute();
+
+
+
+
+
+    }
+
 }

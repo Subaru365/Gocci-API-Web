@@ -5,21 +5,14 @@ header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Req
 error_reporting(-1);
 date_default_timezone_set('Asia/Tokyo');
 
-/**
- * base
- *
- */
-
 class Controller_V1_Web_Base extends Controller
 {
     public static function post_check()
     {
 	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-	     // postであれば問題なく処理を進む
-	     // echo 'postです';
-	     
+	     // postであれば問題なく処理を進む  	   
 	} else {
-	     // getなので不正な処理と見なす
+	     // getなので不正な処理
 	    self::error_json("UnAuthorized");
 	}
     }
@@ -30,10 +23,12 @@ class Controller_V1_Web_Base extends Controller
         $key = 'i_am_a_secret_key';
         try {
 	    // $leeway in seconds
-	    // JWT::$leeway = 60;
+	    // JWT::$leeway = 60; 1分
+	    // JWT::$leeway = 1; // 1sec
             $decoded = JWT::decode($jwt, $key, array('HS256'));
             $decoded = session::set('data', $decoded);
-            // error_log('ログイン成功');
+	    error_log('decodedの中身を確認 by base');
+	    error_log($decoded);
 
         } catch (Exception $e){
             $decoded = "";
@@ -44,84 +39,87 @@ class Controller_V1_Web_Base extends Controller
     // encode
     public static function encode($user_id, $username)
     {
-        $key   = 'i_am_a_secret_key';
-		
+        $key   = 'i_am_a_secret_key';		
 	// exp (Expiration Time): jwtが無効になる時間
 	// iat (Issued At): jwtが発行された時間
 	// nbf (Not Before): 現在時刻が指定した時間より前なら処理しないような時間
 
-	$iat = time(); // jwtを発行する時間
-	$exp = $iat + 1;
-
+	// $iat = time(); // jwtを発行する時間
+	// $exp = $iat + 1;
+        // $exp = time() + 3600;  # 1は1秒 60 = 1分 3600は60分
+	//$exp = time() + 60;
+	$exp = time() + 86400; // 24h
         $json  = [
 		'user_id' => $user_id,
-		'username'=> $username,
-		'iat'     => $iat,
 		'exp'     => $exp,
-		'nbf'     => '',
+		'username'=> $username
 	];
         $json = json_encode($json);
 	
         if ($json === NULL) {
             die("[Error]\n");
         }
-
         $jwt = JWT::encode($json, $key);
 
         return $jwt;
-	// return $json;
+    }
+   
+    public static function check_jwtExp($exp)
+    {
+	if (isset($exp) && (time() >= $exp)) { 
+	    error_log('=jwtの有効期限切れ=');
+	    self::expired_token("Expired Token");
+	} else {
+	    error_log('有効期限内です');
+	    $time = time();
+	    error_log('現在時刻');
+	    error_log($time);
+	    error_log('exp');
+	    error_log($exp);
+	}
     }
 
-	// Not JWT
-	public static function unauth()
-	{
-		$status = [
+    // Not JWT
+    public static function unauth($uri="",$login_flag=0)
+    {
+        error_log('アクセス拒否 base unauth method.');
+	$status = [
  		   "api_version" => 3,
-    		   "api_code" => 1,
+	           "api_uri"     => $uri,
+    		   "api_code"    => 1,
     	           "api_message" => "UnAuthorized",
-	           "api_data:" => $obj = new stdClass()
-		];
-
-		$status = json_encode(
-        	$status,
+		   "login_flag"  => $login_flag,
+	           "api_data"   => $obj = new stdClass()
+	];
+	$status = json_encode(
+            $status,
             JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
         );
+	echo $status;
+	exit;
+    }
 
-		echo $status;
-		exit();
-	}
+    public static function output_json($data)
+    {
+	$json = json_encode(
+		$data,
+		JSON_PRETTY_PRINT|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
+	);
+	echo $json;
+    }
 
-	public static function output_json($data)
+    public static function getallheaders()
+    {
+        $headers = '';
+	foreach ($_SERVER as $name => $value)
 	{
-		/*
-		// 脆弱性あり
-		$json = json_encode(
-			$data,
-			JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
-		);
-		*/
-		
-		$json = json_encode(
-			$data,
-			JSON_PRETTY_PRINT|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
-		);
-
-		echo $json;
-	}
-
-	public static function getallheaders()
-	{
-		$headers = '';
-	    foreach ($_SERVER as $name => $value)
+	    if (substr($name, 0, 5) == 'HTTP_')
 	    {
-	    	// print_r($_SERVER);
-	        if (substr($name, 0, 5) == 'HTTP_')
-	        {
-	             $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
-	        }
+	        $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
 	    }
-	    return $headers;
 	}
+	return $headers;
+    }
 
   public static function notfounduser()
   {
@@ -129,7 +127,6 @@ class Controller_V1_Web_Base extends Controller
       'code'   => '401',
       'status' => 'Userが存在しません'
     );
-
     $status = json_encode(
       $status,
         JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
@@ -152,23 +149,27 @@ class Controller_V1_Web_Base extends Controller
       echo $status;
       exit;
   }
+
   public static function success_json($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $token,$message) 
   {
 	$api_data = [
-	     "user_id"  => $user_id,
-	     "username" => $username,
+	     "user_id"     => $user_id,
+	     "username"    => $username,
 	     "profile_img" => $profile_img, 
 	     "identity_id" => $identity_id,
 	     "badge_num"   => $badge_num,
-	     "token"    => $token
+	     "jwt"         => $token,
+	     "login_flag"  => 1 
 	];
 
 	$status = [
 	    "api_version" => 3,
-            "api_code" => 1,
+            "api_code"    => 1,
+	    "api_uri"     => "",
             "api_message" => $message,
-            "api_data:" => $api_data
+            "api_data"   => $api_data
 	];
+
 	$status = json_encode(
                 $status,
                 JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
@@ -176,26 +177,42 @@ class Controller_V1_Web_Base extends Controller
 
         echo $status;
         exit();
-
   }
-
 
   public static function error_json($message)
   {
-	// ver3 validation
-	$status = [
-                   "api_version" => 3,
-                   "api_code" => 1,
-                   "api_message" => $message,
-                   "api_data:" => $obj = new stdClass()
-                ];
-
-                $status = json_encode(
+      // ver3 validation
+      $status = [
+          "api_version" => 3,
+	  "api_uri"     => "",
+          "api_code"    => 1,
+          "api_message" => $message,
+          "login_flag"  => 0,
+          "api_data"   => $obj = new stdClass()
+      ];
+      $status = json_encode(
                 $status,
-            JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
-        );
+                JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+      );
+      echo $status;
+      exit();	
+  }
 
-        echo $status;
-        exit();	
+  public static function expired_token()
+  {
+	$status = [
+	    "api_version" => 3,
+	    "api_uri"     => "",
+	    "api_code"    => 1,
+	    "api_message" => $message,
+	    "login_flag"  => 2, // 2 リダイレクト
+	    "api_data"    => $obj = new stdClass()
+	];
+	$status = json_encode(
+	    $status,
+	    JSON_PRETY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+	);
+	echo $status;
+	exit;
   }
 }

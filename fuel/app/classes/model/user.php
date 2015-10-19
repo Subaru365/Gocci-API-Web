@@ -2,6 +2,7 @@
 
 class Model_User extends Model
 {
+    // ユーザー名とパスワードをチェック【web】
     public static function check_name_pass($username, $password)
     {
 	// username/passwordの両方が空の場合
@@ -11,7 +12,7 @@ class Model_User extends Model
 	    // usernameもしくはpasswordが空の場合
 	    Controller_V1_Web_Base::error_json('Username or password do not enter.');
 	}
-
+	
     }
 
     //ユーザー名チェック
@@ -21,19 +22,28 @@ class Model_User extends Model
         ->where('username', "$username");
 
         $result = $query->execute()->as_array();
-
-        // if (!empty($result[0]['username'])) {
-        //     Controller_V1_Web_Base::error_json("username already registered.");
-        //     // 既に登録されているusername
-
-        // } else {
-        //     // まだ登録されていないusername
-        //     return $username;
-        // }
-
         return $result;
     }
 
+    // ユーザー名チェック
+    public static function check_web_name($username)
+    {
+        $query = DB::select('username')->from('users')
+        ->where('username', "$username");
+
+        $result = $query->execute()->as_array();
+
+        if (!empty($result[0]['username'])) {
+             Controller_V1_Web_Base::error_json("username already registered.");
+             // 既に登録されているusername
+
+        } else {
+             // まだ登録されていないusername
+	     // $username = $result[0]['username'];
+             return $username;
+         }
+
+    }
 
     public static function empty_name($username)
     {
@@ -291,6 +301,21 @@ class Model_User extends Model
 
     }
 
+    // sns inset
+    public static function sns_insert_data($username, $identity_id, $profile_img)
+    {
+	$query = DB::insert('users')
+	->set(array(
+	    'username'    => $username,
+	    'profile_igm' => $profile_img,
+	    'identity_id' => $identity_id
+	))
+	->execute();	
+	$profile_img = Model_Transcode::decode_profile_img($profile_img);
+        return $profile_img;
+    }
+
+
     //通知数リセット
     public static function reset_badge($user_id)
     {
@@ -420,13 +445,43 @@ class Model_User extends Model
     {
         if (password_verify($pass, $hash_pass)) {
             //認証OK
+	    
         }else{
+	    
             error_log('パスワードが一致しません');
             Controller_V1_Mobile_Base::output_none();
             exit;
         }
     }
 
+    public static function web_verify_pass($pass, $hash_pass)
+    {
+	if (password_verify($pass, $hash_pass)) {
+            //認証OK
+	    $match_pass = password_verify($pass, $hash_pass);
+        }else{
+             error_log('パスワードが一致しません');
+             Controller_V1_Web_Base::error_json("パスワードが正しくありません");
+             exit;
+        }
+	return $match_pass;
+    }
+
+    public static function get_current_db_pass($user_id, $current_password)
+    {
+	// ユーザから送られてきた生パスワードをエンクリプト
+	$encrypt_password = self::encryption_pass($current_password);
+	// TRUEだったらmatch_passは1が代入される
+	// $match_pass = self::web_verify_pass($current_password, $encrypt_password);
+	// dbからパスワードを取得
+	$query = DB::select('password')
+                ->from('users')
+                ->where('user_id', $user_id);
+	// これを実行すると、as_arrayには何が入るのか [成功と失敗で]
+        return $db_password = $query->execute()->as_array();
+	
+
+    }
 
     //Conversion
     //===========================================================================//

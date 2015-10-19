@@ -2,25 +2,11 @@
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
-
-// header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
-/**
- * Auth api
- *
- */
-class Controller_V1_Web_Auth extends Controller
+
+class Controller_V1_Web_Auth extends Controller_V1_Web_Base
 {
-    /*
-    public function action_test_login()
-    {
-	// testなので、usernameだけ
-	$username = "kazu0914";
-	$user_id = 3;
-	// JWT生成
-        echo $jwt = self::encode($user_id, $username);
-    }
-    */
+    const SESSION_KEY_LOGGED_IN = 'logged-in';
 
     // SNSログイン(Facebook/Twitter)
     public function action_login()
@@ -32,11 +18,10 @@ class Controller_V1_Web_Auth extends Controller
         try
         {
             if (empty($provider) && empty($token) || empty($provider) or empty($token) ) {
-                self::error_json();
+                self::error_json("UnAuthorized");
             }
             $identity_id = Model_Cognito::get_identity_id($provider, $token);
             $user_data   = Model_User::get_auth($identity_id);
-
             $user_id     = $user_data['user_id'];
             $username    = $user_data['username'];
             $profile_img = $user_data['profile_img'];
@@ -49,6 +34,7 @@ class Controller_V1_Web_Auth extends Controller
 
 	    // JSON出力
             $api_data = [
+
 	    ];
 
             self::success(
@@ -78,132 +64,96 @@ class Controller_V1_Web_Auth extends Controller
         }
     }
 
+    public static function action_logout()
+    {
+	// このapiの脆弱制 => このapiのURLを知っていて、user_idをpostしてしまえば、
+	// そのidでログインしているユーザーがかってにログアウトされてしまうことになる
+	$uri = "auth/logout";
+	$user_id = Input::post('user_id');
+	// ユーザデータを保持していないのであれば、強制終了
+	if (empty($user_id)) {
+	    // baseのerror_json呼び出し
+	    self::error_json('ログインしていないためユーザーデータが存在しません');
+        }
+
+	try {
+	    // ログアウトのためsessionデータ削除
+	    \Session::delete(self::SESSION_KEY_LOGGED_IN);
+
+	    $api_data = [
+                    "message" => "ログアウトしました"
+	    ];
+
+            $base_data = [
+                    "api_version" =>3,
+		    "api_uri"     =>$uri,
+                    "api_code"    =>1,
+                    "api_message" =>"success",
+		    "login_flag"  => 0,
+                    "api_data"    => $api_data
+            ];
+	    // json output
+	    self::output_json($base_data);
+	    error_log('ログアウトしました');
+       } catch (Exception $e) {
+
+       }
+    }
+
     // username/passwordログイン
     public function action_pass_login()
     {
-        // username
   	$username  = Input::post('username');
-  	// password
   	$password  = Input::post('password');
-  	// $hash_pass = password_hash($password, PASSWORD_BCRYPT);
+
+	// post check
+	self::post_check();
 
         if (empty($username) && empty($password) || empty($username) or empty($password) ) {
-                self::error_json();	
+                self::error_json("usenameもしくはpasswordが入力されていません");	
         }
 
   	try {
-	    /*
-	    Model_User::check_name($username);
-	    Model_User::pass_login_validate($username, $password);
-	    */
-	    // username/passwordを入力しているかチェックする
-	    // Model_User::check_name_pass($username, $hash_pass);
-	    if (!empty($password)) {
+	    if (!empty($username) && !empty($password)) {
                 $user_data   = Model_User::check_pass($username, $password);
                 $user_id     = $user_data[0]['user_id'];
                 $profile_img = $user_data[0]['profile_img'];
                 $identity_id = $user_data[0]['identity_id'];
                 $badge_num   = $user_data[0]['badge_num'];
 
-                $token = Model_Cognito::get_token($user_id, $identity_id);
-
-                $old_endpoint_arn = Model_Device::get_arn($user_id);
-                Model_Sns::delete_endpoint($old_endpoint_arn);
-
-                $new_endpoint_arn = Model_Sns::post_endpoint($user_id, $register_id, $os);
-                Model_Device::update_data($user_id, $os, $model, $register_id, $new_endpoint_arn);
-
                 Model_Login::post_login($user_id);
-                self::success($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $token);
+               	// JWT認証
+ 	        $jwt = self::encode($user_id, $username);
+	   
+	        $api_data = [
+	   	    "user_id"     => $user_id,
+		    "username"    => $username,
+		    "profile_img" => $profile_img,
+		    "identity_id" => $identity_id,
+		    "badge_num"   => $badge_num,
+		    "jwt"         => $jwt
+	        ];
+ 	    
+	        $base_data = [
+		    "api_version" =>3,
+	            "api_code"    =>0,
+	            "api_message" =>"success",
+	            "api_data"    => $api_data
+	        ];
+
+	        // JSONを返す
+	        self::output_json($base_data);
 	    }
-
-
-	    // usernameとpasswordの組み合わせが正しいuserが存在するか
-
-	    // identity_id取得
-	    // identity_idからuser_dataを取得
- 	    // Model_User::get_web_identity_id($username, $hash_pass)
-
-	    print_R($user_id);
-            print_R($username);
-	    exit;
-
-  	    // JWT認証
- 	    $jwt = self::encode($user_id, $username);
-
-	    Model_Login::post_login($user_id);
- 	    // sucess
-	    $api_data = [
-
-	    ];
-
 
   	} catch (Exception $e) {
 
   	    // JWT Exception
 
   	    // Not access
-
   	}
    }
 
-    // jwt decode
-    public static function decode()
-    {
-	// ログイン時
-        $key = 'i_am_a_secret_key';
-        try {
-            $decoded = JWT::decode($jwt, $key, array('HS256'));
-            print_r($decoded);
-
-            // user_idを取得する
-
-            error_log('ログイン成功');
-
-        } catch (Exception $e){
-            die("[ERROR] Invalid jwt. Detail: " . $e->getMessage() . "\n");
-        }
-        return true;
-    }
-
-    // jwt encode
-    public static function encode($user_id, $username)
-    {
-    	// token create
-        $key   = 'i_am_a_secret_key';
-	/*
-        $json  = array('user_id' => $user_id,'username' => $username);
-        $token = json_encode($json);
-
-        if ($token === NULL) {
-            die("[Error]\n");
-        }
-
-        $jwt = JWT::encode($token, $key);
-        return $jwt;
-	*/
-      $iat = time(); // jwtを発行する時間
-        $exp = $iat + 1;
-
-        $json  = [
-                'user_id' => $user_id,
-                'username'=> $username,
-                'iat'     => $iat,
-                'exp'     => $exp,
-                'nbf'     => '',
-        ];
-        $json = json_encode($json);
-
-        if ($json === NULL) {
-            die("[Error]\n");
-        }
-
-        $jwt = JWT::encode($json, $key);
-
-        return $jwt;
-    }
-
-    public static function output_json($data)
+   public static function output_json($data)
     {
         $json = json_encode(
             $data,
@@ -261,23 +211,5 @@ class Controller_V1_Web_Auth extends Controller
         ];
 
         Controller_V1_Mobile_Base::output_json($data);
-    }
-
-    private function error_json()
-    {
-	$data = [
-		"api_version" => 3,
-		"api_code" => 1,
-		"api_message" => "Not Authorized.",
-		"api_data" => $obj = new StdClass()
-	];
-
-	$json = json_encode(
-            $data,
-            JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
-        );
-
-        echo "$json";
-	exit;
     }
 }
