@@ -9,8 +9,8 @@ class Model_Post extends Model
 		$query = DB::select(
 			'post_id', 'movie', 'thumbnail', 'category', 'tag', 'value',
 			'memo', 'post_date', 'cheer_flag',
-			'user_id', 'username', 'profile_img', 'rest_id', 'restname',
-			DB::expr('X(lon_lat), Y(lon_lat)'),
+			'user_id', 'username', 'profile_img', 'rest_id', 'restname','tell', 'locality',
+			DB::expr('X(lon_lat), Y(lon_lat)'), 
 			DB::expr("GLength(GeomFromText(CONCAT('LineString(${option['lon']} ${option['lat']},', X(lon_lat),' ', Y(lon_lat),')'))) as distance")
 		)
 		->from('posts')

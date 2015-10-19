@@ -30,6 +30,8 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 			session::set('user_id', $user_id);
 			$username  = $obj->{'username'};
 			session::set('username', $username);
+		        $exp       = $obj->{'exp'};
+		        session::set('exp', $exp);
 		} else {
 			self::unauth();
 			error_log('UnAuthorized Accsess..');
@@ -40,14 +42,15 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 	// SNS連携
 	public function action_sns()
         {
-		$keyword        = 'SNS連携';
-		// $user_id = 
-		// $provider = Input::post('provider');
-		// $token   = Input::post('token');
-		// $profile_img = Input::post('profile_img');
+		self::create_token();
+		$keyword     = 'SNS連携'; 
+		$user_id     = session::get('user_id');
+		$provider    = Input::post('provider');
+		$token       = Input::post('token');
+		$profile_img = Input::post('profile_img');
 
 	        try {
-		    exit;
+		   
 		    if ($profile_img !== 'none') {
 		    	$profile_img = Model_S3::input($user_id, $profile_img);
 		    	$profile_img = Modle_User::update_profile_img($user_id, $profile_img);
@@ -59,23 +62,26 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 		    $data = [
 			"api_version" => 3,
 			"api_code" => 0,
+			"login_flag" => 1, // 連携するということは、ログインしており設定ページからなのでログインしているから1。
 			"api_message" => $keyword . "しました",
 			"api_data" => [
 			    "profile_img" => $profile_img
 			]
 		    ];
-		    self::output_json($data);
+	
+		    // JSON出力
+  	            self::output_json($data);
 
 		} catch (\Database_Exception $e) {
 		    self::failed($keyword);
 		    error_log($e);
 		}
-
         }
 
 	// sns解除
 	public function action_unlink()
         {
+	        self::create_token();
 		exit;
 		$keyword = 'SNS連携解除';
 		$user_id = Input::post('provider');
@@ -95,20 +101,19 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 		}
         }
 
-	// Gochi
+	// Gochi => Like
 	public function action_gochi()
 	{
 		self::create_token();
 		
-		$keyword = 'gochi!';
+		$keyword = 'gochi';
 		$user_id = session::get('user_id');
 		$post_id = Input::post('post_id');
 
 		try {
-			$target_user_id = Model_Gochi::post_gochi(
+		     	$target_user_id = Model_Gochi::post_gochi(
 				$user_id, $post_id
 			);
-
 			/*
 			if ((int)$user_id !== (int)$target_user_id) {
 				$record = Model_Notice::post_data(
@@ -116,7 +121,6 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 				);
 			}
 			*/
-
 			self::success($keyword);
 
 		} catch (\Database_Exception $e) {
@@ -129,8 +133,11 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 	// Comment
 	public function action_comment()
 	{
+	        self::create_token();
 		$keyword = 'コメント';
 		$user_id = session::get('user_id');
+	        error_log('user_idの中身');
+		error_log($user_id);
 		$post_id = Input::post('post_id');
 		$comment = Input::post('comment');
 
@@ -145,7 +152,6 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 				);
 			}
 			*/
-
 			self::success($keyword);
 		} catch(\Database_Exception $e) {
 			self::failed($keyword);
@@ -156,14 +162,16 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 	// Follow
 	public function action_follow()
 	{
+		self::create_token();
 		$keyword        = 'フォロー';
 		$user_id        = session::get('user_id');
+	        // $user_id = 4;
 		$follow_user_id = Input::post('target_user_id');
 
 		try {
 			$result = Model_Follow::post_follow($user_id, $follow_user_id);
 
-			$record = Model_Notice::post_data(
+			$record = Model_Notice::web_notice_insert(
 				$keyword, $user_id, $follow_user_id
 			);
 
@@ -177,13 +185,20 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 	// UnFollow
 	public function action_unfollow()
 	{
+		 self::create_token();
 		$keyword          = 'フォローを解除';
 		$user_id          = session::get('user_id');
 		$unfollow_user_id = Input::post('target_user_id');
 
 		try {
 			$result = Model_Follow::post_unfollow($user_id, $unfollow_user_id);
+	
+			$record = Model_Notice::web_notice_insert(
+                                $keyword, $user_id, $follow_user_id
+                        );
 			self::success($keyword);
+
+
 		} catch (\Database_Exception $e) {
 			self::failed($keyword);
 			error_log($e);
@@ -193,6 +208,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 	// Want
 	public function action_want()
 	{
+		self::create_token();
 		$keyword = '行きたい店リストに追加';
 		$user_id = session::get('user_id');
 		$rest_id = Input::post('rest_id');
@@ -209,6 +225,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 	// UnWant
 	public function action_unwant()
 	{
+		self::create_token();
 		$keyword = '行きたい店リストから削除';
 		$user_id = session::get('user_id');
 		$rest_id = Input::post('rest_id');
@@ -225,6 +242,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 	// PostBlock
 	public function action_postblock()
 	{
+		self::create_token();
 		$keyword = '投稿を違反報告';
 		$user_id = session::get('user_id');
 		$post_id = Input::post('post_id');
@@ -241,6 +259,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 	// PostDelete
 	public function action_postdel()
 	{
+		self::create_token();
 		$keyword = '投稿を消去';
 		$post_id = Input::post('post_id');
 
@@ -257,6 +276,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 	// Profile Edit
 	public function action_update_profile()
 	{
+		self::create_token();
 		$keyword 	    = 'プロフィールを変更';
 		$user_id 	    = session::get('user_id');
 		$username       = Input::post('username');
@@ -302,6 +322,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 	// FeedBack
 	public function action_feedback()
 	{
+		self::create_token();
 		$keyword  = '意見を投稿';
 		$user_id  = session::get('user_id');
 		$feedback = Input::post('feedback');
@@ -318,6 +339,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 	// Rest Add [Mobile]
 	public function action_restadd()
 	{
+		self::create_token();
 		$keyword   = '店舗を追加';
 		$rest_name = Input::post('rest_name');
 		$lat       = Input::post('lat');
@@ -359,5 +381,51 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 
 		self::output_json($data);
 	}
+
+	// Password変更 api
+        public function action_password_change()
+        {
+            // ログインしているユーザIDを取得
+	    self::create_token();
+	    $user_id = session::get('user_id');
+	    // $user_id = 503;
+            // POST: ユーザーの現在のパスワード
+            $current_password = Input::post('current_password');
+            // POST: 変更したい新しいパスワード
+            $new_password     = Input::post('new_password');
+	    try {
+                // ユーザのIDから登録時のパスワードを取得し、送信されたパスワードとDBパスワード一致するか調べる
+	        $db_password = Model_User::get_current_db_pass($user_id, $current_password);
+		// current_passwordはhash化毎に変わるので、以下だと絶対一致しない
+		$match_pass = Model_User::web_verify_pass($current_password, $db_password[0]['password']);
+		
+		if ($match_pass) {
+		    // 一致
+		    Model_User::update_pass($user_id, $new_password);
+		
+		    // 正式に変更できたら、jsonでパスワードを変更しましたを含むJSONを吐く
+		    $data = [
+		        "message" => "パスワードを変更しました"
+		    ];
+		    $base_data = [
+            		    "api_version" => 3,
+            		    "api_code"    => 0,
+           		    "api_message" => "success",
+            		    "api_data" => $data
+       		    ];
+
+		    $status         = $this->output_json($base_data);
+		}  else {
+		    // 送ってもらったパスワードが登録されたパスワードと違う
+		    error_log('パスワードが一致しません');
+                    Controller_V1_Web_Base::error_json("パスワードが正しくありません");
+                    exit;
+		}
+	    } catch (\Database_Exception $e) {
+		
+
+	    }
+
+        }
 
 }

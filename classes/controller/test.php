@@ -1,20 +1,22 @@
 <?php
-
 use Aws\Sns\SnsClient;
-
 /**
 *
 */
 class Controller_Test extends Controller
 {
-
-
 	public static function action_index()
 	{
-		$message = 'テスト通知しました';
-		$target_arn = Model_Device::get_arn(408);
+		$body = array(
+		    'Cache-Control'     => 'no-cache, no-store, max-age=0, must-revalidate',
+		    'Expires'           => 'Mon, 26 Jul 1997 05:00:00 GMT',
+		    'Pragma'            => 'no-cache',
+		);
 
-		self::push($target_arn, $message);
+		// $response = new Response($body, 404, $headers);
+		// $response->send_headers();
+
+		return Response::forge($body, 404);
 	}
 
 	public static function push($endpointArn, $alert)
