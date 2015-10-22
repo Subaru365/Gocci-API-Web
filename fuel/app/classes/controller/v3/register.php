@@ -1,25 +1,17 @@
 <?php
-/**
- * Register Class Api
- * @package    Gocci-Web
- * @version    3.1 <2015/10/20>
- * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
- * @license    MIT License
- * @copyright  2014-2015 Inase,inc.
- * @link       https://bitbucket.org/inase/gocci-web-api
- */
 
 header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
 
-class Controller_V1_Web_Register extends Controller_V1_Web_Base
+class Controller_V3_Web_Register extends Controller_V3_Web_Base
 {
 	/**
-	 * username password register
-	 *
-	 * @param string POST $username
-	 * @param string POST $password 
+	 * username/password register
+	 * @POST username
+	 * @POST password 
 	 */
+
+	// username/password register api
 	public function action_sign_up()
 	{
 		$keyword  = 'サインアップ';
@@ -29,7 +21,7 @@ class Controller_V1_Web_Register extends Controller_V1_Web_Base
 		$password = Input::post('password');
 		$os       = "Web";
 		$model    = "PC";
-		$register_id = $user_id; 
+		$register_id = $user_id; // webに端末IDは存在しない
 
 	        // getであれば、UnAuthorized
 		Controller_V1_Web_Base::post_check();
@@ -70,28 +62,29 @@ class Controller_V1_Web_Register extends Controller_V1_Web_Base
 		}
 	}
 
-	/**
-         * sns register
-	 *
-         * @param string POST $username
-         * @param string POST $profile_img
-	 * @param string POST $token
-	 * @param string POST $provider
-         */
-
 	// sns登録(Facebook/Twitter)
         public function action_sns_sign_up()
         {
+	    // webはsns_sing_up内に、sns連携処理もある
+
+	    /**
+	     * SNS登録処理手順
+	     * 1 username
+	     * 2 既に登録されていないか等のエラーハンドリング
+	     * 3 Facebook連携
+	     * 4 JSON出力
+	     */
+
 	    $keyword     = "SNS登録";
-	    $os          = "Web";
-            $model       = "PC";	
 	    $badge_num   = 0;
 	    $user_id     = Model_User::get_next_id();
-	    $username    = Input::post('username');
+	    $username    = Input::post('username'); // ユーザーが希望するユーザ名
 	    $profile_img = Input::post('profile_img');
-	    $sns_token   = Input::post('token');
+	    $token       = Input::post('token');
 	    $provider    = Input::post('provider'); 
-	    $register_id = $user_id;
+            $os          = "Web";
+	    $model       = "PC";
+	    $register_id = $user_id; // webはregister_idが存在しない
 
 	    // getであれば、UnAuthorized
             Controller_V1_Web_Base::post_check();
@@ -102,34 +95,42 @@ class Controller_V1_Web_Register extends Controller_V1_Web_Base
 		$username = Model_User::empty_name($username);
 		$username = Model_User::format_name_check($username);
 
-		// facebook/twitterアカウントデータをusers/devices に保存する	
-		$cognito_data = Model_Cognito::post_web_sns($user_id, $provider, $sns_token);
-		$identity_id  = $cognito_data['IdentityId'];
-      
-      		// users table insert       
+		// facebook/twitterアカウントデータをusers/devices に保存する
+		Model_Device::check_register_id($register_id);
+                $cognito_data = Model_Cognito::post_data($user_id);
+                $identity_id  = $cognito_data['IdentityId'];
+                $token        = $cognito_data['Token'];
+
+                // users table insert           
 		$profile_img  = Model_User::sns_insert_data($username, $identity_id, $profile_img);
-        	$endpoint_arn = 0;
+                $endpoint_arn = 0;
 
 		// device insert
-        	Model_Device::post_data($user_id, $os, $model, $register_id, $endpoint_arn);
+                Model_Device::post_data($user_id, $os, $model, $register_id, $endpoint_arn);
 
-		error_log('provider:');
-        	error_log($provider);
 
+		// SNS連携
+		if ($profile_img != 'none') {
+                    $profile_img = Model_S3::input($user_id, $profile_img);
+                    $profile_img = Model_User::update_profile_img($user_id, $profile_img);
+                }
+
+                $identity_id = Model_User::get_identity_id($user_id);
+		// identity_idを発行
 		// 連携したので、flagを更新
-        	Model_User::update_sns_flag($user_id, $provider);
+                Model_User::update_sns_flag($user_id, $provider);
+                Model_Cognito::post_sns($user_id, $identity_id, $provider, $token);
+
 		// jwt 生成
 		$jwt = self::encode($user_id, $username);
-		error_log('json出力します');
-
 		// 正常に登録したらJSON出力
 		self::success_json($keyword, $user_id, $username,
-		    $profile_img, $identity_id, $badge_num,
-		    $jwt,$message = "success"
+			           $profile_img, $identity_id, $badge_num,
+		                   $jwt,$message = "success"
 		);
-
 	    } catch (\Database_Exception $e) {
 		// 
+
 	    }
 	}
 }

@@ -1,58 +1,14 @@
 <?php
-/**
- * Auth Class Api
- * @package    Gocci-Web
- * @version    3.1 <2015/10/20>
- * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
- * @license    MIT License
- * @copyright  2014-2015 Inase,inc.
- * @link       https://bitbucket.org/inase/gocci-web-api
- */
-
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
 error_reporting(-1);
 
-class Controller_V1_Web_Auth extends Controller_V1_Web_Base
+class Controller_V3_Web_Auth extends Controller_V3_Web_Base
 {
     const SESSION_KEY_LOGGED_IN = 'logged-in';
 
-    /**
-    * jwtがあるかどうかをcheckするメソッド
-    *
-    * @return string
-    */
-    public static function get_jwt_token($uri="", $login_flag)
-    {
-        $jwt = @$_SERVER["HTTP_AUTHORIZATION"] ?  @$_SERVER["HTTP_AUTHORIZATION"] : "";
-	
-	if(isset($jwt)) {
-            $data      = self::decode($jwt);
-            $user_data = session::get('data');
-            $obj       = json_decode($user_data);
-            if (empty($obj)) {
-                 self::unauth();
-            }
-            $user_id   = $obj->{'user_id'};
-            session::set('user_id', $user_id);
-            $username  = $obj->{'username'};
-            session::set('username', $username);
-            $exp       = $obj->{'exp'};
-            session::set('exp', $exp);
-
-        } else {
-            self::unauth();
-            error_log('UnAuthorized Accsess..');
-            exit;
-        }	
-    }
-
-    /**
-    * SNS Login (Facebook/Twitter)
-    *
-    * @return string
-    */
+    // SNSログイン(Facebook/Twitter)
     public function action_login()
     {
         $keyword     = 'ログイン';
@@ -65,7 +21,7 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
                 self::error_json("UnAuthorized");
             }
             $identity_id = Model_Cognito::get_identity_id($provider, $token);
-            $user_data   = Model_User::web_get_auth($identity_id);
+            $user_data   = Model_User::get_auth($identity_id);
             $user_id     = $user_data['user_id'];
             $username    = $user_data['username'];
             $profile_img = $user_data['profile_img'];
@@ -108,23 +64,16 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
         }
     }
 
-    /**
-    * Logout メソッド
-    *
-    * @return string
-    */
     public static function action_logout()
     {
 	// このapiの脆弱制 => このapiのURLを知っていて、user_idをpostしてしまえば、
 	// そのidでログインしているユーザーがかってにログアウトされてしまうことになる
-	// なので、他api同様に、post等でuserを識別するのではなく、jwtからuser_idを識別する
-	
-	self::get_jwt_token($uri="/auth/logout", $login_flag=1);	
-	$user_id = Input::post('user_id'); // いずれ廃止
-
+	$uri = "auth/logout";
+	$user_id = Input::post('user_id');
+	// ユーザデータを保持していないのであれば、強制終了
 	if (empty($user_id)) {
 	    // baseのerror_json呼び出し
-	    self::error_json('ログインしていないためログアウトできません');
+	    self::error_json('ログインしていないためユーザーデータが存在しません');
         }
 
 	try {
@@ -136,10 +85,10 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
 	    ];
 
             $base_data = [
-                    "api_version" => 3.1,
-		    "api_uri"     => $uri,
-                    "api_code"    => 1,
-                    "api_message" => "success",
+                    "api_version" =>3,
+		    "api_uri"     =>$uri,
+                    "api_code"    =>1,
+                    "api_message" =>"success",
 		    "login_flag"  => 0,
                     "api_data"    => $api_data
             ];
@@ -151,11 +100,7 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
        }
     }
 
-    /**
-    * username password Login
-    *
-    * @return string
-    */
+    // username/passwordログイン
     public function action_pass_login()
     {
   	$username  = Input::post('username');
@@ -190,11 +135,12 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
 	        ];
  	    
 	        $base_data = [
-		    "api_version" => 3.1,
-	            "api_code"    => 0,
-	            "api_message" => "success",
+		    "api_version" =>3,
+	            "api_code"    =>0,
+	            "api_message" =>"success",
 	            "api_data"    => $api_data
 	        ];
+
 	        // JSONを返す
 	        self::output_json($base_data);
 	    }
@@ -207,11 +153,6 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
   	}
    }
 
-   /**
-   * output json
-   *
-   * @return string
-   */
    public static function output_json($data)
     {
         $json = json_encode(
@@ -222,10 +163,6 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
     }
 
     // DBデータ入力成功
-
-    // -------------------------------------------------
-    // 以下メソッドを使っていなければ廃止
-    // -------------------------------------------------
     private static function success(
         $keyword,
         $user_id,
@@ -237,7 +174,7 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
     )
     {
         $data = [
-	    'api_version' => 3.1,
+	    'api_version' => 3,
             'code'        => 200,
 	    'api_message' => "success",
 	    'api_data'    => $obj = new stdClass(),
@@ -252,12 +189,9 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
 
         Controller_V1_Mobile_Base::output_json($data);
         session::set('user_id', $user_id);
-  }
-    /**
-    * DBデータ入力エラー
-    *
-    * @return string
-    */
+    }
+
+    // DBデータ入力エラー
     private static function failed(
         $keyword,
         $user_id,
@@ -268,14 +202,12 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
     )
     {
         $data = [
-	    'api_version' => 3.1,
-	    'api_uri'     => Uri::string(),
-            'api_code'    => "Failed",
-            'api_message' => $keyword . 'できませんでした。',
-            'username'    => $username,
-            'profile_img' => $profile_img,
-            'identity_id' => $identity_id,
-            'badge_num'   => $badge_num,
+            'code'        => 401,
+            'message'     => "$keyword" . 'できませんでした。',
+            'username'    => "$username",
+            'profile_img' => "$profile_img",
+            'identity_id' => "$identity_id",
+            'badge_num'   => "$badge_num",
         ];
 
         Controller_V1_Mobile_Base::output_json($data);
