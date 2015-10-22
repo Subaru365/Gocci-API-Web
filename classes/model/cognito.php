@@ -50,6 +50,26 @@ class Model_Cognito extends Model
         return $result;
     }
 
+    //Web SNS登録&連携
+    public static function post_web_sns($user_id, $provider, $token)
+    {
+        $cognito_data = Config::get('_cognito');
+
+        $client = new CognitoIdentityClient([
+            'region'  => 'us-east-1',
+            'version' => 'latest'
+        ]);
+
+        $result = $client->getOpenIdTokenForDeveloperIdentity([
+            'IdentityPoolId' => "$cognito_data[IdentityPoolId]",
+            'Logins'         => [
+                "$cognito_data[developer_provider]" => "$user_id",
+                "$provider" => "$token",
+            ],
+        ]);
+
+        return $result;
+    }
 
 	//identity_idからtokenを取得
 	public static function get_token($user_id, $identity_id)

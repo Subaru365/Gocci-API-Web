@@ -86,7 +86,6 @@ class Model_Post extends Model
 			->order_by(DB::expr('COUNT(gochi_post_id)'), 'desc');
 		}
 
-
 		//カテゴリー絞り込み
 		if ($option['category_id'] != 0) {
 			$query->where('category_id', $option['category_id']);

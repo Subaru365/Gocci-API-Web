@@ -228,6 +228,24 @@ class Model_User extends Model
         return $user_data[0];
     }
 
+    // Web用 ログインユーザ情報取得
+    public static function web_get_auth($identity_id)
+    {
+	$query = DB::select('user_id', 'username', 'profile_img', 'badge_num')->from('users')
+	->where('identity_id', $identity_id);
+	$user_data = $query->execute()->as_array();
+
+	if (empty($user_data)) {
+	    Controller_V1_Web_Base::error_json('登録されていないユーザです');
+	    error_log('登録されていないユーザー' . $identity_id);
+	    // Cognitoから消去
+	    Model_Cognito::delete_identity_id($identity_id);
+	    exit;
+	}
+	$user_data[0]['profile_img'] = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
+	return $user_data[0];
+    }
+
     // username/passwordからidentity_idを取得する【web】
     public static function get_web_identity_id($username, $password)
     {
@@ -307,11 +325,12 @@ class Model_User extends Model
 	$query = DB::insert('users')
 	->set(array(
 	    'username'    => $username,
-	    'profile_igm' => $profile_img,
-	    'identity_id' => $identity_id
+	    'profile_img' => $profile_img,
+	    'identity_id' => $identity_id,
 	))
 	->execute();	
 	$profile_img = Model_Transcode::decode_profile_img($profile_img);
+	// error_log('usersテーブルにinsertしました');
         return $profile_img;
     }
 
@@ -460,6 +479,11 @@ class Model_User extends Model
             //認証OK
 	    $match_pass = password_verify($pass, $hash_pass);
         }else{
+	     error_log('current_pass');
+             error_log($pass);
+
+             error_log('hash_pass');
+             error_log($hash_pass);
              error_log('パスワードが一致しません');
              Controller_V1_Web_Base::error_json("パスワードが正しくありません");
              exit;
@@ -539,9 +563,13 @@ class Model_User extends Model
 	$val = Validation::forge();
 	$val->add_field('username', 'ユーザーネーム', 'required');
 	$val->add_field('password', 'パスワード', 'required');
-
-
     }
-
-
+   
+    // web username/profile_img 空かどうかチェック
+    public static function username_profile_img_check($username, $profile_img)
+    {
+	if (empty($username) || empty($profile_img)) {
+	      Controller_V1_Web_Base::error_json('Username and profile_img do not enter.');
+         }
+    }
 }
