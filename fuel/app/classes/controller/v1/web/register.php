@@ -2,7 +2,7 @@
 /**
  * Register Class Api
  * @package    Gocci-Web
- * @version    3.1 <2015/10/20>
+ * @version    3.0 <2015/10/20>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2014-2015 Inase,inc.

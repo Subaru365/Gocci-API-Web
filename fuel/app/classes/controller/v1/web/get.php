@@ -2,7 +2,7 @@
 /**
  * Get Class Api
  * @package    Gocci-Web
- * @version    3.1 <2015/10/20>
+ * @version    3.0 <2015/10/20>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2014-2015 Inase,inc.
@@ -38,7 +38,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     *
     * @return string
     */
-    public function create_token($uri="",$login_flag)
+    public function create_token($uri,$login_flag)
     {
         $jwt = @$_SERVER["HTTP_AUTHORIZATION"] ?  @$_SERVER["HTTP_AUTHORIZATION"] : "";
 
@@ -70,11 +70,11 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     */
     public function action_timeline()
     {
-        self::create_token($uri="/get/timeline", $login_flag=0);
+        self::create_token($uri=Uri::string(), $login_flag=0);
     	$user_id  = session::get('user_id');
     	$username = session::get('username');
 	$exp      = session::get('exp');
-	self::check_jwtExp($exp);
+	$jwt = self::check_jwtExp($exp);
 
 	$sort_key = 'all';
 	$limit    = 20;
@@ -87,7 +87,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
 		'lat'		=> Input::get('lat', 0)
 	];
 
-	$data     = Model_Post::get_data($user_id, $sort_key, $sort_key, $limit);
+	$data = Model_Post::get_data($user_id, $sort_key, $sort_key, $limit);
 
 	for ($i = 0; $i<$limit; $i++) {
 		$post_id = $data[$i]['post_id'];
@@ -98,11 +98,12 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
 		];
 	}
 	$base_data = [
-	        "api_version" => 3,
+	        "api_version" => 3.0,
 		"api_uri"     => Uri::string(),
     	        "api_code"    => 0,
     		"api_message" => "success",
-    		"api_data"    =>$data		
+    		"api_data"    => $data,
+		"jwt"         => $jwt		
 	];
 	$status   = $this->output_json($base_data);
     }
@@ -114,13 +115,13 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     */
     public function action_timeline_loading()
     {
-	self::create_token($uri="get/timeline_loading",$login_flag=2);
+	self::create_token($uri=Uri::string(),$login_flag=2);
         $sort_key = 'all';
         $user_id  = session::get('user_id');
         $page_num = Input::get('page');
 	$limit    = 20;
 	$exp      = session::get('exp');
-        self::check_jwtExp($exp);
+        $jwt = self::check_jwtExp($exp);
         $data     = Model_Post::get_data($user_id, $sort_key, $page_num);
 
 	for ($i = 0; $i<$limit; $i++) {
@@ -131,7 +132,15 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
 		    "comments" => $Comment_data
 		];
 	}
-        $status   = $this->output_json($data);
+	$base_data = [
+                "api_version" => 3.0,
+                "api_uri"     => Uri::string(),
+                "api_code"    => 0,
+                "api_message" => "success",
+                "api_data"    => $data,
+                "jwt"         => $jwt
+        ];
+        $status   = $this->output_json($base_data);
     }
 
     /**
@@ -141,11 +150,11 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     */
     public function action_recommendation()
     {
-	self::create_token($uri="/get/recommendation", $login_flag=2);
+	self::create_token($uri=Uri::string(), $login_flag=2);
 	// ユーザー好きそうな傾向のある投稿・お店をレコメンドする R/Pythonの方が良い気がする
 	$user_id = session::get('user_id');
 	$exp      = session::get('exp');
-        self::check_jwtExp($exp);
+        $jwt = self::check_jwtExp($exp);
     }
 
     /**
@@ -155,12 +164,12 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     */
     public function action_popular_loading()
     {
-        self::create_token($uri="/get/popular_loading",$login_flag=2);
+        self::create_token($uri=Uri::string(),$login_flag=2);
         $sort_key = 'post';
         $page_num = Input::get('page');
         $user_id  = session::get('user_id');
 	$exp      = session::get('exp');
-        self::check_jwtExp($exp);
+        $jwt = self::check_jwtExp($exp);
         $post_id  = Model_Gochi::get_rank($page_num);
         $num      = count($post_id);
 
@@ -184,12 +193,12 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     */
     public function action_comment()
     {
-	self::create_token($uri="/get/comment",$login_flag=2);
+	self::create_token($uri=Uri::string(), $login_flag=2);
         $sort_key     = 'post';
         $user_id      = session::get('user_id');
         $post_id      = Input::get('post_id');
-	$exp      = session::get('exp');
-        self::check_jwtExp($exp);
+	$exp          = session::get('exp');
+        $jwt          = self::check_jwtExp($exp);
         $post_data    = Model_Post::get_data($user_id, $sort_key, $post_id);
         $Comment_data = Model_Comment::get_data($post_id);
 
@@ -197,6 +206,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
             "post"     => $post_data[0],
             "comments" => $Comment_data
         ];
+	// $base_data
 
         $status = $this->output_json($data);
     }
@@ -209,7 +219,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     public function action_rest()
     {
 	$rest_id    = Input::get('rest_id');
-	$uri        = "get/rest";
+	$uri        = Uri::string();
         $login_flag = 0;
         $sort_key   = 'rest';
 
@@ -220,6 +230,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
 	    $obj       = json_decode($user_data); 
 
 	    if (empty($obj)) {
+		$jwt = "";
 		// ログインしていない
 	        $user_id = 0;
 		$rest_data = Model_Restaurant::get_data($user_id, $rest_id);
@@ -228,7 +239,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         	$post_data = Model_Post::get_data($user_id, $sort_key, $rest_id);
 
         	if (empty($user_id)) {
-            	    $login_flag =0;
+            	    $login_flag = 0;
         	} else {
             	    $login_flag = 1;
        	        }
@@ -239,12 +250,13 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         	];	
 
 		$base_data = [
-                    "api_version"=> 3,
+                    "api_version"=> 3.0,
                     "api_uri"    => $uri,
                     "api_code"   => 0,
             	    "api_message"=> "UnAuthorized",
             	    "login_flag" => $login_flag,
-           	    "api_data"   => $data
+           	    "api_data"   => $data,
+		    "jwt"        => $jwt
        	         ];
         	$status = $this->output_json($base_data);
 		exit;
@@ -258,7 +270,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         session::set('exp', $exp);
         $rest_id   = Input::get('rest_id');
 	// $exp      = session::get('exp');
-        self::check_jwtExp($exp);
+        $jwt = self::check_jwtExp($exp);
 
         $rest_data = Model_Restaurant::get_data($user_id, $rest_id);
         $rest_data[0]['want_flag'] = Model_Want::get_flag($user_id, $rest_id);
@@ -278,12 +290,13 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         ];
 
 	$base_data = [
-            "api_version"=> 3,
+            "api_version"=> 3.0,
 	    "api_uri"    => $uri,
             "api_code"   => 0,
             "api_message"=> "success",
 	    "login_flag" => $login_flag,
-            "api_data"   => $data
+            "api_data"   => $data,
+	    "jwt"        => $jwt
         ];
 
         $status = $this->output_json($base_data);
@@ -296,7 +309,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     */
     public function action_user($target_username)
     {
-	$uri = "get/user";
+	$uri = Uri::string();
 	$jwt = @$_SERVER["HTTP_AUTHORIZATION"] ?  @$_SERVER["HTTP_AUTHORIZATION"] : "";
 
         if(isset($jwt)) {
@@ -330,12 +343,13 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
                             "posts"  => $post_data
                     ];
 		    $base_data = [
-                            "api_version"=> 3,
+                            "api_version"=> 3.0,
 			    "api_uri"    => $uri,
                             "api_code"   => 1,
                             "api_message"=> "UnAuthorized",
                             "login_flag" => 0,
-                            "api_data"   => $data
+                            "api_data"   => $data,
+			    "jwt"        => $jwt
                     ];
         	    $status = $this->output_json($base_data);
 		    exit;
@@ -347,7 +361,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         session::set('username', $username);
         $exp      = $obj->{'exp'};
         session::set('exp', $exp);
-        self::check_jwtExp($exp);
+        $jwt = self::check_jwtExp($exp);
 
         $sort_key = 'user';
         $limit    = 20;
@@ -378,12 +392,13 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
             "posts"  => $post_data
         ];
 	$base_data = [
-            "api_version"=> 3,
+            "api_version"=> 3.0,
 	    "api_uri"    => $uri,
             "api_code"   => 0,
             "api_message"=> "sucess",
             "login_flag" => $login_flag,
-            "api_data"   => $data
+            "api_data"   => $data,
+	    "jwt"        => $jwt
         ];
         $status = $this->output_json($base_data);
     }
@@ -395,12 +410,13 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     */
     public function action_notice()
     {	
-	self::create_token($uri="/get/notice",$login_flag=2);
+	self::create_token($uri=Uri::string(), $login_flag=2);
         $user_id = session::get('user_id');
 	$exp     = session::get('exp');
-        self::check_jwtExp($exp);
+        $jwt = self::check_jwtExp($exp);
         $data    = Model_Notice::get_data($user_id);
         Model_User::reset_badge($user_id);
+	// $base_data = 
         $status  = $this->output_json($data);
     }
 
@@ -411,21 +427,22 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     */
     public function action_near()
     {
-	self::create_token($uri='/get/near',$login_flag=2);
+	self::create_token($uri=Uri::string(), $login_flag=2);
 	$lon  = Input::get('lon');
 	$lat  = Input::get('lat');
-	$exp      = session::get('exp');
-        self::check_jwtExp($exp);
+	$exp  = session::get('exp');
+        $jwt  = self::check_jwtExp($exp);
 	$data = Model_Restaurant::get_near($lon, $lat);
 
 	// JSON
 	$base_data = [
-	    "api_version" => 3,
-	    "api_uri"     => '/get/near',
+	    "api_version" => 3.0,
+	    "api_uri"     => Uri::string(),
 	    "api_code"    => 0,
 	    "api_message" => "success",
 	    "login_flag"  => 1,
-	    "api_data"    => $data
+	    "api_data"    => $data,
+	    "jwt"         => $jwt
 	];
 	$status = $this->output_json($base_data);	
     }
@@ -437,10 +454,10 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     */
     public function action_follow()
     {
-	self::create_token($uri="/get/follow",$login_flag=2);
+	self::create_token($uri=Uri::string(), $login_flag=2);
         $user_id  = session::get('user_id');
 	$exp      = session::get('exp');
-        self::check_jwtExp($exp);
+        $jwt      = self::check_jwtExp($exp);
 
 	$option = [
                 'call'        => Input::get('call', 0),
@@ -465,12 +482,13 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         }
 
 	$base_data = [
-	    "api_version" => 3,
-            "api_uri"     => "/get/follow",
+	    "api_version" => 3.0,
+            "api_uri"     => Uri::string(),
 	    "api_code"    => 0,
 	    "api_message" => "success",
 	    "login_flag"  => 1,
-	    "api_data"    => $data
+	    "api_data"    => $data,
+	    "jwt"         => $jwt
 	]; 
         $status         = $this->output_json($base_data);
     }
@@ -482,12 +500,13 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     */
     public function action_follower()
     {
-	self::create_token($uri="/get/follower",$login_flag=2);
+	self::create_token($uri=Uri::string(), $login_flag=2);
         $user_id        = session::get('user_id');
         $target_user_id = Input::get('target_user_id');
-	$exp      = session::get('exp');
-        self::check_jwtExp($exp);
+	$exp            = session::get('exp');
+        $jwt            = self::check_jwtExp($exp);
         $data           = Model_Follow::get_follower($user_id, $target_user_id);
+	// $base_data      = 
         $status         = $this->output_json($data);
     }
 
@@ -498,11 +517,12 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     */
     public function action_want()
     {
-	self::create_token($uri="/get/want",$login_flag=2);
+	self::create_token($uri=Uri::string(), $login_flag=2);
         $target_user_id = Input::get('target_user_id');
 	$exp      = session::get('exp');
-        self::check_jwtExp($exp);
+        $jwt = self::check_jwtExp($exp);
         $data           = Model_Want::get_want($target_user_id);
+	// $base_data = 
         $status         = $this->output_json($data);
     }
 
@@ -513,11 +533,12 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     */
     public function action_user_cheer()
     {
-        self::create_token($uri="/get/user_cheer",$login_flag=2);
+        self::create_token($uri=Uri::string(), $login_flag=2);
         $target_user_id = Input::get('target_user_id');
 	$exp      = session::get('exp');
-        self::check_jwtExp($exp);
+        $jwt = self::check_jwtExp($exp);
         $data           = Model_Post::get_user_cheer($target_user_id);
+	// $base_data = 
         $status         = $this->output_json($data);
     }
 
@@ -528,11 +549,11 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     */
     public function action_rest_cheer()
     {
-        self::create_token($uri="/get/rest_cheer",$login_flag=2);
+        self::create_token($uri=Uri::string(), $login_flag=2);
         $user_id = Input::get('user_id');
         $rest_id = Input::get('rest_id');
-	$exp      = session::get('exp');
-        self::check_jwtExp($exp);
+	$exp     = session::get('exp');
+        $jwt     = self::check_jwtExp($exp);
         $data    = Model_Post::get_rest_cheer($rest_id);
         $num     = count($data);
         for ($i=0;$i<$num;$i++) {
@@ -540,6 +561,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
             $follow_flag    = Model_Follow::get_flag($user_id, $target_user_id);
             $adta[$i]['follow_flag'] = $follow_flag;
         }
+	// $base_data
         $status = $this->output_json($data);
     }
 
@@ -550,13 +572,14 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     */
     public function action_user_search()
     {
-        self::create_token($uri="/get/user_search",$login_flag=2);
+        self::create_token($uri=Uri::string(), $login_flag=2);
         $user_id         = session::get('user_id');
         $targetUserName  = Input::get('username');
-	$exp      = session::get('exp');
-        self::check_jwtExp($exp);
+	$exp             = session::get('exp');
+        $jwt             = self::check_jwtExp($exp);
         $targetUserId    = Model_User::get_id($targetUserName);
         $userData        = Model_User::get_data($user_id, $targetUserId);
+	// $base_data       = 
 	$status          = $this->output_json($userData);
     }
 }

@@ -2,7 +2,7 @@
 /**
  * Post Class Api
  * @package    Gocci-Web
- * @version    3.1 <2015/10/20>
+ * @version    3.0 <2015/10/20>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2015 Inase,inc.
@@ -54,7 +54,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
      */
     public function action_sns()
     {
-        self::create_token($uri="/get/timeline", $login_flag=0);
+        self::create_token($uri=Uri::string(), $login_flag=0);
         $keyword     = 'SNS連携'; 
         $user_id     = session::get('user_id');
         $provider    = Input::post('provider');
@@ -71,8 +71,8 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             Model_Cognito::post_sns($user_id, $identity_id, $provider, $token);
 
             $data = [
-                "api_version" => 3.1,
-                "api_uri"     => "/post/sns",
+                "api_version" => 3.0,
+                "api_uri"     => Uri::string(),
                 "api_code"    => 0,
                 "login_flag"  => 1,
                 "api_message" => $keyword . "しました",
@@ -94,7 +94,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
      */
     public function action_unlink()
     {
-           self::create_token($uri="/post/unlink", $login_flag=1);
+           self::create_token($uri=Uri::string(), $login_flag=1);
            $keyword  = 'SNS連携解除';
            $user_id  = session::get('user_id');
            $provider = Input::post('provider');
@@ -119,7 +119,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
          */
         public function action_gochi()
         {
-            self::create_token($uri="/post/gochi", $login_flag=0);      
+            self::create_token($uri=Uri::string(), $login_flag=0);      
             $keyword = 'gochi';
             $user_id = session::get('user_id');
             $post_id = Input::post('post_id');
@@ -151,7 +151,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
          */
         public function action_comment()
         {
-            self::create_token($uri="/post/comment", $login_flag=0);
+            self::create_token($uri=Uri::string(), $login_flag=0);
             $keyword = 'コメント';
             $user_id = session::get('user_id');
             error_log('user_idの中身');
@@ -185,7 +185,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
      	*/
         public function action_follow()
         {
-            self::create_token($uri="/post/follow", $login_flag=0);
+            self::create_token($uri=Uri::string(), $login_flag=0);
             $keyword        = 'フォロー';
             $user_id        = session::get('user_id');
             $follow_user_id = Input::post('target_user_id');
@@ -209,7 +209,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
      	*/
         public function action_unfollow()
         {
-            self::create_token($uri="post/unfollow", $login_flag=0);
+            self::create_token($uri=Uri::string(), $login_flag=0);
             $keyword          = 'フォローを解除';
             $user_id          = session::get('user_id');
             $unfollow_user_id = Input::post('target_user_id');
@@ -231,7 +231,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
      	*/
         public function action_want()
         {
-            self::create_token($uri="/post/want", $login_flag=0);
+            self::create_token($uri=Uri::string(), $login_flag=0);
             $keyword = '行きたい店リストに追加';
             $user_id = session::get('user_id');
             $rest_id = Input::post('rest_id');
@@ -252,7 +252,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
      	*/
         public function action_unwant()
         {
-            self::create_token($uri="/post/unwant", $login_flag=0);
+            self::create_token($uri=Uri::string(), $login_flag=0);
             $keyword = '行きたい店リストから削除';
             $user_id = session::get('user_id');
             $rest_id = Input::post('rest_id');
@@ -273,7 +273,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
      	*/
         public function action_postblock()
         {
-            self::create_token($uri="/post/postblock", $login_flag=0);
+            self::create_token($uri=Uri::string(), $login_flag=0);
             $keyword = '投稿を違反報告';
             $user_id = session::get('user_id');
             $post_id = Input::post('post_id');
@@ -294,7 +294,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
      	*/
         public function action_postdel()
         {
-            self::create_token($uri="/post/postdel", $login_flag=0);
+            self::create_token($uri=Uri::string(), $login_flag=0);
             $keyword = '投稿を消去';
             $post_id = Input::post('post_id');
 
@@ -314,7 +314,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
      	*/
         public function action_update_profile()
         {
-            self::create_token($uri="post/update_profile", $login_flag=0);
+            self::create_token($uri=Uri::string(), $login_flag=0);
             // error_log('update_profile 0');
             $keyword        = 'プロフィールを変更';
             $user_id        = session::get('user_id');
@@ -369,8 +369,8 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
                 ];
    
                 $base_data = [
-                        "api_version" => 3,
-                        "api_uri"     => "/post/update_profile",
+                        "api_version" => 3.0,
+                        "api_uri"     => Uri::string(),
                         "api_code"    => 0,
                         "login_falg"  => 1,
                         "api_message" => "success",
@@ -393,7 +393,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
      	*/
         public function action_feedback()
         {
-            self::create_token($uri="post/fedback", $login_flag=0);
+            self::create_token($uri=Uri::string(), $login_flag=0);
             $keyword  = '意見を投稿';
             $user_id  = session::get('user_id');
             $feedback = Input::post('feedback');
@@ -465,7 +465,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
         public function action_password_change()
         {
             // ログインしているユーザIDを取得
-            self::create_token($uri="post/password_change", $login_flag=0);
+            self::create_token($uri=Uri::string(), $login_flag=0);
             $user_id = session::get('user_id');
 
             error_log('パスワードを変更するuser_idは: ');
@@ -490,11 +490,11 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
                         "message" => "パスワードを変更しました"
                     ];
                     $base_data = [
-                        "api_version" => 3,
+                        "api_version" => 3.0,
                         "api_code"    => 0,
                         "login_falg"  => 1,
                         "api_message" => "success",
-                        "api_data" => $data
+                        "api_data"    => $data
                     ];
 
                     $status = $this->output_json($base_data);

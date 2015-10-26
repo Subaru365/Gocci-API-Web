@@ -2,7 +2,7 @@
 /**
  * Auth Class Api
  * @package    Gocci-Web
- * @version    3.1 <2015/10/20>
+ * @version    3.0 <2015/10/20>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2014-2015 Inase,inc.
@@ -119,7 +119,7 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
 	// そのidでログインしているユーザーがかってにログアウトされてしまうことになる
 	// なので、他api同様に、post等でuserを識別するのではなく、jwtからuser_idを識別する
 	
-	self::get_jwt_token($uri="/auth/logout", $login_flag=1);	
+	self::get_jwt_token($uri=Uri::string(), $login_flag=1);	
 	$user_id = Input::post('user_id'); // いずれ廃止
 
 	if (empty($user_id)) {
@@ -129,7 +129,10 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
 
 	try {
 	    // ログアウトのためsessionデータ削除
-	    \Session::delete(self::SESSION_KEY_LOGGED_IN);
+	    // \Session::delete(self::SESSION_KEY_LOGGED_IN);
+	    \Sessoin::delete('user_id');
+	    \Session::delete('username');
+	    \Session::delete('exp');
 
 	    $api_data = [
                     "message" => "ログアウトしました"
