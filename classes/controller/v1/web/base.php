@@ -2,46 +2,18 @@
 /**
  * Base Class Api
  * @package    Gocci-Web
- * @version    3.1 <2015/10/20>
+ * @version    3.0 <2015/10/20>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2014-2015 Inase,inc.
  * @link       https://bitbucket.org/inase/gocci-web-api
  */
-
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
 error_reporting(-1);
 class Controller_V1_Web_Base extends Controller
 {
-    /*
-    public static function create_token($uri="", $login_flag)
-    {
-        $jwt = @$_SERVER["HTTP_AUTHORIZATION"] ?  @$_SERVER["HTTP_AUTHORIZATION"] : "";
-
-        if(isset($jwt)) {
-            $data      = self::decode($jwt);
-            $user_data = session::get('data');
-            $obj       = json_decode($user_data);
-            if (empty($obj)) {
-                 self::unauth();
-            }
-            $user_id   = $obj->{'user_id'};
-            session::set('user_id', $user_id);
-            $username  = $obj->{'username'};
-            session::set('username', $username);
-            $exp       = $obj->{'exp'};
-            session::set('exp', $exp);
-
-        } else {
-            self::unauth();
-            error_log('UnAuthorized Accsess..');
-            exit;
-        }
-     }
-     */
-
     /**
     * post check
     *
@@ -78,7 +50,7 @@ class Controller_V1_Web_Base extends Controller
     }
 
     /**
-    * encode
+    * encode (JWT create)
     *
     * @return string
     */
@@ -108,18 +80,43 @@ class Controller_V1_Web_Base extends Controller
     */   
     public static function check_jwtExp($exp)
     {
+	$jwt = "";
 	if (isset($exp) && (time() >= $exp)) { 
 	    error_log('=jwtの有効期限切れ=');
 	    self::expired_token("Expired Token");
 	} else {
 	    error_log('有効期限内です');
+	    // refresh_token method call!
+	    $jwt = self::_refresh_token();
 	    $time = time();
 	    error_log('現在時刻');
 	    error_log($time);
 	    error_log('exp');
 	    error_log($exp);
+
+	    
 	}
+	return $jwt;
     }
+
+    /**
+    * refresh token method
+    *
+    * @return string
+    */
+    public static function _refresh_token()
+    {
+	// jwt tokenのexpが有効なのでtokenの有効期限伸ばす(refreshする)
+	$user_id  = session::get('user_id');
+	$username = session::get('usernaem');
+
+	// 古いSessionデータexpを破棄する
+	\Session::delete('exp');
+	$jwt = self::encode($user_id, $username);
+	error_log('JWT was update!');	
+	return $jwt;
+    }
+
 
     /**
     * Not JWT
@@ -130,8 +127,8 @@ class Controller_V1_Web_Base extends Controller
     {
         error_log('アクセス拒否 base unauth method.');
 	$status = [
- 		   "api_version" => 3,
-	           "api_uri"     => $uri,
+ 		   "api_version" => 3.0,
+	           "api_uri"     => Uri::string(),
     		   "api_code"    => 1,
     	           "api_message" => "UnAuthorized",
 		   "login_flag"  => $login_flag,
@@ -236,7 +233,7 @@ class Controller_V1_Web_Base extends Controller
 	];
 
 	$status = [
-	    "api_version" => 3.1,
+	    "api_version" => 3.0,
 	    "api_uri"     => Uri::string(),
             "api_code"    => "SUCCESS",
             "api_message" => "$message Successful API request",
@@ -245,7 +242,6 @@ class Controller_V1_Web_Base extends Controller
 
 	$status = json_encode(
                 $status,
-                // JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
 		JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
         );
 
@@ -262,7 +258,7 @@ class Controller_V1_Web_Base extends Controller
   {
       // ver3 validation
       $status = [
-          "api_version" => 3.1,
+          "api_version" => 3.0,
 	  "api_uri"     => Uri::string(),
           "api_code"    => " VALIDATION ERROR",
           "api_message" => $message,
@@ -272,7 +268,6 @@ class Controller_V1_Web_Base extends Controller
       $status = json_encode(
                 $status,
 		JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
-                // JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
       );
       echo $status;
       exit;	
@@ -285,8 +280,9 @@ class Controller_V1_Web_Base extends Controller
   */
   public static function expired_token()
   {
+	// $login_flagが2であれば、フロント側でリダイレクトする
 	$status = [
-          "api_version" => 3.1,
+          "api_version" => 3.0,
           "api_uri"     => Uri::string(),
           "api_code"    => "Failed",
           "api_message" => $message,
