@@ -94,24 +94,159 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
      */
     public function action_unlink()
     {
-           self::create_token($uri=Uri::string(), $login_flag=1);
-           $keyword  = 'SNS連携解除';
-           $user_id  = session::get('user_id');
-           $provider = Input::post('provider');
-           $token    = Input::post('token');
+        self::create_token($uri=Uri::string(), $login_flag=1);
+        $keyword  = 'SNS連携解除';
+        $user_id  = session::get('user_id');
+        $provider = Input::post('provider');
+        $token    = Input::post('token');
+	error_log('provider');
+	error_log($provider);
+	error_log('token');
+	error_log($token);
 
-           try {
-               $identity_id = Model_User::get_indentity_id($user_id);
-               Model_User::deleet_sns_flag($user_id, $provider);
-               Model_Cognito::delete_sns($user_id, $identity_id, $provider, $token);
-               self::success($keyword);
-           } catch (\Dataase_Exception $e) {
-                self::failed($keyword);
-                error_log($e);
-           }
-       }
+        try {
+            // 他にSNS連携しているか確認
+            $sns_flag = Model_User::check_sns_flag($user_id);      
+            $facebook_flag = $sns_flag[0]['facebook_flag'];
+            $twitter_flag  = $sns_flag[0]['twitter_flag'];
+	    $password = Model_User::get_password($user_id);
 
-	/**
+            if (empty($password)) {
+                // パスワードが空
+                // パスワード登録をしてください(3)
+                self::failed($message = "パスワードを登録してください SNS解除");
+            } else if ((int)$facebook_flag === (int)1 || (int)$twitter_flag === (int)1) {
+                // 既に連携している(1) 連携解除しました
+                self::start_unlink($user_id, $provider, $token, $keyword);                  
+                
+            } else {
+                // パスワードは既に登録されている
+                self::start_unlink($user_id, $provider, $token, $keyword);
+            } 
+        } catch (\Dataase_Exception $e) {
+            self::failed($keyword);
+            error_log($e);
+        }
+    }
+
+    /**
+     * 現在何を連携しているのかを
+     *
+     *
+     */
+    public static function action_check_sns_coordination()
+    {
+	
+	self::create_token($uri=Uri::string(), $login_flag=1);
+        $user_id  = session::get('user_id');
+	
+	// $user_id = 1;
+	$sns_flag = Model_User::check_sns_flag($user_id);
+        $facebook_flag = $sns_flag[0]['facebook_flag'];
+        $twitter_flag  = $sns_flag[0]['twitter_flag'];
+
+	$data = [
+            "facebook_flag" => (int)$facebook_flag,
+	    "twitter_flag"  => (int)$twitter_flag          
+        ];
+
+        $base_data = [
+            "api_version" => 3.0,
+            "api_uri"     => Uri::string(),
+            "api_code"    => 0,
+            "login_falg"  => 1,
+            "api_message" => "success",
+            "api_data"    => $data
+        ];
+        $status = self::output_json($base_data);
+        error_log('json出力');
+    }
+
+    // password check 
+    // ==================処理的にModel ======================== 
+    public static function action_password_check()
+    {
+	self::create_token($uri=Uri::string(), $login_flag=1);
+	$user_id  = session::get('user_id');
+
+	// パスワードが登録されているか
+        $password = Model_User::get_password($user_id);
+
+        if (empty($password)) {
+            // パスワードが空
+            // パスワード登録をしてください(3)
+            self::failed($message = "パスワードを登録してください");
+        } else {
+            // パスワードは既に登録されている
+            self::success($message = "パスワードは既に登録されています");
+        }
+    }
+
+    public static function action_create_password()
+    {
+	self::create_token($uri=Uri::string(), $login_flag=1);
+        $user_id  = session::get('user_id');
+	$password = Input::post('password');	
+        // passwordが入力されているか
+	if (empty($password)) {
+	    // passwordが空です。入力してください
+	    self::failed($message = "passwordが空です。パスワードが生成");
+	}
+	// passwordの文字数が制限範囲内か
+	$password = Model_User::format_password_check($password);
+
+	// passwordをhash化させる
+	$hash_pass = password_hash($password, PASSWORD_BCRYPT);
+
+	try {
+	    // パスワードを空から指定したパスワードに更新
+	    Model_User::update_password($user_id, $password);
+	    // json出力
+
+	    $data = [
+                "message" => "パスワードを登録しました"
+            ];
+
+            $base_data = [
+                "api_version" => 3.0,
+                "api_uri"     => Uri::string(),
+                "api_code"    => 0,
+                "login_falg"  => 1,
+                "api_message" => "success",
+                "api_data"    => $data
+            ];
+            $status = self::output_json($base_data);
+            error_log('json出力');
+
+	} catch (\Database_Exception $e) {
+
+	}
+    }
+
+    /**
+     *
+     * @param string POST $user_id 
+     * @param string POST $provider
+     * @param string POST $token
+     * @param string POST $keyword
+     */      
+          
+    // ==================処理的にModel ======================== 
+    public static function action_start_unlink($user_id, $provider, $token, $keyword)
+    {
+	error_log('start_unlink');
+            try {
+                $identity_id = Model_User::get_indentity_id($user_id);
+                Model_User::deleet_sns_flag($user_id, $provider);
+                Model_Cognito::delete_sns($user_id, $identity_id, $provider, $token);
+                self::success($keyword);
+            } catch (\Dataase_Exception $e) {
+                 self::failed($keyword);
+                 error_log($e);
+            }
+    }
+
+        /**
          * Gochi->Like
          *
          * @param string POST $uri
@@ -146,8 +281,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 
         /**
          * comment
-         *
-         * 
+         * @return string  
          */
         public function action_comment()
         {
@@ -177,12 +311,12 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             }
         }
 
-	/**
-     	* Follow
-    	*
-     	* @param string POST $uri
-     	* @param string POST $login_flag
-     	*/
+        /**
+        * Follow
+        * @param string POST $uri
+        * @param string POST $login_flag
+        * @return string
+        */
         public function action_follow()
         {
             self::create_token($uri=Uri::string(), $login_flag=0);
@@ -203,10 +337,10 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             }
         }
 
-	/**
-     	* UnFollow
-    	*
-     	*/
+        /**
+        * UnFollow
+        * @return string
+        */
         public function action_unfollow()
         {
             self::create_token($uri=Uri::string(), $login_flag=0);
@@ -224,11 +358,11 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             }
         }
 
-	/**
-     	* Want
-     	*
-    	* @return string
-     	*/
+        /**
+        * Want
+        *
+        * @return string
+        */
         public function action_want()
         {
             self::create_token($uri=Uri::string(), $login_flag=0);
@@ -245,11 +379,11 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
              }
         }
 
-	/**
-     	* UnWant
-     	*
-     	* @return string
-     	*/
+        /**
+        * UnWant
+        *
+        * @return string
+        */
         public function action_unwant()
         {
             self::create_token($uri=Uri::string(), $login_flag=0);
@@ -266,11 +400,11 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             }
         }
 
-	/**
-     	* PostBlock
-     	*
-     	* @return string
-     	*/
+        /**
+        * PostBlock
+        *
+        * @return string
+        */
         public function action_postblock()
         {
             self::create_token($uri=Uri::string(), $login_flag=0);
@@ -287,11 +421,11 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             }
         }
 
-	/**
-     	* PostDelete
-    	*
-     	* @return string
-     	*/
+        /**
+        * PostDelete
+        *
+        * @return string
+        */
         public function action_postdel()
         {
             self::create_token($uri=Uri::string(), $login_flag=0);
@@ -307,22 +441,23 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             }
         }
 
-	/**
-     	* Profile Edit
-     	*
-     	* @return string
-     	*/
+        /**
+        * Profile Edit
+        *
+        * @return string
+        */
         public function action_update_profile()
         {
             self::create_token($uri=Uri::string(), $login_flag=0);
-            // error_log('update_profile 0');
             $keyword        = 'プロフィールを変更';
             $user_id        = session::get('user_id');
+            // $user_id = 690;
             $username       = Input::post('username');
             error_log('username');
             error_log($username);
             $profile_img    = @$_FILES["profile_img"]["tmp_name"];
             error_log('profile_img');
+            // print_r($profile_img);exit;
             error_log(print_r($profile_img, true));
             $save_filename  = $user_id . "_" . date('Y-m-d-H-i-s') . ".png";
 
@@ -337,7 +472,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
                     error_log('usernameが空。写真をupdateします');
                     // S3にpictureをupload
                     // Model_Upload::picture_upload($profile_img, $save_filename);
-                    Model_S3::input($user_id, $profile_img);
+                    Model_S3::input_img($user_id, $profile_img);
                     Model_User::update_profile_img($user_id, $profile_img);
                 } elseif (empty($profile_img)) {
                     // username update
@@ -345,15 +480,17 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
                     Model_User::check_name($username);
                     Model_User::update_name($user_id, $username);
                 } else {
-                    // Both update
-                    error_log('両方updateします');
+                    // Both updatei
+                    error_log('両方updateしますYo');
                     Model_User::check_name($username);
+                    
                     // Model_Upload::picture_upload($profile_img, $save_filename);
-                    Model_S3::input($user_id, $profile_img);
+                    $profile_img = Model_S3::input_img($user_id, $profile_img);
+                    error_log($profile_img);
                     $result = Model_User::update_profile(
                                 $user_id, $username, $profile_img
-                    );
-                }
+                    );  
+              }
                 $user_data   = Model_User::get_profile($user_id);
                 $username    = $user_data['username'];
                 error_log('元のusername');
@@ -386,11 +523,11 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             }
         }
 
-	/**
-     	* FeedBack
-     	*
-     	* @return string
-     	*/
+        /**
+        * FeedBack
+        *
+        * @return string
+        */
         public function action_feedback()
         {
             self::create_token($uri=Uri::string(), $login_flag=0);
@@ -407,33 +544,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             }
         }
 
-        // Rest Add [Mobile]
-	/*
-        public function action_restadd()
-        {
-            self::create_token($uri="post/restadd", $login_flag=0);
-            $keyword   = '店舗を追加';
-            $rest_name = Input::post('rest_name');
-            $lat       = Input::post('lat');
-            $lon       = Input::post('lon');
-
-            try {
-                $rest_id = Model_Restaurant::post_add($rest_name, $lat, $lon);
-                $data = [
-                    'code'    => 200,
-                    'message' => $keyword . "しました",
-                    'rest_id' => $rest_id
-                ];
-
-                self::output_json($data);
-            } catch (\Database_Exception $e) {
-                self::failed($keyword);
-                error_log($e);
-            }
-        }
-	*/
-
-	/**
+        /**
         * Db added Success.
         *
         * @return string
@@ -448,16 +559,22 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
         }
 
         // DB Error
-        private static function failed($keyword)
+        private static function failed($message)
         {
-            $data = [
-                'code'    => 401,
-                'message' => $keyword . 'できませんでした'
+	    
+            $api_data = [
+                "api_version" => 3.0,
+		"api_uri"     => Uri::string(),
+	        "api_code"    => " VALIDATION ERROR",
+                "api_message" => $message . "できませんでした",
+		"login_flag"  => 1,
+		"api_data"    => $obj = new stdClass()
             ];
-            self::output_json($data);
+            self::output_json($api_data);
+	    exit;
         }
 
-	/**
+        /**
         * Password change
         *
         * @return string

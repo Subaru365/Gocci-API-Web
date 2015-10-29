@@ -55,6 +55,7 @@ class Controller_V1_Web_Register extends Controller_V1_Web_Base
 		    $token        = $cognito_data['Token'];
 
 		    // user登録		
+		    $hash_pass    = password_hash($password, PASSWORD_BCRYPT);
 		    $profile_img  = Model_User::insert_data($username, $identity_id,$hash_pass);
 		    $endpoint_arn = 0;
         	    Model_Device::post_data($user_id, $os, $model, $register_id, $endpoint_arn);

@@ -130,16 +130,16 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
 	try {
 	    // ログアウトのためsessionデータ削除
 	    // \Session::delete(self::SESSION_KEY_LOGGED_IN);
-	    \Sessoin::delete('user_id');
-	    \Session::delete('username');
-	    \Session::delete('exp');
+	    Session::delete('user_id');
+	    Session::delete('username');
+	    Session::delete('exp');
 
 	    $api_data = [
                     "message" => "ログアウトしました"
 	    ];
 
             $base_data = [
-                    "api_version" => 3.1,
+                    "api_version" => 3.0,
 		    "api_uri"     => $uri,
                     "api_code"    => 1,
                     "api_message" => "success",
@@ -193,7 +193,7 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
 	        ];
  	    
 	        $base_data = [
-		    "api_version" => 3.1,
+		    "api_version" => 3.0,
 	            "api_code"    => 0,
 	            "api_message" => "success",
 	            "api_data"    => $api_data
@@ -209,20 +209,6 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
   	    // Not access
   	}
    }
-
-   /**
-   * output json
-   *
-   * @return string
-   */
-   public static function output_json($data)
-    {
-        $json = json_encode(
-            $data,
-            JSON_PRETTY_PRINT//|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
-        );
-        echo "$json";
-    }
 
     // DBデータ入力成功
 
@@ -240,7 +226,7 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
     )
     {
         $data = [
-	    'api_version' => 3.1,
+	    'api_version' => 3.0,
             'code'        => 200,
 	    'api_message' => "success",
 	    'api_data'    => $obj = new stdClass(),
@@ -271,7 +257,7 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
     )
     {
         $data = [
-	    'api_version' => 3.1,
+	    'api_version' => 3.0,
 	    'api_uri'     => Uri::string(),
             'api_code'    => "Failed",
             'api_message' => $keyword . 'できませんでした。',

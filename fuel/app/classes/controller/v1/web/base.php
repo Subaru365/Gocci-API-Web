@@ -12,8 +12,19 @@ header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
 error_reporting(-1);
+/**
+ * Base Class
+ * @author Kazunori Tani <k-tani@inase-inc.jp>
+ *
+ */
 class Controller_V1_Web_Base extends Controller
 {
+    /**
+     * The Web Gocci api Version number.
+     * @var string
+     */
+    public static $Version = '3.0';    
+
     /**
     * post check
     *
@@ -31,7 +42,7 @@ class Controller_V1_Web_Base extends Controller
 
     /**
     * decode
-    *
+    * @param  $jwt
     * @return string
     */
     public static function decode($jwt)
@@ -40,8 +51,8 @@ class Controller_V1_Web_Base extends Controller
         try {
             $decoded = JWT::decode($jwt, $key, array('HS256'));
             $decoded = session::set('data', $decoded);
-	    error_log('decodedの中身を確認 by base');
-	    error_log($decoded);
+            error_log('decodedの中身を確認 by base');
+            error_log($decoded);
 
         } catch (Exception $e){
             $decoded = "";
@@ -51,20 +62,21 @@ class Controller_V1_Web_Base extends Controller
 
     /**
     * encode (JWT create)
-    *
+    * @param  $user_id
+    * @params $username
     * @return string
     */
     public static function encode($user_id, $username)
     {
-        $key   = 'i_am_a_secret_key';		
-	$exp = time() + 86400; // 24h
+        $key   = 'i_am_a_secret_key';           
+        $exp = time() + 86400; // 24h
         $json  = [
-		'user_id' => $user_id,
-		'exp'     => $exp,
-		'username'=> $username
-	];
+                'user_id' => $user_id,
+                'exp'     => $exp,
+                'username'=> $username
+        ];
         $json = json_encode($json);
-	
+        
         if ($json === NULL) {
             die("[Error]\n");
         }
@@ -75,28 +87,26 @@ class Controller_V1_Web_Base extends Controller
 
     /**
     * jwt expire check
-    *
+    * @params $exp
     * @return string
     */   
     public static function check_jwtExp($exp)
     {
-	$jwt = "";
-	if (isset($exp) && (time() >= $exp)) { 
-	    error_log('=jwtの有効期限切れ=');
-	    self::expired_token("Expired Token");
-	} else {
-	    error_log('有効期限内です');
-	    // refresh_token method call!
-	    $jwt = self::_refresh_token();
-	    $time = time();
-	    error_log('現在時刻');
-	    error_log($time);
-	    error_log('exp');
-	    error_log($exp);
-
-	    
-	}
-	return $jwt;
+        $jwt = "";
+        if (isset($exp) && (time() >= $exp)) { 
+            error_log('=jwtの有効期限切れ=');
+            self::expired_token("Expired Token");
+        } else {
+            error_log('有効期限内です');
+            // refresh_token method call!
+            $jwt = self::_refresh_token();
+            $time = time();
+            error_log('現在時刻');
+            error_log($time);
+            error_log('exp');
+            error_log($exp);
+        }
+        return $jwt;
     }
 
     /**
@@ -106,55 +116,66 @@ class Controller_V1_Web_Base extends Controller
     */
     public static function _refresh_token()
     {
-	// jwt tokenのexpが有効なのでtokenの有効期限伸ばす(refreshする)
-	$user_id  = session::get('user_id');
-	$username = session::get('usernaem');
+        // jwt tokenのexpが有効なのでtokenの有効期限伸ばす(refreshする)
+        $user_id  = session::get('user_id');
+        $username = session::get('usernaem');
 
-	// 古いSessionデータexpを破棄する
-	\Session::delete('exp');
-	$jwt = self::encode($user_id, $username);
-	error_log('JWT was update!');	
-	return $jwt;
+        // 古いSessionデータexpを破棄する
+        Session::delete('exp');
+        $jwt = self::encode($user_id, $username);
+        error_log('JWT was update!');   
+        return $jwt;
     }
 
 
     /**
-    * Not JWT
-    *
+    * Not JWT unauth
+    * @params $uri
+    * @params $login_flag
     * @return string
     */
     public static function unauth($uri="",$login_flag=0)
     {
         error_log('アクセス拒否 base unauth method.');
-	$status = [
- 		   "api_version" => 3.0,
-	           "api_uri"     => Uri::string(),
-    		   "api_code"    => 1,
-    	           "api_message" => "UnAuthorized",
-		   "login_flag"  => $login_flag,
-	           "api_data"    => $obj = new stdClass()
-	];
-	$status = json_encode(
+        $status = [
+                   "api_version" => self::$Version,
+                   "api_uri"     => Uri::string(),
+                   "api_code"    => 1,
+                   "api_message" => "UnAuthorized",
+                   "login_flag"  => $login_flag,
+                   "api_data"    => $obj = new stdClass()
+        ];
+        $status = json_encode(
             $status,
             // JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
-	    JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
+            JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
         );
-	echo $status;
-	exit;
+        echo $status;
+        exit;
     }
 
     /**
     * output json
-    *
+    * @param  $data
     * @return string
     */
-    public static function output_json($data)
+    public static function output_json($api_data)
     {
-	$json = json_encode(
-		$data,
-		JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
-	);
-	echo $json;
+	/*	
+        $base_data = [
+            "api_version" => 3.0,
+            "api_uri"     => Uri::string(),
+            "api_code"    => "SUCCESS",
+            "api_message" => "Successful API request",
+            "api_data"    => $api_data
+        ];
+	*/
+        $json = json_encode(
+                // $base_data,
+		$api_data,
+                JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
+        );
+        echo $json;
     }
 
     /**
@@ -165,14 +186,14 @@ class Controller_V1_Web_Base extends Controller
     public static function getallheaders()
     {
         $headers = '';
-	foreach ($_SERVER as $name => $value)
-	{
-	    if (substr($name, 0, 5) == 'HTTP_')
-	    {
-	        $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
-	    }
-	}
-	return $headers;
+        foreach ($_SERVER as $name => $value)
+        {
+            if (substr($name, 0, 5) == 'HTTP_')
+            {
+                $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+            }
+        }
+        return $headers;
     }
 
   /**
@@ -213,6 +234,20 @@ class Controller_V1_Web_Base extends Controller
       echo $status;
       exit;
   }
+
+   /**
+    * api_data_status template
+    *
+    *
+    */
+    public static function api_data_status_template()
+    {
+        $api_data = [
+
+        ];
+
+    }
+
  
    /**
    * Success JSON output
@@ -222,27 +257,27 @@ class Controller_V1_Web_Base extends Controller
   // public static function success_json($api_daata) {
   public static function success_json($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $token,$message) 
   {
-	$api_data = [
-	     "user_id"     => $user_id,
-	     "username"    => $username,
-	     "profile_img" => $profile_img, 
-	     "identity_id" => $identity_id,
-	     "badge_num"   => $badge_num,
-	     "jwt"         => $token,
-	     "login_flag"  => 1 
-	];
+        $api_data = [
+             "user_id"     => $user_id,
+             "username"    => $username,
+             "profile_img" => $profile_img, 
+             "identity_id" => $identity_id,
+             "badge_num"   => $badge_num,
+             "jwt"         => $token,
+             "login_flag"  => 1 
+        ];
 
-	$status = [
-	    "api_version" => 3.0,
-	    "api_uri"     => Uri::string(),
+        $status = [
+            "api_version" => 3.0,
+            "api_uri"     => Uri::string(),
             "api_code"    => "SUCCESS",
             "api_message" => "$message Successful API request",
             "api_data"    => $api_data
-	];
+        ];
 
-	$status = json_encode(
+        $status = json_encode(
                 $status,
-		JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
+                JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
         );
 
         echo $status;
@@ -259,7 +294,7 @@ class Controller_V1_Web_Base extends Controller
       // ver3 validation
       $status = [
           "api_version" => 3.0,
-	  "api_uri"     => Uri::string(),
+          "api_uri"     => Uri::string(),
           "api_code"    => " VALIDATION ERROR",
           "api_message" => $message,
           "login_flag"  => 0,
@@ -267,10 +302,10 @@ class Controller_V1_Web_Base extends Controller
       ];
       $status = json_encode(
                 $status,
-		JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
+                JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
       );
       echo $status;
-      exit;	
+      exit;     
   }
 
   /**
@@ -280,21 +315,20 @@ class Controller_V1_Web_Base extends Controller
   */
   public static function expired_token()
   {
-	// $login_flagが2であれば、フロント側でリダイレクトする
-	$status = [
+        // $login_flagが2であれば、フロント側でリダイレクトする
+        $status = [
           "api_version" => 3.0,
           "api_uri"     => Uri::string(),
           "api_code"    => "Failed",
           "api_message" => $message,
           "login_flag"  => 2,
           "api_data"    => $obj = new stdClass()
-      	];
-	$status = json_encode(
-	    $status,
-	    JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
-	    // JSON_PRETY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
-	);
-	echo $status;
-	exit;
+        ];
+        $status = json_encode(
+            $status,
+            JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
+        );
+        echo $status;
+        exit;
   }
 }
