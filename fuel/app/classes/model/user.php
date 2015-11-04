@@ -5,14 +5,14 @@ class Model_User extends Model
     // ユーザー名とパスワードをチェック【web】
     public static function check_name_pass($username, $password)
     {
-	// username/passwordの両方が空の場合
-	if (empty($username) && empty($password)) {
-	    Controller_V1_Web_Base::error_json('Username and password do not enter.');
-	} else if (empty($username) || empty($password)) {
-	    // usernameもしくはpasswordが空の場合
-	    Controller_V1_Web_Base::error_json('Username or password do not enter.');
-	}
-	
+        // username/passwordの両方が空の場合
+        if (empty($username) && empty($password)) {
+            Controller_V1_Web_Base::error_json('Username and password do not enter.');
+        } else if (empty($username) || empty($password)) {
+            // usernameもしくはpasswordが空の場合
+            Controller_V1_Web_Base::error_json('Username or password do not enter.');
+        }
+        
     }
 
     //ユーザー名チェック
@@ -39,7 +39,7 @@ class Model_User extends Model
 
         } else {
              // まだ登録されていないusername
-	     // $username = $result[0]['username'];
+             // $username = $result[0]['username'];
              return $username;
          }
 
@@ -48,37 +48,45 @@ class Model_User extends Model
     public static function empty_name($username)
     {
 
-	if (empty($username)) {
-	   // TRUEだとusernameは空である
-	   return Controller_V1_Web_Base::error_json("Please enter your user name.");
-	} else {
-	   return $username;
-	}
+        if (empty($username)) {
+           // TRUEだとusernameは空である
+           return Controller_V1_Web_Base::error_json("Please enter your user name.");
+        } else {
+           return $username;
+        }
     }
 
     public static function empty_password($password)
     {
-	if (empty($password)) {
-	    return Controller_V1_Web_Base::error_json("Please enter your password.");
-	} else {
-	    return $password;
-	}
+        if (empty($password)) {
+            return Controller_V1_Web_Base::error_json("Please enter your password.");
+        } else {
+            return $password;
+        }
 
     }
 
     public static function format_name_check($username)
     {
-	//$username = '';
-	// 文字数チェック
-	if (preg_match('/^[a-z\d_]{4,20}$/i', $username)) {
-   	     // 4 - 20文字以内
-	     return $username;
-	} else {
-    	     return Controller_V1_Web_Base::error_json("ユーザーネームは4文字から20文字以内です");
-	}
-
+        //$username = '';
+        // 文字数チェック
+        if (preg_match('/^[a-z\d_]{4,20}$/i', $username)) {
+             // 4 - 20文字以内
+             return $username;
+        } else {
+             return Controller_V1_Web_Base::error_json("ユーザーネームは4文字から20文字以内です");
+        }
     }
 
+    public static function format_password_check($password)
+    {
+        if (preg_match('/^[A-Za-z0-9]{6,25}\z/', $password)) {
+            // 6-25文字
+            return $password;
+        } else {
+            return Controller_V1_Web_Base::error_json("パスワードは6文字以上25文字以内です");
+        }
+    }
 
     public static function check_pass($username, $password)
     {
@@ -138,8 +146,7 @@ class Model_User extends Model
         return $user_id[0]['user_id'];
     }
 
-
-    //次のuser_id取得
+    // 次のuser_id取得
     public static function get_next_id()
     {
         $query = DB::select('user_id')->from('users')
@@ -191,6 +198,17 @@ class Model_User extends Model
         return $user_data[0];
     }
 
+    // パスワード取得
+    public static function get_password($user_id)
+    {
+        $query = DB::select('password')
+                ->from('users')
+                ->where('user_id', $user_id);
+
+        $password = $query->execute()->as_array();
+        return $password[0]['password'];
+
+    }
 
     //通知数取得
     public static function get_badge($user_id)
@@ -231,30 +249,30 @@ class Model_User extends Model
     // Web用 ログインユーザ情報取得
     public static function web_get_auth($identity_id)
     {
-	$query = DB::select('user_id', 'username', 'profile_img', 'badge_num')->from('users')
-	->where('identity_id', $identity_id);
-	$user_data = $query->execute()->as_array();
+        $query = DB::select('user_id', 'username', 'profile_img', 'badge_num')->from('users')
+        ->where('identity_id', $identity_id);
+        $user_data = $query->execute()->as_array();
 
-	if (empty($user_data)) {
-	    Controller_V1_Web_Base::error_json('登録されていないユーザです');
-	    error_log('登録されていないユーザー' . $identity_id);
-	    // Cognitoから消去
-	    Model_Cognito::delete_identity_id($identity_id);
-	    exit;
-	}
-	$user_data[0]['profile_img'] = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
-	return $user_data[0];
+        if (empty($user_data)) {
+            Controller_V1_Web_Base::error_json('登録されていないユーザです');
+            error_log('登録されていないユーザー' . $identity_id);
+            // Cognitoから消去
+            Model_Cognito::delete_identity_id($identity_id);
+            exit;
+        }
+        $user_data[0]['profile_img'] = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
+        return $user_data[0];
     }
 
     // username/passwordからidentity_idを取得する【web】
     public static function get_web_identity_id($username, $password)
     {
-	$query = DB::select('identity_id')
-		->from('users')
-		->where('username', $username)
-		->and_where('password', $password);
+        $query = DB::select('identity_id')
+                ->from('users')
+                ->where('username', $username)
+                ->and_where('password', $password);
 
-	$identity_id = $query->execute()->as_array();
+        $identity_id = $query->execute()->as_array();
 
     }
 
@@ -302,14 +320,14 @@ class Model_User extends Model
     // username/password登録
     public static function insert_data($username, $identity_id,$password)
     {
-	$profile_img = '0_tosty_' . mt_rand(1, 7);
+        $profile_img = '0_tosty_' . mt_rand(1, 7);
 
         $query = DB::insert('users')
         ->set(array(
             'username'    => $username,
             'profile_img' => $profile_img,
             'identity_id' => $identity_id,
-	    'password'    => $password,
+            'password'    => $password,
         ))
         ->execute();
 
@@ -322,18 +340,27 @@ class Model_User extends Model
     // sns inset
     public static function sns_insert_data($username, $identity_id, $profile_img)
     {
-	$query = DB::insert('users')
-	->set(array(
-	    'username'    => $username,
-	    'profile_img' => $profile_img,
-	    'identity_id' => $identity_id,
-	))
-	->execute();	
-	$profile_img = Model_Transcode::decode_profile_img($profile_img);
-	// error_log('usersテーブルにinsertしました');
+        $query = DB::insert('users')
+        ->set(array(
+            'username'    => $username,
+            'profile_img' => $profile_img,
+            'identity_id' => $identity_id,
+        ))
+        ->execute();    
+        $profile_img = Model_Transcode::decode_profile_img($profile_img);
+        // error_log('usersテーブルにinsertしました');
         return $profile_img;
     }
+ 
+    public static function update_password($user_id, $password)
+    {
+        $query = DB::update('users')
+        ->value('password', $password)
+        ->where('user_id' , $user_id)
+        ->execute();
 
+        return $query;
+    }
 
     //通知数リセット
     public static function reset_badge($user_id)
@@ -436,8 +463,18 @@ class Model_User extends Model
         ->execute();
     }
 
+    // SNS連携しているか確認する
+    public static function check_sns_flag($user_id) 
+    {
+        $query = DB::select('facebook_flag', 'twitter_flag')
+                ->from('users')
+                ->where('user_id', $user_id);
 
-    //SNS連携
+        return $sns_flag = $query->execute()->as_array();
+    }
+ 
+
+    // SNS連携
     public static function delete_sns_flag($user_id, $provider)
     {
         if ($provider == 'graph.facebook.com') {
@@ -464,9 +501,9 @@ class Model_User extends Model
     {
         if (password_verify($pass, $hash_pass)) {
             //認証OK
-	    
+            
         }else{
-	    
+            
             error_log('パスワードが一致しません');
             Controller_V1_Mobile_Base::output_none();
             exit;
@@ -475,11 +512,11 @@ class Model_User extends Model
 
     public static function web_verify_pass($pass, $hash_pass)
     {
-	if (password_verify($pass, $hash_pass)) {
+        if (password_verify($pass, $hash_pass)) {
             //認証OK
-	    $match_pass = password_verify($pass, $hash_pass);
+            $match_pass = password_verify($pass, $hash_pass);
         }else{
-	     error_log('current_pass');
+             error_log('current_pass');
              error_log($pass);
 
              error_log('hash_pass');
@@ -488,22 +525,22 @@ class Model_User extends Model
              Controller_V1_Web_Base::error_json("パスワードが正しくありません");
              exit;
         }
-	return $match_pass;
+        return $match_pass;
     }
 
     public static function get_current_db_pass($user_id, $current_password)
     {
-	// ユーザから送られてきた生パスワードをエンクリプト
-	$encrypt_password = self::encryption_pass($current_password);
-	// TRUEだったらmatch_passは1が代入される
-	// $match_pass = self::web_verify_pass($current_password, $encrypt_password);
-	// dbからパスワードを取得
-	$query = DB::select('password')
+        // ユーザから送られてきた生パスワードをエンクリプト
+        $encrypt_password = self::encryption_pass($current_password);
+        // TRUEだったらmatch_passは1が代入される
+        // $match_pass = self::web_verify_pass($current_password, $encrypt_password);
+        // dbからパスワードを取得
+        $query = DB::select('password')
                 ->from('users')
                 ->where('user_id', $user_id);
-	// これを実行すると、as_arrayには何が入るのか [成功と失敗で]
+        // これを実行すると、as_arrayには何が入るのか [成功と失敗で]
         return $db_password = $query->execute()->as_array();
-	
+        
 
     }
 
@@ -560,16 +597,16 @@ class Model_User extends Model
     // web: username/password check
     public static function pass_login_validate($username, $passsword)
     {
-	$val = Validation::forge();
-	$val->add_field('username', 'ユーザーネーム', 'required');
-	$val->add_field('password', 'パスワード', 'required');
+        $val = Validation::forge();
+        $val->add_field('username', 'ユーザーネーム', 'required');
+        $val->add_field('password', 'パスワード', 'required');
     }
    
     // web username/profile_img 空かどうかチェック
     public static function username_profile_img_check($username, $profile_img)
     {
-	if (empty($username) || empty($profile_img)) {
-	      Controller_V1_Web_Base::error_json('Username and profile_img do not enter.');
+        if (empty($username) || empty($profile_img)) {
+              Controller_V1_Web_Base::error_json('Username and profile_img do not enter.');
          }
     }
 }

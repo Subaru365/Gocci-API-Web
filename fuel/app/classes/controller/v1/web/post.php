@@ -8,7 +8,6 @@
  * @copyright  2015 Inase,inc.
  * @link       https://bitbucket.org/inase/gocci-web-api
  */
-
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
@@ -31,8 +30,8 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             $data      = self::decode($jwt);
             $user_data = session::get('data');
             $obj       = json_decode($user_data);
-            if (empty($obj)) {
-                 self::unauth();
+            if (empty($obj)) { 
+                self::unauth(); 
             }
             $user_id   = $obj->{'user_id'};
             session::set('user_id', $user_id);
@@ -60,7 +59,6 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
         $provider    = Input::post('provider');
         $token       = Input::post('token');
         $profile_img = Input::post('profile_img');
-
         try {      
             if ($profile_img !== 'none') {
                 $profile_img = Model_S3::input($user_id, $profile_img);
@@ -70,18 +68,11 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             Model_User::update_sns_flag($user_id, $provider);
             Model_Cognito::post_sns($user_id, $identity_id, $provider, $token);
 
-            $data = [
-                "api_version" => 3.0,
-                "api_uri"     => Uri::string(),
-                "api_code"    => 0,
-                "login_flag"  => 1,
-                "api_message" => $keyword . "しました",
-                "api_data" => [             
-                    "profile_img" => $profile_img
-                ]
+            $data = [          
+                "profile_img" => $profile_img
             ];
-            // JSON出力
-            self::output_json($data);
+            $base_data = self::base_template($api_code = 0, $api_message = "success", $login_flag =  1,$data, $jwt);
+            self::output_json($base_data);
         } catch (\Database_Exception $e) {
             self::failed($keyword);
             error_log($e);
@@ -99,24 +90,18 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
         $user_id  = session::get('user_id');
         $provider = Input::post('provider');
         $token    = Input::post('token');
-	error_log('provider');
-	error_log($provider);
-	error_log('token');
-	error_log($token);
 
         try {
             // 他にSNS連携しているか確認
             $sns_flag = Model_User::check_sns_flag($user_id);      
             $facebook_flag = $sns_flag[0]['facebook_flag'];
             $twitter_flag  = $sns_flag[0]['twitter_flag'];
-	    $password = Model_User::get_password($user_id);
+            $password = Model_User::get_password($user_id);
 
             if (empty($password)) {
                 // パスワードが空
-                // パスワード登録をしてください(3)
                 self::failed($message = "パスワードを登録してください SNS解除");
             } else if ((int)$facebook_flag === (int)1 || (int)$twitter_flag === (int)1) {
-                // 既に連携している(1) 連携解除しました
                 self::start_unlink($user_id, $provider, $token, $keyword);                  
                 
             } else {
@@ -135,92 +120,76 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
      *
      */
     public static function action_check_sns_coordination()
-    {
-	
-	self::create_token($uri=Uri::string(), $login_flag=1);
-        $user_id  = session::get('user_id');
-	
-	// $user_id = 1;
-	$sns_flag = Model_User::check_sns_flag($user_id);
+    {   
+        self::create_token($uri=Uri::string(), $login_flag=1);
+        $user_id  = session::get('user_id');    
+        $sns_flag = Model_User::check_sns_flag($user_id);
         $facebook_flag = $sns_flag[0]['facebook_flag'];
         $twitter_flag  = $sns_flag[0]['twitter_flag'];
-
-	$data = [
+        $data = [
             "facebook_flag" => (int)$facebook_flag,
-	    "twitter_flag"  => (int)$twitter_flag          
+            "twitter_flag"  => (int)$twitter_flag          
         ];
-
-        $base_data = [
-            "api_version" => 3.0,
-            "api_uri"     => Uri::string(),
-            "api_code"    => 0,
-            "login_falg"  => 1,
-            "api_message" => "success",
-            "api_data"    => $data
-        ];
+        $base_data = self::base_template($api_code = 0, $api_message = "success", $login_flag =  1,$data, $jwt = "");
         $status = self::output_json($base_data);
         error_log('json出力');
     }
-
-    // password check 
+ 
     // ==================処理的にModel ======================== 
     public static function action_password_check()
     {
-	self::create_token($uri=Uri::string(), $login_flag=1);
-	$user_id  = session::get('user_id');
-
-	// パスワードが登録されているか
+        
+        self::create_token($uri=Uri::string(), $login_flag=1);
+        $user_id  = session::get('user_id');
+        // パスワードが登録されているか
         $password = Model_User::get_password($user_id);
 
         if (empty($password)) {
             // パスワードが空
-            // パスワード登録をしてください(3)
-            self::failed($message = "パスワードを登録してください");
+            $data = [
+                "message" => "パスワードを登録してください"
+            ];
+            $base_data = self::base_template($api_code = 0, $api_message = "success", $login_flag =  1, $data, $jwt="");
+            self::output_json($base_data);
         } else {
             // パスワードは既に登録されている
-            self::success($message = "パスワードは既に登録されています");
+            $data = [
+                "message" => "パスワードは既に登録されています"
+            ];
+            $base_data = self::base_template($api_code = 0, $api_message = "success", $login_flag =  1,$data, $jwt="");
+            self::output_json($base_data);
         }
     }
 
     public static function action_create_password()
     {
-	self::create_token($uri=Uri::string(), $login_flag=1);
+        self::create_token($uri=Uri::string(), $login_flag=1);
         $user_id  = session::get('user_id');
-	$password = Input::post('password');	
+        $password = Input::post('password');    
         // passwordが入力されているか
-	if (empty($password)) {
-	    // passwordが空です。入力してください
-	    self::failed($message = "passwordが空です。パスワードが生成");
-	}
-	// passwordの文字数が制限範囲内か
-	$password = Model_User::format_password_check($password);
+        if (empty($password)) {
+            // passwordが空です。入力してください
+            self::failed($message = "passwordが空です。パスワードが生成");
+        }
+        // passwordの文字数が制限範囲内か
+        $password = Model_User::format_password_check($password);
 
-	// passwordをhash化させる
-	$hash_pass = password_hash($password, PASSWORD_BCRYPT);
+        // passwordをhash化させる
+        $hash_pass = password_hash($password, PASSWORD_BCRYPT);
 
-	try {
-	    // パスワードを空から指定したパスワードに更新
-	    Model_User::update_password($user_id, $password);
-	    // json出力
-
-	    $data = [
+        try {
+            // パスワードを空から指定したパスワードに更新
+            Model_User::update_password($user_id, $password);
+            $data = [
                 "message" => "パスワードを登録しました"
             ];
-
-            $base_data = [
-                "api_version" => 3.0,
-                "api_uri"     => Uri::string(),
-                "api_code"    => 0,
-                "login_falg"  => 1,
-                "api_message" => "success",
-                "api_data"    => $data
-            ];
+            $base_data = self::base_template($api_code = 0, $api_message = "success", $login_flag =  1, $data, $jwt="");
             $status = self::output_json($base_data);
             error_log('json出力');
 
-	} catch (\Database_Exception $e) {
+        } catch (\Database_Exception $e) {
 
-	}
+        }
     }
 
     /**
@@ -229,12 +198,10 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
      * @param string POST $provider
      * @param string POST $token
      * @param string POST $keyword
-     */      
-          
+     */                
     // ==================処理的にModel ======================== 
     public static function action_start_unlink($user_id, $provider, $token, $keyword)
     {
-	error_log('start_unlink');
             try {
                 $identity_id = Model_User::get_indentity_id($user_id);
                 Model_User::deleet_sns_flag($user_id, $provider);
@@ -260,18 +227,16 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             $post_id = Input::post('post_id');
 
             try {
-                // いいねしたことをテーブルに格納
+                // テーブルに格納
                 $target_user_id = Model_Gochi::post_gochi(
                     $user_id, $post_id
                 );
-
                 if ((int)$user_id !== (int)$target_user_id) {
                     // noticeテーブルにインサート and 通知
                     $record = Model_Notice::notice_insert(
                         $keyword, $user_id, $target_user_id, $post_id
                     );
-                }
-                        
+                }                 
                 self::success($keyword);
             } catch (\Database_Exception $e) {
                 self::failed($keyword);
@@ -295,15 +260,13 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 
             try {
                 $target_user_id = Model_Comment::post_comment(
-                        $user_id, $post_id, $comment
-                );
-                
+                    $user_id, $post_id, $comment
+                ); 
                 if ((int)$user_id !== (int)$target_user_id) {
                     $record = Model_Notice::notice_insert(
                         $keyword, $user_id, $target_user_id, $post_id
                     );
-                }
-               
+                } 
                 self::success($keyword);
             } catch(\Database_Exception $e) {
                 self::failed($keyword);
@@ -329,7 +292,6 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
                 $record = Model_Notice::notice_insert(
                     $keyword, $user_id, $follow_user_id
                 );
-
                 self::success($keyword);
             } catch(\Database_Exception $e) {
                 self::failed($keyword);
@@ -351,7 +313,6 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             try {
                 $result = Model_Follow::post_unfollow($user_id, $unfollow_user_id);
                 self::success($keyword);
-
             } catch (\Database_Exception $e) {
                 self::failed($keyword);
                 error_log($e);
@@ -369,14 +330,13 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             $keyword = '行きたい店リストに追加';
             $user_id = session::get('user_id');
             $rest_id = Input::post('rest_id');
-
-             try {
-                 $result = Model_Want::post_want($user_id, $rest_id);
-                 self::success($keyword);
-             } catch (\Database_Exception $e) {
-                 self::failed($keyword);
-                 error_log($e);
-             }
+            try {
+                $result = Model_Want::post_want($user_id, $rest_id);
+                self::success($keyword);
+            } catch (\Database_Exception $e) {
+                self::failed($keyword);
+                error_log($e);
+            }
         }
 
         /**
@@ -451,14 +411,8 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             self::create_token($uri=Uri::string(), $login_flag=0);
             $keyword        = 'プロフィールを変更';
             $user_id        = session::get('user_id');
-            // $user_id = 690;
             $username       = Input::post('username');
-            error_log('username');
-            error_log($username);
             $profile_img    = @$_FILES["profile_img"]["tmp_name"];
-            error_log('profile_img');
-            // print_r($profile_img);exit;
-            error_log(print_r($profile_img, true));
             $save_filename  = $user_id . "_" . date('Y-m-d-H-i-s') . ".png";
 
             try {
@@ -466,57 +420,34 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
                 if (empty($username) && empty($profile_img)) {
                      // do nothing
                      Controller_V1_Web_Base::error_json('Username and profile_img are empty.');
-                     error_log('usernameとprofile_imgが空です');
                 } elseif (empty($username)) {
                     // profile update
-                    error_log('usernameが空。写真をupdateします');
                     // S3にpictureをupload
-                    // Model_Upload::picture_upload($profile_img, $save_filename);
                     Model_S3::input_img($user_id, $profile_img);
                     Model_User::update_profile_img($user_id, $profile_img);
                 } elseif (empty($profile_img)) {
                     // username update
-                    error_log('profile_imgが空。ユーザネームをupdateします');
                     Model_User::check_name($username);
                     Model_User::update_name($user_id, $username);
                 } else {
                     // Both updatei
-                    error_log('両方updateしますYo');
                     Model_User::check_name($username);
-                    
-                    // Model_Upload::picture_upload($profile_img, $save_filename);
                     $profile_img = Model_S3::input_img($user_id, $profile_img);
                     error_log($profile_img);
                     $result = Model_User::update_profile(
                                 $user_id, $username, $profile_img
                     );  
-              }
+                }
                 $user_data   = Model_User::get_profile($user_id);
                 $username    = $user_data['username'];
-                error_log('元のusername');
-                error_log($username);
-                error_log('もとのpicture');
-                // $profile_img = $user_daa['profile_img'];
-                // error_log($profile_img);
+  
                 $data = [
                         "code"        => 200,
                         "message"     => "プロフィールを変更しました",
-                        "username"    => $username
-                        // "profile_img" => $profile_img    
+                        "username"    => $username,
+                        "profile_img" => $profile_img    
                 ];
-   
-                $base_data = [
-                        "api_version" => 3.0,
-                        "api_uri"     => Uri::string(),
-                        "api_code"    => 0,
-                        "login_falg"  => 1,
-                        "api_message" => "success",
-                        "api_data"    => $data
-                ];
-                
-                $status = $this->output_json($base_data);
-                error_log('json出力');
-
+                $base_data = self::base_template($api_code = 0, $api_message = "success", $login_flag =  1,$data, $jwt="");                  $status = $this->output_json($base_data);
             } catch (\Database_Exception $e) {
                 // self::failed($keyword);
                 error_log($e);
@@ -561,17 +492,17 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
         // DB Error
         private static function failed($message)
         {
-	    
+            
             $api_data = [
                 "api_version" => 3.0,
-		"api_uri"     => Uri::string(),
-	        "api_code"    => " VALIDATION ERROR",
+                "api_uri"     => Uri::string(),
+                "api_code"    => " VALIDATION ERROR",
                 "api_message" => $message . "できませんでした",
-		"login_flag"  => 1,
-		"api_data"    => $obj = new stdClass()
+                "login_flag"  => 1,
+                "api_data"    => $obj = new stdClass()
             ];
             self::output_json($api_data);
-	    exit;
+            exit;
         }
 
         /**
@@ -584,10 +515,6 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             // ログインしているユーザIDを取得
             self::create_token($uri=Uri::string(), $login_flag=0);
             $user_id = session::get('user_id');
-
-            error_log('パスワードを変更するuser_idは: ');
-            error_log($user_id);
-
             // POST: ユーザーの現在のパスワード
             $current_password = Input::post('current_password');
             // POST: 変更したい新しいパスワード
@@ -606,18 +533,10 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
                     $data = [
                         "message" => "パスワードを変更しました"
                     ];
-                    $base_data = [
-                        "api_version" => 3.0,
-                        "api_code"    => 0,
-                        "login_falg"  => 1,
-                        "api_message" => "success",
-                        "api_data"    => $data
-                    ];
 
+                    $base_data = self::base_template($api_code = 0, $api_message = "success", $login_flag =  1,$data, $jwt="");
                     $status = $this->output_json($base_data);
                 }  else {
-                    // 送ってもらったパスワードが登録されたパスワードと違う
-                    error_log('パスワードが一致しません');
                     Controller_V1_Web_Base::error_json("パスワードが正しくありません");
                     exit;
                 }

@@ -1,14 +1,20 @@
 <?php
+/**
+ * Cognito Class
+ * @package    Gocci-Web
+ * @version    3.0 <2015/10/20>
+ * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
+ * @license    MIT License
+ * @copyright  2014-2015 Inase,inc.
+ * @link       https://bitbucket.org/inase/gocci-web-api
+ */
 
 use Aws\CognitoIdentity\CognitoIdentityClient;
 use Aws\CognitoSync\CognitoSyncClient;
 
-/**
-* CognitoIdentity Model
-*/
 class Model_Cognito extends Model
 {
-    //IdentityID取得 DataSet [User_Info]
+    // IdentityID取得 DataSet [User_Info]
     public static function post_data($user_id)
     {
         $cognito_data = Config::get('_cognito');
@@ -24,11 +30,10 @@ class Model_Cognito extends Model
             ],
         ]);
 
-		return $result;
-	}
+	return $result;
+    }
 
-
-    //SNS連携
+    // SNS連携
     public static function post_sns($user_id, $identity_id, $provider, $token)
     {
         $cognito_data = Config::get('_cognito');
@@ -50,7 +55,7 @@ class Model_Cognito extends Model
         return $result;
     }
 
-    //Web SNS登録&連携
+    // Web SNS登録&連携
     public static function post_web_sns($user_id, $provider, $token)
     {
         $cognito_data = Config::get('_cognito');
@@ -70,28 +75,23 @@ class Model_Cognito extends Model
 
         return $result;
     }
-
-	//identity_idからtokenを取得
-	public static function get_token($user_id, $identity_id)
-	{
+    // identity_idからtokenを取得
+    public static function get_token($user_id, $identity_id)
+    {
         $cognito_data = Config::get('_cognito');
-
-		$client = new CognitoIdentityClient([
-			'region'  => 'us-east-1',
+	$client = new CognitoIdentityClient([
+		'region'  => 'us-east-1',
     		'version' => 'latest'
-		]);
-
+	]);
         $result = $client->getOpenIdTokenForDeveloperIdentity([
-            'IdentityId'     => "$identity_id",
-            'IdentityPoolId' => "$cognito_data[IdentityPoolId]",
-            'Logins'         => [
+                'IdentityId'     => "$identity_id",
+                'IdentityPoolId' => "$cognito_data[IdentityPoolId]",
+                'Logins'         => [
                 "$cognito_data[developer_provider]" => "$user_id",
-            ],
+                ],
         ]);
-
-		return $result['Token'];
-	}
-
+	return $result['Token'];
+    }
 
     public static function delete_identity_id($identity_id)
     {
@@ -122,13 +122,8 @@ class Model_Cognito extends Model
         ]);
     }
 
-
-
-
     //=========================================================================//
-
-
-    //identity_id取得
+    // identity_id取得
     public static function get_identity_id($provider, $token)
     {
         $IdentityPoolId = Config::get('_cognito.IdentityPoolId');
@@ -147,8 +142,7 @@ class Model_Cognito extends Model
         return $result['IdentityId'];
     }
 
-
-    //SNS連携
+    // SNS連携
     public static function post_dev_sns(
         $user_id, $provider, $token, $username, $os, $model, $register_id)
     {
