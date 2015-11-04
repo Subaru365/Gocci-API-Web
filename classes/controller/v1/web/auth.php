@@ -16,8 +16,6 @@ error_reporting(-1);
 
 class Controller_V1_Web_Auth extends Controller_V1_Web_Base
 {
-    const SESSION_KEY_LOGGED_IN = 'logged-in';
-
     /**
     * jwtがあるかどうかをcheckするメソッド
     *
@@ -71,16 +69,9 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
             $profile_img = $user_data['profile_img'];
             $badge_num   = $user_data['badge_num'];
 
-	    // JWT生成
             $jwt = self::encode($user_id, $username);
-
             Model_Login::post_login($user_id);
-
-	    // JSON出力
-            $api_data = [
-
-	    ];
-
+	    
             self::success(
                 $keyword,
                 $user_id,
@@ -90,11 +81,7 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
                 $badge_num,
                 $jwt
             );
-        }
-
-        // データベース登録エラー
-        catch(\Database_Exception $e)
-        {
+        } catch(\Database_Exception $e) {
             self::failed(
                 $keyword,
                 $user_id,
@@ -103,7 +90,6 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
                 $identity_id,
                 $badge_num
             );
-
             error_log($e);
         }
     }
@@ -118,6 +104,8 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
 	// このapiの脆弱制 => このapiのURLを知っていて、user_idをpostしてしまえば、
 	// そのidでログインしているユーザーがかってにログアウトされてしまうことになる
 	// なので、他api同様に、post等でuserを識別するのではなく、jwtからuser_idを識別する
+	// ::create_token($uri=Uri::string(), $login_flag=1);
+	$user_id = session::get('user_id');
 	
 	self::get_jwt_token($uri=Uri::string(), $login_flag=1);	
 	$user_id = Input::post('user_id'); // いずれ廃止
@@ -126,27 +114,16 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
 	    // baseのerror_json呼び出し
 	    self::error_json('ログインしていないためログアウトできません');
         }
-
 	try {
 	    // ログアウトのためsessionデータ削除
-	    // \Session::delete(self::SESSION_KEY_LOGGED_IN);
 	    Session::delete('user_id');
 	    Session::delete('username');
 	    Session::delete('exp');
-
-	    $api_data = [
+	
+	    $data = [
                     "message" => "ログアウトしました"
 	    ];
-
-            $base_data = [
-                    "api_version" => 3.0,
-		    "api_uri"     => $uri,
-                    "api_code"    => 1,
-                    "api_message" => "success",
-		    "login_flag"  => 0,
-                    "api_data"    => $api_data
-            ];
-	    // json output
+	    $base_data = self::base_template($api_code = 0, $api_message = "success", $login_flag =  1,$data, $jwt);
 	    self::output_json($base_data);
 	    error_log('ログアウトしました');
        } catch (Exception $e) {
@@ -166,11 +143,9 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
 
 	// post check
 	self::post_check();
-
         if (empty($username) && empty($password) || empty($username) or empty($password) ) {
                 self::error_json("usenameもしくはpasswordが入力されていません");	
         }
-
   	try {
 	    if (!empty($username) && !empty($password)) {
                 $user_data   = Model_User::check_pass($username, $password);
@@ -183,7 +158,7 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
                	// JWT認証
  	        $jwt = self::encode($user_id, $username);
 	   
-	        $api_data = [
+	        $data = [
 	   	    "user_id"     => $user_id,
 		    "username"    => $username,
 		    "profile_img" => $profile_img,
@@ -191,27 +166,16 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
 		    "badge_num"   => $badge_num,
 		    "jwt"         => $jwt
 	        ];
- 	    
-	        $base_data = [
-		    "api_version" => 3.0,
-	            "api_code"    => 0,
-	            "api_message" => "success",
-	            "api_data"    => $api_data
-	        ];
-	        // JSONを返す
+ 	        $base_data = self::base_template($api_code = 0, $api_message = "success", $login_flag =  1,$data, $jwt);
 	        self::output_json($base_data);
 	    }
 
   	} catch (Exception $e) {
-
   	    // JWT Exception
-
   	    // Not access
   	}
    }
-
     // DBデータ入力成功
-
     // -------------------------------------------------
     // 以下メソッドを使っていなければ廃止
     // -------------------------------------------------
@@ -238,7 +202,6 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
             'badge_num'   => "$badge_num",
             'jwt'         => $jwt,
         ];
-
         Controller_V1_Mobile_Base::output_json($data);
         session::set('user_id', $user_id);
   }

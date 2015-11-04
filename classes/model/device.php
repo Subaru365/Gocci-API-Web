@@ -1,7 +1,8 @@
 <?php
+
 class Model_Device extends Model
 {
-    //登録履歴確認
+    // 登録履歴確認
     public static function check_register_id($register_id)
     {
         $query = DB::select('device_user_id', 'endpoint_arn')
@@ -10,9 +11,8 @@ class Model_Device extends Model
 
         $device_data = $query->execute()->as_array();
 
-
         if (!empty($device_data)) {
-            //登録あり→消去
+            // 登録あり→消去
             $old_user_id  = $device_data[0]['device_user_id'];
             $endpoint_arn = $device_data[0]['endpoint_arn'];
 
@@ -32,9 +32,8 @@ class Model_Device extends Model
         return $register_id[0]['register_id'];
     }
 
-
-  	public static function get_arn($user_id)
-  	{
+    public static function get_arn($user_id)
+    {
         $query = DB::select('endpoint_arn')->from('devices')
         ->where('device_user_id', "$user_id");
 
@@ -43,18 +42,18 @@ class Model_Device extends Model
         if (!empty($result)) {
             Model_Sns::delete_endpoint($result[0]['endpoint_arn']);
         }
-  	}
+        }
 
 
     public static function post_data($user_id, $os, $model, $register_id, $endpoint_arn)
     {
-     	$query = DB::insert('devices')
+        $query = DB::insert('devices')
       ->set(array(
           'device_user_id' => "$user_id",
           'os'             => "$os",
           'model'          => "$model",
           'register_id'    => "$register_id",
-       	  'endpoint_arn'   => "$endpoint_arn"
+          'endpoint_arn'   => "$endpoint_arn"
         ))
         ->execute();
     }

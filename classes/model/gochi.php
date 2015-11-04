@@ -2,91 +2,91 @@
 
 class Model_Gochi extends Model
 {
-	//１投稿のgochi数を求める
-	public static function get_num($post_id)
-	{
-		$query = DB::select('gochi_id')
-		->from ('gochis')
-		->where('gochi_post_id', "$post_id");
+        //１投稿のgochi数を求める
+        public static function get_num($post_id)
+        {
+                $query = DB::select('gochi_id')
+                ->from ('gochis')
+                ->where('gochi_post_id', "$post_id");
 
-		$result    = $query->execute()->as_array();
-	   	$gochi_num = count($result);
+                $result    = $query->execute()->as_array();
+                $gochi_num = count($result);
 
-		return $gochi_num;
-	}
-
-
-	//１投稿に対して自分がgochiしているかを求める
-	public static function get_flag($user_id, $post_id)
-	{
-		$query = DB::select('gochi_id')
-		->from     ('gochis')
-		->where    ('gochi_user_id', "$user_id")
-		->and_where('gochi_post_id', "$post_id");
-
-		$result = $query->execute()->as_array();
+                return $gochi_num;
+        }
 
 
-		if ($result == true) {
-			$gochi_flag = 1;
-		}else{
-			$gochi_flag = 0;
-		}
+        //１投稿に対して自分がgochiしているかを求める
+        public static function get_flag($user_id, $post_id)
+        {
+                $query = DB::select('gochi_id')
+                ->from     ('gochis')
+                ->where    ('gochi_user_id', "$user_id")
+                ->and_where('gochi_post_id', "$post_id");
 
-		return $gochi_flag;
-	}
-
-
-	// //gochi順に投稿を格納する
-	// public static function get_rank($category_id = 0, $value = 0, $call = 0, $limit = 20)
-	// {
-	// 	//対象となる投稿の期間($interval)
-	// 	$now_date = date("Y-m-d",strtotime("+1 day"));
-	// 	$interval = date("Y-m-d",strtotime("-3 month"));
+                $result = $query->execute()->as_array();
 
 
-	// 	$query = DB::select('post_id')
-	// 	->from     ('gochis')
-	// 	->where	   ('gochi_date', 'BETWEEN', array("$interval", "$now_date"))
-	// 	->and_where('post_status_flag', '1')
+                if ($result == true) {
+                        $gochi_flag = 1;
+                }else{
+                        $gochi_flag = 0;
+                }
 
-	// 	->join('posts', 'INNER')
-	// 	->on  ('gochi_post_id', '=', 'post_id')
-
-	// 	->group_by('gochi_post_id')
-	// 	->order_by(DB::expr('COUNT(gochi_id)'), 'desc')
-	// 	->order_by('post_date', 'desc')
-
-	// 	->limit("$limit");
+                return $gochi_flag;
+        }
 
 
-	// 	if ($call != 0) {
-	// 		$call_num = $call * $limit;
-	// 		$query->offset($call_num);
-	// 	}
-
-	// 	$result = $query->execute()->as_array();
-	// 	return $result;
-	// }
+        // //gochi順に投稿を格納する
+        // public static function get_rank($category_id = 0, $value = 0, $call = 0, $limit = 20)
+        // {
+        //      //対象となる投稿の期間($interval)
+        //      $now_date = date("Y-m-d",strtotime("+1 day"));
+        //      $interval = date("Y-m-d",strtotime("-3 month"));
 
 
-	//gochi登録
-	public static function post_gochi($user_id, $post_id)
-	{
-		$query = DB::insert('gochis')
-		->set(array(
-			'gochi_user_id' => "$user_id",
-			'gochi_post_id' => "$post_id"
-		))
-		->execute();
+        //      $query = DB::select('post_id')
+        //      ->from     ('gochis')
+        //      ->where    ('gochi_date', 'BETWEEN', array("$interval", "$now_date"))
+        //      ->and_where('post_status_flag', '1')
+
+        //      ->join('posts', 'INNER')
+        //      ->on  ('gochi_post_id', '=', 'post_id')
+
+        //      ->group_by('gochi_post_id')
+        //      ->order_by(DB::expr('COUNT(gochi_id)'), 'desc')
+        //      ->order_by('post_date', 'desc')
+
+        //      ->limit("$limit");
 
 
-		$query = DB::select('post_user_id')
-		->from ('posts')
-		->where('post_id', "$post_id");
+        //      if ($call != 0) {
+        //              $call_num = $call * $limit;
+        //              $query->offset($call_num);
+        //      }
 
-		$post_user_id = $query->execute()->as_array();
+        //      $result = $query->execute()->as_array();
+        //      return $result;
+        // }
 
-		return $post_user_id[0]['post_user_id'];
-	}
+
+        //gochi登録
+        public static function post_gochi($user_id, $post_id)
+        {
+                $query = DB::insert('gochis')
+                ->set(array(
+                        'gochi_user_id' => "$user_id",
+                        'gochi_post_id' => "$post_id"
+                ))
+                ->execute();
+
+
+                $query = DB::select('post_user_id')
+                ->from ('posts')
+                ->where('post_id', "$post_id");
+
+                $post_user_id = $query->execute()->as_array();
+
+                return $post_user_id[0]['post_user_id'];
+        }
 }

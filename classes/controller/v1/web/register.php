@@ -8,10 +8,8 @@
  * @copyright  2014-2015 Inase,inc.
  * @link       https://bitbucket.org/inase/gocci-web-api
  */
-
 header('Content-Type: application/json; charset=UTF-8');
 error_reporting(-1);
-
 class Controller_V1_Web_Register extends Controller_V1_Web_Base
 {
 	/**
@@ -53,21 +51,16 @@ class Controller_V1_Web_Register extends Controller_V1_Web_Base
 		    // コグニートID
  		    $identity_id  = $cognito_data['IdentityId'];
 		    $token        = $cognito_data['Token'];
-
 		    // user登録		
 		    $hash_pass    = password_hash($password, PASSWORD_BCRYPT);
 		    $profile_img  = Model_User::insert_data($username, $identity_id,$hash_pass);
 		    $endpoint_arn = 0;
         	    Model_Device::post_data($user_id, $os, $model, $register_id, $endpoint_arn);
-		    // jwt生成
+	
 		    $jwt = self::encode($user_id, $username);
         	    self::success_json($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $jwt, $message = "success");
-
-		}
-		catch(\Database_Exception $e)
-		{
-		    // self::failed($keyword);
-		    // error_log($e);
+		} catch(\Database_Exception $e) {
+		    // self::failed($keyword); 
 		}
 	}
 
@@ -79,8 +72,6 @@ class Controller_V1_Web_Register extends Controller_V1_Web_Base
 	 * @param string POST $token
 	 * @param string POST $provider
          */
-
-	// sns登録(Facebook/Twitter)
         public function action_sns_sign_up()
         {
 	    $keyword     = "SNS登録";
@@ -114,9 +105,6 @@ class Controller_V1_Web_Register extends Controller_V1_Web_Base
 		// device insert
         	Model_Device::post_data($user_id, $os, $model, $register_id, $endpoint_arn);
 
-		error_log('provider:');
-        	error_log($provider);
-
 		// 連携したので、flagを更新
         	Model_User::update_sns_flag($user_id, $provider);
 		// jwt 生成
@@ -128,7 +116,6 @@ class Controller_V1_Web_Register extends Controller_V1_Web_Base
 		    $profile_img, $identity_id, $badge_num,
 		    $jwt,$message = "success"
 		);
-
 	    } catch (\Database_Exception $e) {
 		// 
 	    }

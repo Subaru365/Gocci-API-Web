@@ -16,6 +16,17 @@ class Controller_V1_Web_Example extends Controller_V1_Web_Base
 	echo Uri::string();
     }
 
+    public static function action_test_json()
+    {
+        $api_code = 0;
+	$api_message = "success";
+	$api_data = [
+	    "test" => "test_json"
+	];
+	$jwt = "Abw8Rsasfw_Ejgw";
+	$base_data = self::base_template($api_code, $api_message, $api_data, $jwt);
+	print_R($base_data);
+    }
     
 }
 

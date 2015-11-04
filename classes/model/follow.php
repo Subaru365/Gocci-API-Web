@@ -1,54 +1,56 @@
 <?php
+/**
+ * Follow Class 
+ * @package    Gocci-Web
+ * @version    3.0 <2015/10/20>
+ * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
+ * @license    MIT License
+ * @copyright  2014-2015 Inase,inc.
+ * @link       https://bitbucket.org/inase/gocci-web-api
+ */
 
 class Model_Follow extends Model
 {
 	//followしているuser_idリスト
 	public static function get_follow_id($user_id)
 	{
-		$query = DB::select('follow_p_user_id')
-		->from('follows')
-		->where('follow_a_user_id', "$user_id");
+	    $query = DB::select('follow_p_user_id')
+	    ->from('follows')
+	    ->where('follow_a_user_id', "$user_id");
 
-		$follow_id = $query->execute()->as_array();
+	    $follow_id = $query->execute()->as_array();
 
-		if (empty($follow_id)) {
-			Controller_V1_Mobile_Base::output_square_brackets();
-			error_log("user_id:${user_id}のフォロワーはいません");
-			exit;
-		}
-
-		return $follow_id;
+	    if (empty($follow_id)) {
+		Controller_V1_Mobile_Base::output_square_brackets();
+		error_log("user_id:${user_id}のフォロワーはいません");
+		exit;
+	    }
+	    return $follow_id;
 	}
 
-
-	//followしているユーザー情報
+	// followしているユーザー情報
 	public static function get_follow($user_id, $target_user_id)
 	{
-		$query = DB::select(
-			'user_id', 'username', 'profile_img'
-		)
-		->from ('follows')
-		->join ('users', 'INNER')
-		->on   ('follow_p_user_id', '=', 'user_id')
-		->where('follow_a_user_id', "$target_user_id");
+	    $query = DB::select(
+		'user_id', 'username', 'profile_img'
+	    )
+	    ->from ('follows')
+	    ->join ('users', 'INNER')
+	    ->on   ('follow_p_user_id', '=', 'user_id')
+	    ->where('follow_a_user_id', "$target_user_id");
 
-		$follow_list = $query->execute()->as_array();
+	    $follow_list = $query->execute()->as_array();
+	    $follow_num = count($follow_list);
 
-		$follow_num = count($follow_list);
-
-		for ($i=0; $i < $follow_num; $i++) {
-			$follow_list[$i]['profile_img'] =
-				Model_Transcode::decode_profile_img($follow_list[$i]['profile_img']);
-
-			$follow_list[$i]['follow_flag'] =
-				self::get_flag($user_id, $follow_list[$i]['user_id']);
+	    for ($i=0; $i < $follow_num; $i++) {
+		$follow_list[$i]['profile_img'] = Model_Transcode::decode_profile_img($follow_list[$i]['profile_img']);
+			$follow_list[$i]['follow_flag'] = self::get_flag($user_id, $follow_list[$i]['user_id']);
 		}
 
 		return $follow_list;
 	}
 
-
-	//フォローされてるユーザー情報
+	// フォローされてるユーザー情報
 	public static function get_follower($user_id, $target_user_id)
 	{
 		$query = DB::select(

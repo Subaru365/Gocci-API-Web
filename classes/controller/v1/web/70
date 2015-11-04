@@ -262,6 +262,23 @@ class Controller_V1_Web_Base extends Controller
   }
 
    /**
+    * api_data_status template
+    * @param POST string $api_code SUCESS or Failed
+    *
+    */
+    public static function api_data_status_template($message, $api_data)
+    {	
+	$base_data = [
+            "api_version" => 3.0,
+            "api_uri"     => Uri::string(),
+            "api_code"    => $api_code,
+            "api_message" => "$message ",
+            "api_data"    => $api_data
+        ];
+	return $base_data;
+    }
+ 
+   /**
    * Success JSON output
    *
    * @return string
@@ -312,8 +329,8 @@ class Controller_V1_Web_Base extends Controller
           "api_data"    => $obj = new stdClass()
       ];
       $status = json_encode(
-          $status,
-          JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
+                $status,
+                JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
       );
       echo $status;
       exit;     
