@@ -11,7 +11,12 @@
 
 class Model_Notice extends Model
 {
-
+    /**
+     * 1投稿のgochi数を求める
+     * @param Int $user_id
+     *
+     * @param Array $notice_data
+     */
     public static function get_data($user_id)
     {
         $query = DB::select(
@@ -43,23 +48,32 @@ class Model_Notice extends Model
         return $notice_data;
     }
 
-    // badge数取得
+    /**
+     * badge数取得
+     * @param Int $user_id
+     *
+     * @return $query
+     */
     public static function get_badge($user_id)
     {
-	$query = DB::select('read_flag')->from('notices')
-	->where('read_flag', '=', 1)
-	->and_where('notice_a_user_id', '=', $user_id)
-	->execute()->as_array();
+        $query = DB::select('read_flag')->from('notices')
+        ->where('read_flag', '=', 1)
+        ->and_where('notice_a_user_id', '=', $user_id)
+        ->execute()->as_array();
 
-	if ( isset($query[0]['read_flag']) ) {
-	    return count($query);
-	} else {
-	    return 0;
-	}
-	
+        if ( isset($query[0]['read_flag']) ) {
+            return count($query);
+        } else {
+            return 0;
+        }
     }
 
-    // Notice登録
+    /**
+     * Notice登録
+     * @param Int $a_user_id
+     * @param Int $p_user_id
+     * @param Int $post_id
+     */
     public static function notice_insert(
             $keyword, $a_user_id, $p_user_id, $post_id = 1)
     {
@@ -74,14 +88,13 @@ class Model_Notice extends Model
         }
         $query = DB::insert('notices')
         ->set(array(
-                  'notice_a_user_id' => "$a_user_id",
-                  'notice_p_user_id' => "$p_user_id",
-                  'notice'           => "$notice",
-                  'notice_post_id'   => "$post_id"
+            'notice_a_user_id' => "$a_user_id",
+            'notice_p_user_id' => "$p_user_id",
+            'notice'           => "$notice",
+            'notice_post_id'   => "$post_id"
         ))
         ->execute();
-        // register_idがwebかmobileかで、PUSH通知処理を分ける
-        // SNS Publish 外部処理
+
         $ch = curl_init();
 
         curl_setopt($ch, CURLOPT_URL,

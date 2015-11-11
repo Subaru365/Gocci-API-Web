@@ -14,7 +14,11 @@ use Aws\CognitoSync\CognitoSyncClient;
 
 class Model_Cognito extends Model
 {
-    // IdentityID取得 DataSet [User_Info]
+    /**
+     * IdentityID取得 DataSet [User_Info]
+     * @param  Int $user_id
+     * @return Array $result
+     */
     public static function post_data($user_id)
     {
         $cognito_data = Config::get('_cognito');
@@ -29,11 +33,18 @@ class Model_Cognito extends Model
                 "$cognito_data[developer_provider]" => "$user_id",
             ],
         ]);
-
-	return $result;
+        return $result;
     }
 
-    // SNS連携
+    /**
+     * SNS連携
+     * @param Int $user_id
+     * @param Int $identity_id
+     * @param String $provider
+     * @param String $token
+     *
+     * @return Array $result
+     */
     public static function post_sns($user_id, $identity_id, $provider, $token)
     {
         $cognito_data = Config::get('_cognito');
@@ -51,11 +62,17 @@ class Model_Cognito extends Model
                 "$provider" => "$token",
             ],
         ]);
-
         return $result;
     }
 
-    // Web SNS登録&連携
+    /**
+     * Web SNS登録&連携
+     * @param Int $user_id
+     * @param String $provider
+     * @param String $token
+     *
+     * @return Array $result
+     */
     public static function post_web_sns($user_id, $provider, $token)
     {
         $cognito_data = Config::get('_cognito');
@@ -72,27 +89,36 @@ class Model_Cognito extends Model
                 "$provider" => "$token",
             ],
         ]);
-
         return $result;
     }
-    // identity_idからtokenを取得
+     /**
+      * identity_idからtokenを取得
+      * @param Int $user_id
+      * @param Int $identity_id
+      *
+      * @return Array $result
+      */
     public static function get_token($user_id, $identity_id)
     {
         $cognito_data = Config::get('_cognito');
-	$client = new CognitoIdentityClient([
-		'region'  => 'us-east-1',
-    		'version' => 'latest'
-	]);
-        $result = $client->getOpenIdTokenForDeveloperIdentity([
-                'IdentityId'     => "$identity_id",
-                'IdentityPoolId' => "$cognito_data[IdentityPoolId]",
-                'Logins'         => [
-                "$cognito_data[developer_provider]" => "$user_id",
-                ],
+        $client = new CognitoIdentityClient([
+            'region'  => 'us-east-1',
+            'version' => 'latest'
         ]);
-	return $result['Token'];
+        $result = $client->getOpenIdTokenForDeveloperIdentity([
+            'IdentityId'     => "$identity_id",
+            'IdentityPoolId' => "$cognito_data[IdentityPoolId]",
+            'Logins'         => [
+            "$cognito_data[developer_provider]" => "$user_id",
+            ],
+        ]);
+        return $result['Token'];
     }
 
+    /**
+     * identity_id削除
+     * @param Int $identity_id
+     */
     public static function delete_identity_id($identity_id)
     {
         $client = new CognitoIdentityClient([
@@ -105,7 +131,13 @@ class Model_Cognito extends Model
         ]);
     }
 
-
+    /**
+     * identity_id削除
+     * @param Int $user_id
+     * @param Int $identity_id
+     * @param String $provider
+     * @param String $token
+     */
     public static function delete_sns($user_id, $identity_id, $provider, $token)
     {
         $developer_provider = Config::get('_cognito.developer_provider');
@@ -122,8 +154,13 @@ class Model_Cognito extends Model
         ]);
     }
 
-    //=========================================================================//
-    // identity_id取得
+    /**
+     * identity_id取得
+     * @param String $provider
+     * @param String $token
+     *
+     * @return Array $result
+     */
     public static function get_identity_id($provider, $token)
     {
         $IdentityPoolId = Config::get('_cognito.IdentityPoolId');
@@ -142,7 +179,18 @@ class Model_Cognito extends Model
         return $result['IdentityId'];
     }
 
-    // SNS連携
+    /**
+     * SNS連携
+     * @param Int $user_id
+     * @param String $provider
+     * @param String $token
+     * @param String $username
+     * @param String $os
+     * @param String $model
+     * @param Int $register_id
+     *
+     * @return Array $result
+     */
     public static function post_dev_sns(
         $user_id, $provider, $token, $username, $os, $model, $register_id)
     {
