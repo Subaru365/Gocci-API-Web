@@ -12,19 +12,20 @@
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
+// error_reporting(-1);
 
 class Controller_V1_Web_Auth extends Controller_V1_Web_Base
 {
     /**
-     * jwtがあるかどうかをcheckするメソッド
-     * @var String $uri
-     * @var String $login_flag
-     */
+    * jwtがあるかどうかをcheckするメソッド
+    *
+    * @return string
+    */
     public static function get_jwt_token($uri="", $login_flag)
     {
-        $jwt = @$_SERVER["HTTP_AUTHORIZATION"] ? @$_SERVER["HTTP_AUTHORIZATION"] : "";
-
-        if(isset($jwt)) {
+        $jwt = @$_SERVER["HTTP_AUTHORIZATION"] ?  @$_SERVER["HTTP_AUTHORIZATION"] : "";
+	
+	if(isset($jwt)) {
             $data      = self::decode($jwt);
             $user_data = session::get('data');
             $obj       = json_decode($user_data);
@@ -41,18 +42,20 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
             self::unauth();
             error_log('UnAuthorized Accsess..');
             exit;
-        }
+        }	
     }
 
     /**
-     * SNS Login (Facebook/Twitter)
-     */
+    * SNS Login (Facebook/Twitter)
+    *
+    * @return string
+    */
     public function action_login()
     {
-        $keyword   = 'ログイン';
-        $provider  = Input::get('provider');
-        $token     = Input::get('token');
-
+        $keyword     = 'ログイン';
+        $provider    = Input::get('provider');
+        $token       = Input::get('token');
+	
         try
         {
             if (empty($provider) && empty($token) || empty($provider) or empty($token) ) {
@@ -66,18 +69,14 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
             $badge_num   = $user_data['badge_num'];
             $jwt = self::encode($user_id, $username);
             Model_Login::post_login($user_id);
-            $data = [
-                "user_id"     => $user_id,
-                "username"    => $username,
-                "profile_img" => $profile_img,
-                "identity_id" => $identity_id,
-                "badge_num"   => $badge_num,
-            ];
-            $base_data = self::base_template($api_code = "SUCCESS",
-                                $api_message = "Successful API request",
-                                $login_flag =  1,
-                                $data, $jwt);
-
+	    $data = [
+		"user_id"     => $user_id,
+		"username"    => $username,
+		"profile_img" => $profile_img, 
+		"identity_id" => $identity_id,
+		"badge_num"   => $badge_num,
+	    ];
+	    $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1, $data, $jwt);
             self::output_json($base_data);
 
         } catch(\Database_Exception $e) {
@@ -100,75 +99,76 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
     */
     public static function action_logout()
     {
-        self::get_jwt_token($uri=Uri::string(), $login_flag=1);
-        $user_id = session::get('user_id');
-        if (empty($user_id)) {
-           self::error_json('ログインしていないためログアウトできません');
+	self::create_token($uri=Uri::string(), $login_flag=1);
+	$user_id = session::get('user_id');
+	
+	self::get_jwt_token($uri=Uri::string(), $login_flag=1);	
+	// $user_id = Input::post('user_id'); // 廃止
+
+	if (empty($user_id)) {
+	    self::error_json('ログインしていないためログアウトできません');
         }
-        try {
-            // ログアウトのためsessionデータ削除
-            Session::delete('user_id');
-            Session::delete('username');
-            Session::delete('exp');
-
-            $data = [
-                "message" => "ログアウトしました"
-            ];
-            $base_data = self::base_template($api_code = "SUCCESS",
-                                $api_message = "Successful API request",
-                                $login_flag =  1,
-                                $data, $jwt);
-
-            self::output_json($base_data);
-            error_log('ログアウトしました');
-
+	try {
+	    // ログアウトのためsessionデータ削除
+	    Session::delete('user_id');
+	    Session::delete('username');
+	    Session::delete('exp');
+	
+	    $data = [
+                    "message" => "ログアウトしました"
+	    ];
+	    $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1, $data, $jwt);
+	    self::output_json($base_data);
+	    error_log('ログアウトしました');
        } catch (Exception $e) {
 
        }
     }
 
     /**
-     * username password Login
-     */
+    * username password Login
+    *
+    * @return string
+    */
     public function action_pass_login()
     {
-        $username  = Input::post('username');
-        $password  = Input::post('password');
-
-        self::post_check();
+  	$username  = Input::post('username');
+  	$password  = Input::post('password');
+	
+	self::post_check();
         if (empty($username) && empty($password) || empty($username) or empty($password) ) {
-            self::error_signin($message = "usernameもしくはpasswordが入力されていません");
-        }
-        try {
-            if (!empty($username) && !empty($password)) {
+		self::error_signin($message = "usernameもしくはpasswordが入力されていません");	
+        } 
+  	try {
+	    if (!empty($username) && !empty($password)) {
                 $user_data   = Model_User::check_pass($username, $password);
                 $user_id     = $user_data[0]['user_id'];
                 $profile_img = $user_data[0]['profile_img'];
                 $identity_id = $user_data[0]['identity_id'];
                 $badge_num   = $user_data[0]['badge_num'];
                 Model_Login::post_login($user_id);
-                // JWT認証
-                $jwt = self::encode($user_id, $username);
-                $data = [
-                    "user_id"     => $user_id,
-                    "username"    => $username,
-                    "profile_img" => $profile_img,
-                    "identity_id" => $identity_id,
-                    "badge_num"   => $badge_num
-                ];
-                $base_data = self::base_template($api_code = "SUCCESS",
-                                    $api_message = "Successful API request",
-                                    $login_flag =  1,$data, $jwt);
-                self::output_json($base_data);
-            }
-        } catch (Exception $e) {
-            // JWT Exception
-            // Not access
-        }
-    }
+               	// JWT認証
+ 	        $jwt = self::encode($user_id, $username);
+	        $data = [
+	   	    "user_id"     => $user_id,
+		    "username"    => $username,
+		    "profile_img" => $profile_img,
+		    "identity_id" => $identity_id,
+		    "badge_num"   => $badge_num
+	        ];	
+	        $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1,$data, $jwt);
+	        self::output_json($base_data);
+	    }	    
+  	} catch (Exception $e) {
+  	    // JWT Exception
+  	    // Not access
+  	}
+   }
     /**
-     * DBデータ入力エラー
-     */
+    * DBデータ入力エラー
+    *
+    * @return string
+    */
     private static function failed(
         $keyword,
         $user_id,
@@ -179,8 +179,8 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
     )
     {
         $data = [
-            'api_version' => 3.0,
-            'api_uri'     => Uri::string(),
+	    'api_version' => 3.0,
+	    'api_uri'     => Uri::string(),
             'api_code'    => "Failed",
             'api_message' => $keyword . 'できませんでした。',
             'username'    => $username,

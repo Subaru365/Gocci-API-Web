@@ -11,8 +11,7 @@
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
-error_reporting(-1);
-
+header('X-Content-Type-Options: nosniff');
 /**
  * Base Class
  * @author Kazunori Tani <k-tani@inase-inc.jp>
@@ -36,7 +35,7 @@ class Controller_V1_Web_Base extends Controller
      *
      * @var string
      */
-    public static $Error_API_request_message ="Error_API_request";
+    public static $Error_API_request_message = "Error_API_request";
 
     /**
      * 
@@ -69,6 +68,20 @@ class Controller_V1_Web_Base extends Controller
     }    
 
     /**
+     * json_encode template
+     * @param Array $status
+     * return $status
+     */
+    public static function json_encode_template($status)
+    {
+	$status = json_encode(
+            $status,
+            JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
+        );
+	return $status;
+    }
+   
+    /**
     * post check
     *
     * @return string
@@ -83,6 +96,30 @@ class Controller_V1_Web_Base extends Controller
       }
     }
 
+    public static function get_jwt_token($uri="", $login_flag)
+    {
+        $jwt = self::get_jwt();
+        if(isset($jwt)) {
+            $data      = self::decode($jwt);
+            $user_data = session::get('data');
+            $obj       = json_decode($user_data);
+            if (empty($obj)) {
+                self::unauth();
+            }
+            $user_id   = $obj->{'user_id'};
+            session::set('user_id', $user_id);
+            $username  = $obj->{'username'};
+            session::set('username', $username);
+            $exp       = $obj->{'exp'};
+            session::set('exp', $exp);
+        } else {
+            self::unauth();
+            error_log('UnAuthorized Accsess..');
+            exit;
+        }
+     }
+
+
     /**
     * decode
     * @param  $jwt
@@ -94,7 +131,7 @@ class Controller_V1_Web_Base extends Controller
         try {
             $decoded = JWT::decode($jwt, $key, array('HS256'));
             $decoded = session::set('data', $decoded);
-            error_log('decodedの中身を確認 by base');
+            error_log('decodedの中身を確認 by base decode');
             error_log($decoded);
         } catch (Exception $e){
             $decoded = "";
@@ -111,8 +148,7 @@ class Controller_V1_Web_Base extends Controller
     public static function encode($user_id, $username)
     {
         $key   = 'i_am_a_secret_key';           
-        $exp = time() + 86400; // 24h
-	// $exp = time() + 10;
+        $exp = time() + 86400; // 24h 
         $json  = [
                 'user_id' => $user_id,
                 'exp'     => $exp,
@@ -141,10 +177,7 @@ class Controller_V1_Web_Base extends Controller
             self::expired_token("Expired Token");
         } else {
             error_log('有効期限内です. jwtを更新します');
-            // refresh_token method call!
             $jwt = self::_refresh_token();
-	    error_log('更新したjwt');
-	    error_log($jwt);	    
        }
         return $jwt;
     }
@@ -183,11 +216,7 @@ class Controller_V1_Web_Base extends Controller
             "login_flag"  => $login_flag,
             "api_data"    => $obj = new stdClass()
         ];
-        $status = json_encode(
-            $status,
-            // JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
-            JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
-        );
+	$status = self::json_encode_template($status);
         echo $status;
         exit;
     }
@@ -199,10 +228,7 @@ class Controller_V1_Web_Base extends Controller
     */
     public static function output_json($api_data)
     {
-        $json = json_encode(
-		$api_data,
-                JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
-        );
+	$json = self::json_encode_template($api_data);
         echo $json;
     }
 
@@ -234,13 +260,9 @@ class Controller_V1_Web_Base extends Controller
     $status = [
       'message' => 'Userが存在しません'
     ];
-
-    $status = json_encode(
-      $status,
-        JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
-      );
-      echo $status;
-      exit;
+    $status = self::json_encode_template($status);
+    echo $status;
+    exit;
   }
 
   /**
@@ -250,39 +272,22 @@ class Controller_V1_Web_Base extends Controller
   */
   public static function notid()
   {
-    $status = [
+    $api_data = [
       'message' => 'usernameを入力してください'
     ];
-    $status = json_encode(
-      $status,
-        JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
-      );
-      echo $status;
-      exit;
+    $base_data = self::base_template($api_code = 1, $api_message = "Failed", $login_flag = 0, $api_data, $jwt = "");
+    $status    = self::json_encode_template($base_data);
+    echo $status;
+    exit;
   }
 
-   /**
-    * api_data_status template
-    * @param POST string $api_code SUCESS or Failed
-    *
-    */
-    public static function api_data_status_template($message, $api_data)
-    {	
-	$base_data = [
-            "api_version" => 3.0,
-            "api_uri"     => Uri::string(),
-            "api_code"    => $api_code,
-            "api_message" => "$message ",
-            "api_data"    => $api_data
-        ];
-	return $base_data;
-    }
- 
    /**
    * Success JSON output
    *
    * @return string
    */
+   // 以下のメソッドを使用していなかったら廃止 => register.phpで使用中(output_jsonに以降すべき)
+
   // public static function success_json($api_daata) {
   public static function success_json($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $token,$message) 
   {
@@ -295,23 +300,50 @@ class Controller_V1_Web_Base extends Controller
              "jwt"         => $token,
              "login_flag"  => 1 
         ];
-
         $status = [
             "api_version" => 3.0,
             "api_uri"     => Uri::string(),
-            "api_code"    => "success",
+            "api_code"    => "SUCCESS",
             "api_message" => "$message Successful API request",
             "api_data"    => $api_data
         ];
-
-        $status = json_encode(
-                $status,
-                JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
-        );
+	$status = self::json_encode_template($status);
         echo $status;
         exit;
   }
+  
+  public static function error_signin($message)
+  {
+      $status = [
+          "api_version" => 3.0,
+          "api_uri"     => Uri::string(),
+          "api_code"    => 'ERR_SGNIN',
+          "api_message" => $message,
+          "login_flag"  => 0,
+          "api_data"    => $obj = new stdClass()
+      ];
+      $status = self::json_encode_template($status);
+      echo $status;
+      exit;
+  }
 
+  public static function error_register($message)
+  {
+      $status = [
+          "api_version" => 3.0,
+          "api_uri"     => Uri::string(),
+          "api_code"    => 'ERROR_ALREADY_REGISTER',
+          "api_message" => $message,
+          "login_flag"  => 0,
+          "api_data"    => $obj = new stdClass()
+      ];
+      $status = self::json_encode_template($status);
+      echo $status;
+      exit;
+  }
+
+
+  // 以下使っていなかったら廃止
   /**
   * error json output
   *
@@ -319,21 +351,63 @@ class Controller_V1_Web_Base extends Controller
   */
   public static function error_json($message)
   {
+      $api_message = "UnAuthorized";
       // ver3 validation
       $status = [
           "api_version" => 3.0,
           "api_uri"     => Uri::string(),
-          "api_code"    => " VALIDATION ERROR",
+          "api_code"    => $api_message, #"VALIDATION ERROR",
           "api_message" => $message,
           "login_flag"  => 0,
           "api_data"    => $obj = new stdClass()
       ];
-      $status = json_encode(
-                $status,
-                JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
-      );
+      $status = self::json_encode_template($status);
       echo $status;
       exit;     
+  }
+  
+  public static function timeline_template()
+  {
+	$user_id  = session::get('user_id');
+    	$username = session::get('username');
+	$exp      = session::get('exp');
+	$jwt      = self::check_jwtExp($exp);
+	$sort_key = 'all';
+	$limit    = 20;
+
+	$option   = [
+		    'call'	    => Input::get('call', 0),
+		    'order_id'      => Input::get('order_id', 0),
+		    'category_id'   => Input::get('category_id', 0),
+		    'value_id'      => Input::get('value_id', 0),
+		    'lon'           => Input::get('lon', 0),
+		    'lat'	    => Input::get('lat', 0)
+	];
+	$data = Model_Post::get_data($user_id, $sort_key, $sort_key, $limit);
+
+	for ($i = 0; $i<$limit; $i++) {
+	    $post_id = $data[$i]['post_id'];
+	    $Comment_data = Model_Comment::get_data($post_id);
+	    $hash_id = Hash_Id::video_hash($post_id);
+	    $data[$i]['hash_id']  = $hash_id;
+	    $data[$i] = [
+	        "post"     => $data[$i],
+		"comments" => $Comment_data
+	    ];
+  	}
+	return $data;
+  }
+
+  /**
+  * get jwt method
+  * 
+  * @return string $jwt
+  */
+  public static function get_jwt()
+  {
+      $jwt = @$_SERVER["HTTP_AUTHORIZATION"] ? @$_SERVER["HTTP_AUTHORIZATION"] : "";
+  
+      return $jwt;
   }
 
   /**
@@ -341,7 +415,7 @@ class Controller_V1_Web_Base extends Controller
   *
   * @return string
   */
-  public static function expired_token()
+  public static function expired_token($message)
   {
         // $login_flagが2であれば、フロント側でリダイレクトする
         $status = [
@@ -352,11 +426,7 @@ class Controller_V1_Web_Base extends Controller
           "login_flag"  => 2,
           "api_data"    => $obj = new stdClass()
         ];
-	
-        $status = json_encode(
-            $status,
-            JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
-        );
+	$status = self::json_encode_template($status);
         echo $status;
         exit;
   }
