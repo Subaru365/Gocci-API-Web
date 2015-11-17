@@ -32,10 +32,9 @@ class Model_Post extends Model
      */
     public static function get_post_id($hash_id)
     {
-        $query = DB::select('post_id')->from('posts')
-        ->where('post_hash_id', '=', $hash_id);
-        $post_id = $query->execute()->as_array();
-        return $post_id = $post_id[0]['post_id'];
+        $post_id = `/usr/local/bin/inasehash -d {$hash_id}`;
+
+        return $post_id;
     }
 
     /**
@@ -172,6 +171,9 @@ class Model_Post extends Model
      */
     public static function get_one_data($user_id, $limit = 1, $post_id)
     {
+        error_log('user_id');
+        error_log($user_id);
+
         $query = DB::select(
                 'post_id', 'movie', 'thumbnail', 'category', 'tag', 'value',
                 'memo', 'post_date', 'cheer_flag',
@@ -188,12 +190,13 @@ class Model_Post extends Model
         ->join('tags', 'LEFT OUTER')
         ->on('post_tag_id', '=', 'tag_id')
         ->where('post_status_flag', '1')
-        ->and_where('post_id','=', $post_id)
+        // ->and_where('post_id','=', $post_id)
         ->limit($limit);
 
         $post_data = $query->execute()->as_array();
 
         $post_num  = count($post_data);
+        // print_R($post_num);exit;
         for ($i=0; $i < $post_num; $i++) {
             $movie = $post_data[$i]['movie'];
             $post_data[$i]['mp4_movie']   = Model_Transcode::decode_mp4_movie($post_data[$i]['movie']);
@@ -212,6 +215,7 @@ class Model_Post extends Model
             $post_data[$i]['gochi_flag']  = Model_Gochi::get_flag($user_id, $post_id);
             $post_data[$i]['post_date']   = Model_Date::get_data($post_date);
         }
+        // print_R($post_data);exit;
         return $post_data;
     }
 

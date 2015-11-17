@@ -75,7 +75,7 @@ class Model_User extends Model
         } else {
              // まだ登録されていないusername
              return $username;
-         }
+        }
     }
 
     /**
@@ -356,6 +356,8 @@ class Model_User extends Model
         $user_data = $query->execute()->as_array();
 
         if (empty($user_data)) {
+            // ================= コントローラー名を変更する。 =========================
+
             Controller_V1_Web_Base::error_json('登録されていないユーザです');
             error_log('登録されていないユーザー' . $identity_id);
             // Cognitoから消去
@@ -396,6 +398,12 @@ class Model_User extends Model
 
         $user_data = $query->execute()->as_array();
 
+        if (empty($user_data)) {
+            // ユーザーが見つからなかったので、ページが見つかりませんでした。と表示する
+            // このページはご利用いただけません。リンクに問題があるか、ページが削除された可能性があります。 Gocciに戻る
+            Controller_V1_Web_Base::NotFoundPage();
+            exit;
+        }
         //付加情報格納(follow_num, fllower_num, cheer_num, status_flag)
 
         $user_data[0]['profile_img']  = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);

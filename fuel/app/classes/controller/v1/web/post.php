@@ -173,6 +173,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
                 "message" => "パスワードを登録しました"
             ];
             $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1, $data, $jwt="");
+       
             $status = self::output_json($base_data);
         } catch (\Database_Exception $e) {
 
@@ -211,6 +212,8 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
         $keyword = 'gochi';
         $user_id = session::get('user_id');
         $post_id = Input::post('post_id');
+        error_log('gochiするuser_idは');
+        error_log($user_id);
 
         try {
             // テーブルに格納
@@ -222,12 +225,13 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
                 $record = Model_Notice::notice_insert(
                     $keyword, $user_id, $target_user_id, $post_id
                 );
-            }                 
-            $data  = [
+            }
+            $data = [
                 "message" => "gochiしました"
             ];
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", $login_flag = 1, $data, $jwt = "");
+    
             $status = $this->output_json($base_data);
         } catch (\Database_Exception $e) {
             self::failed($keyword);
@@ -237,7 +241,6 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 
     /**
      * comment
-     * @return string  
      */
     public function action_comment()
     {
@@ -250,7 +253,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
         try {
             $target_user_id = Model_Comment::post_comment(
                 $user_id, $post_id, $comment
-            ); 
+            );
             if ((int)$user_id !== (int)$target_user_id) {
                 $record = Model_Notice::notice_insert(
                     $keyword, $user_id, $target_user_id, $post_id
@@ -259,9 +262,10 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             $data = [
                 "message" => "コメントしました"
             ];
-            $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag = 1, $data, $jwt = "");
-                $status = $this->output_json($base_data);
-
+            $base_data = self::base_template($api_code = "SUCCESS", 
+                $api_message = "Successful API request", $login_flag = 1, $data, $jwt = "");
+ 
+            $status = $this->output_json($base_data);
         } catch(\Database_Exception $e) {
             self::failed($keyword);
             error_log($e);
@@ -291,6 +295,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
                 $login_flag = 1, $data, $jwt = "");
+
             $status = $this->output_json($base_data);
 
         } catch(\Database_Exception $e) {
@@ -319,6 +324,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             $base_data = self::base_template($api_code = "SUCCESS",
                 $api_message = "Successful API request", 
                 $login_flag = 1, $data, $jwt = "");
+
             $status = $this->output_json($base_data);
 
         } catch (\Database_Exception $e) {
@@ -343,6 +349,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             ];
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", $login_flag = 1, $data, $jwt = "");
+
             $status = $this->output_json($base_data);
 
         } catch (\Database_Exception $e) {
@@ -369,6 +376,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             ];
             $base_data = self::base_template($api_code = "SUCCESS",
              $api_message = "Successful API request", $login_flag = 1, $data, $jwt = "");
+     
             $status = $this->output_json($base_data);
         } catch (\Database_Exception $e) {
             self::failed($keyword);
@@ -394,6 +402,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request",
                 $login_flag = 1, $data, $jwt = "");
+
             $status = $this->output_json($base_data);
         } catch (\Database_Exception $e) {
             self::failed($keyword);
@@ -418,6 +427,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
                 $login_flag = 1, $data, $jwt = "");
+   
             $status = $this->output_json($base_data);
         } catch (\Database_Exception $e) {
             self::failed($keyword);
@@ -466,6 +476,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
                 "profile_img" => $profile_img    
             ];
             $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag = 1, $data, $jwt = "");
+
             $status = $this->output_json($base_data); 
 
         } catch (\Database_Exception $e) {
@@ -489,6 +500,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
                 "message" => "ご意見を投稿しました"
             ];
             $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag = 1, $data, $jwt = "");
+
             $status = $this->output_json($base_data);
         } catch(\Database_Exception $e) {
             self::failed($keyword);
@@ -512,6 +524,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             "login_flag"  => 1,
             "api_data"    => $obj = new stdClass()
         ];
+
         self::output_json($api_data);
         exit;
     }
@@ -541,6 +554,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
                     "message" => "パスワードを変更しました"
                 ];
                 $base_data = self::base_template($api_code = 0, $api_message = "SUCCESS", $login_flag =  1,$data, $jwt="");
+
                 $status = $this->output_json($base_data);
             }  else {
                 Controller_V1_Web_Base::error_json("パスワードが正しくありません");

@@ -8,8 +8,7 @@
  * @copyright  2014-2015 Inase,inc.
  * @link       https://bitbucket.org/inase/gocci-web-api
  */
-header('Content-Type: application/json; charset=UTF-8');
-error_reporting(-1);
+
 class Controller_V1_Web_Register extends Controller_V1_Web_Base
 {
     /**
@@ -29,9 +28,10 @@ class Controller_V1_Web_Register extends Controller_V1_Web_Base
         $register_id = $user_id; 
 
         // getであれば、UnAuthorized
-        Controller_V1_Web_Base::post_check();
+        $this->post_check();
 
         try {
+            
             // usernameとpasswordが両方空か
             Model_User::check_name_pass($username, $password);
 
@@ -52,9 +52,12 @@ class Controller_V1_Web_Register extends Controller_V1_Web_Base
             $token        = $cognito_data['Token'];
             // user登録
             $hash_pass    = password_hash($password, PASSWORD_BCRYPT);
-            $profile_img  = Model_User::insert_data($username, $identity_id,$hash_pass);
+            $profile_img  = Model_User::insert_data($username, $identity_id, $hash_pass);
             $endpoint_arn = 0;
             Model_Device::post_data($user_id, $os, $model, $register_id, $endpoint_arn);
+            
+            // Model_User::user_pass_template($username, $password, $register_id, $os, $model);
+
 
             $jwt = self::encode($user_id, $username);
 
@@ -97,7 +100,8 @@ class Controller_V1_Web_Register extends Controller_V1_Web_Base
         $register_id = $user_id;
 
         // getであれば、UnAuthorized
-        Controller_V1_Web_Base::post_check();
+        // Controller_V1_Web_Base::post_check();
+        $this->post_check();
 
         try {
             // usernameが既に使われていないかエラーハンドリング

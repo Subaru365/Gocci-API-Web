@@ -32,6 +32,6 @@ class Controller_V1_Web_Put extends Controller_V1_Web_Base
         $base_data = self::base_template($api_code = "SUCCESS", 
             $api_message = "Sucessful API request", 
             $login_flag = 1, $data, $jwt);
-            $status = self::output_json($base_data);
+        $status = self::output_json($base_data);
    }
 }
