@@ -29,6 +29,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
      * @param $uri
      * @param $login_flag
      */
+    // index_create_tokenとなっていないため呼び出せない/このメソッド使ってないのか？
     public function create_token($uri, $login_flag)
     {
         $jwt = self::get_jwt();
@@ -36,9 +37,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
             $data      = self::decode($jwt);
             $user_data = session::get('data');
             $obj       = json_decode($user_data);
-            if (empty($obj)) {
-                self::unauth($uri, $login_flag);
-            }
+            if (empty($obj)) { self::unauth($uri, $login_flag);}
             $user_id   = $obj->{'user_id'};
             session::set('user_id', $user_id);
             $username  = $obj->{'username'};
@@ -109,7 +108,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
 
     /**
      * badge数を取得するapi
-     */ 
+     */
     public function action_notice_badge()
     {
         self::create_token($uri=Uri::string(), $login_flag=0);
@@ -193,7 +192,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     }
 
     /**
-     * Restarants Page
+     * Restarants Page ver3
      */
     public function action_rest()
     {
@@ -206,54 +205,30 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         if (isset($jwt)) {
             $data      = self::decode($jwt);
             $user_data = session::get('data');
-            $obj       = json_decode($user_data); 
-
+            $obj       = json_decode($user_data);
             if (empty($obj)) {
                 $jwt= "";
                 $user_id= 0;
-                $rest_data= Model_Restaurant::get_data($user_id, $rest_id);
-                $rest_data['want_flag'] = Model_Want::get_flag($user_id, $rest_id);
-                $rest_data['cheer_num'] = Model_Post::get_rest_cheer_num($rest_id);
-                $post_data = Model_Post::get_data($user_id, $sort_key, $rest_id);
 
-                if (empty($user_id)) {
-                    $login_flag = 0;
-                } else {
-                    $login_flag = 1;
-                }
-                $data = [
-                    "header" => $rest_data,//["lat","lon", "locality","restname", "tell", "want_flag","cheer_num"],
-                    "posts"  => $post_data
-                ];
-                $base_data = self::base_template($api_code = "SUCESS", $api_message = "UnAuthorized", $login_flag,$data, $jwt);
+                $data = self::rest_template($user_id, $rest_id, $sort_key);
+                $base_data = self::base_template($api_code = "SUCCESS", $api_message = "UnAuthorized", $login_flag, $data, $jwt);
                 $status = $this->output_json($base_data);
                 exit;
             }
         }
         $user_id   = $obj->{'user_id'};
+        error_log('user_id');
+        error_log($user_id);
         session::set('user_id', $user_id);
         $username  = $obj->{'username'};
         session::set('username', $username);
         $exp       = $obj->{'exp'};
         session::set('exp', $exp);
-        $rest_id   = Input::get('rest_id');
-        $jwt = self::check_jwtExp($exp);
+        $rest_id= Input::get('rest_id');
+        $jwt    = self::check_jwtExp($exp);
+        $data   = self::rest_template($user_id, $rest_id, $sort_key);
 
-        $rest_data = Model_Restaurant::get_data($user_id, $rest_id);
-        $rest_data['want_flag'] = Model_Want::get_flag($user_id, $rest_id);
-        $rest_data['cheer_num'] = Model_Post::get_rest_cheer_num($rest_id);
-        $post_data = Model_Post::get_data($user_id, $sort_key, $rest_id);
-
-        if (empty($user_id)) {
-            $login_flag = 0;
-        } else {
-            $login_flag = 1;
-        }
-        $data = [
-            "header" => $rest_data,
-            "posts"  => $post_data
-        ];
-        $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1,$data, $jwt);
+        $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1, $data, $jwt);
         $status = $this->output_json($base_data);
     }
 
@@ -273,26 +248,8 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
             if (empty($obj)) {
                 $sort_key       = 'user';
                 $limit          = 20;
-                if (ctype_digit($target_username)) { $this->notid();}
-                    // 相手のユーザーID
-                    $target_user_id = Model_User::get_id($target_username);
-                    $user_id        = session::get('user_id');
-                    $user_data      = Model_User::get_data($user_id, $target_user_id);
-                    $post_data      = Model_Post::get_data(
-                    $target_user_id, $sort_key, $target_user_id, $limit
-                );
-                for ($i = 0; $i<count($post_data); $i++) {
-                    $post_id = $post_data[$i]['post_id'];
-                    $Comment_data = Model_Comment::get_data($post_id);
-                    $post_data[$i] = [
-                        "post"     => $post_data[$i],
-                        "comments" => $Comment_data
-                    ];
-                }
-                $data = [
-                    "header" => $user_data,
-                    "posts"  => $post_data
-                ];
+                $data = self::user_template($target_username, $limit, $sort_key);
+
                 $base_data = self::base_template($api_code = "SUCESS", $api_message = "UnAuthorized", $login_flag =  0, $data, $jwt);
                 $status = $this->output_json($base_data);
                 exit;
@@ -309,31 +266,9 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         $sort_key = 'user';
         $limit    = 20;
 
-        if (ctype_digit($target_username)) { $this->notid();} 
-            // ページを見る相手のユーザーID 
-            $target_user_id = Model_User::get_id($target_username);
-
-            $user_id  = session::get('user_id');
-            if (empty($user_id)) { $this->notfounduser(); exit;}
-                $login_flag = 1;
-            $user_data  = Model_User::get_data($user_id, $target_user_id);
-            $post_data  = Model_Post::get_data(
-               $target_user_id, $sort_key, $target_user_id, $limit
-            );
-            for ($i = 0; $i<count($post_data); $i++) {
-                $post_id = $post_data[$i]['post_id'];
-                $Comment_data = Model_Comment::get_data($post_id);
-                $post_data[$i] = [
-                    "post"     => $post_data[$i],
-                    "comments" => $Comment_data
-                ];
-            }
-            $data = [
-                "header" => $user_data,
-                "posts"  => $post_data
-            ];
-            $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1,$data, $jwt);
-            $status = $this->output_json($base_data);
+        $data = self::user_template($target_username, $limit, $sort_key);
+        $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1, $data, $jwt);
+        $status = $this->output_json($base_data);
     }
 
     /**
@@ -343,11 +278,13 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     {
         self::create_token($uri=Uri::string(), $login_flag=1);
         $user_id = session::get('user_id');
+        // $user_id = 4; // debug
         $exp     = session::get('exp');
         $jwt     = self::check_jwtExp($exp);
         $data    = Model_Notice::get_data($user_id);
         Model_User::reset_badge($user_id);
         $base_data = self::base_template($api_code = 0, $api_message = "SUCCESS", $login_flag =  1,$data, $jwt);
+        // $status  = $this->debug_output_json($base_data);// debug
         $status  = $this->output_json($base_data);
     }
 
@@ -428,7 +365,8 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         $exp            = session::get('exp');
         $jwt            = self::check_jwtExp($exp);
         $data           = Model_Follow::get_follower($user_id, $target_user_id);
-        $base_data      = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1,$data, $jwt); 
+        $base_data      = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1,$data, $jwt);
+
         $status         = $this->output_json($base_data);
     }
 
@@ -442,7 +380,8 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         $exp = session::get('exp');
         $jwt = self::check_jwtExp($exp);
         $data= Model_Want::get_want($target_user_id);
-        $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1,$data, $jwt); 
+        $base_data = self::base_template($api_code = "SUCCESS", 
+            $api_message = "Successful API request", $login_flag =  1,$data, $jwt);
         $status = $this->output_json($data);
     }
 
@@ -498,7 +437,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         $targetUserId    = Model_User::get_id($targetUserName);
         $data            = Model_User::get_data($user_id, $targetUserId);
         $base_data       = self::base_template($api_code = 0, $api_message = "SUCCESS", 
-            $login_flag =  1, $data, $jwt);
+                            $login_flag =  1, $data, $jwt);
         $status          = $this->output_json($base_data);
     }
 
@@ -507,20 +446,37 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
      */
     public function action_video($hash_id)
     {
-        $jwt = "";
-        $user_id = "";
-        $sort_key= "all";
-        $post_id = Model_Post::get_post_id($hash_id);
-        $data = Model_Post::get_one_data($user_id, $limit=1, $post_id);
-        for ($i = 0; $i<$limit; $i++) {
-            $Comment_data = Model_Comment::get_data($post_id);
-            $data[$i]['hash_id']  = $hash_id;
-                $data[$i] = [
-                    "post"     => $data[$i],
-                    "comments" => $Comment_data
-                ];
+
+        // jwtを取得して、そこからuser_idを取得しないと、いくらでも、gochi/commentで来てしまう。
+        $jwt = self::get_jwt();
+        if (isset($jwt)) {
+            $data      = self::decode($jwt);
+            $user_data = session::get('data');
+            $obj       = json_decode($user_data);
+
+
+            if (empty($obj)) {
+                // 未ログインユーザー
+                $jwt= "";
+                $user_id= 0;
+                $data = self::video_template($user_id, $hash_id);
+                $base_data = self::base_template($api_code = "SUCESS", $api_message = "UnAuthorized", $login_flag = 0, $data, $jwt);
+                $status = $this->output_json($base_data);
+                exit;
+            }
         }
-        $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag = 1, $data, $jwt);
+        // このページにアクセスしたユーザーがログイン済みのユーザーなのか、
+        // もしくは、未ログインのユーザーなのかで、いいね、コメントの処理を分岐させる。
+        // 未ログインであれば、gochi/commentをしようとした際にダイアログを表示する。
+        // $user_id = session::get('user_id');
+        // sessionではなく、$objからuser_idを取得
+        $user_id   = $obj->{'user_id'};
+        error_log('user_id');
+        error_log($user_id);
+
+        $data = self::video_template($user_id, $hash_id);
+
+        $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag = 1, $data, $jwt = "");
         $status = $this->output_json($base_data);
     }
 }

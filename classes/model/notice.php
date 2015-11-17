@@ -12,7 +12,7 @@
 class Model_Notice extends Model
 {
     /**
-     * 1投稿のgochi数を求める
+     * ユーザーの通知を取得する
      * @param Int $user_id
      *
      * @param Array $notice_data
@@ -20,7 +20,7 @@ class Model_Notice extends Model
     public static function get_data($user_id)
     {
         $query = DB::select(
-         'notice_id', 'notice_a_user_id', 'username',
+         'notice_id', 'notice_a_user_id','post_id', 'post_hash_id', 'username',
          'profile_img', 'notice', 'notice_post_id',
          'read_flag', 'notice_date')
         ->from('notices')
@@ -34,8 +34,8 @@ class Model_Notice extends Model
         ->order_by('notices.notice_date','desc')
 
         ->limit('15')
-        ->where('notices.notice_p_user_id', "$user_id")
-        ->where('post_status_flag', '1');
+        ->where('notices.notice_p_user_id', "$user_id");
+        // ->where('post_status_flag', '1');
 
         $notice_data = $query->execute()->as_array();
         $num = count($notice_data);
@@ -56,6 +56,7 @@ class Model_Notice extends Model
      */
     public static function get_badge($user_id)
     {
+	/*
         $query = DB::select('read_flag')->from('notices')
         ->where('read_flag', '=', 1)
         ->and_where('notice_a_user_id', '=', $user_id)
@@ -66,6 +67,15 @@ class Model_Notice extends Model
         } else {
             return 0;
         }
+	*/
+	$query = DB::select('badge_num')->from('users')
+	->where('user_id', '=', $user_id)
+	->execute()->as_array();
+
+	if ( isset($query[0]['badge_num'])) {
+	    return $query[0]['badge_num'];
+	}
+
     }
 
     /**

@@ -5,7 +5,8 @@ require COREPATH.'bootstrap.php';
 \Autoloader::add_namespace(
 	'Aws', APPPATH.'vendor/aws/aws-sdk-php/src/Aws', true
 );
-
+// http://tech.ewdev.info/2014/01/1373/
+Autoloader::add_namespace('Util', APPPATH.'vendor/util/');
 
 \Autoloader::add_classes(array(
 	// Add classes you want to override here

@@ -8,6 +8,8 @@
  * @copyright  2014-2015 Inase,inc.
  * @link       https://bitbucket.org/inase/gocci-web-api
  */
+// require_once APPPATH . 'classes/middleware.php';
+
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
@@ -15,6 +17,7 @@ header('X-Content-Type-Options: nosniff');
 
 class Controller_V1_Web_Base extends Controller
 {
+
     /**
      * The Web Gocci api Version number.
      * @var string
@@ -75,6 +78,20 @@ class Controller_V1_Web_Base extends Controller
     }
 
     /**
+     * debug_json_encode template
+     * @param Array $status
+     * @return $status
+     */
+    public static function debug_json_encode_template($status)
+    {
+        $status = json_encode(
+            $status,
+            JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES
+        );
+        return $status;
+    }
+
+    /**
      * post check
      * @return string
      */
@@ -83,8 +100,8 @@ class Controller_V1_Web_Base extends Controller
       if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // post
       } else {
-        // getなので不正な処理
-        self::error_json("UnAuthorized");
+        // get
+        self::unauth();
       }
     }
 
@@ -221,6 +238,16 @@ class Controller_V1_Web_Base extends Controller
     }
 
     /**
+     * debug output json
+     * @param  $data
+     */
+    public static function debug_output_json($api_data)
+    {
+        $json = self::debug_json_encode_template($api_data);
+        echo $json;
+    }
+
+    /**
      * getallheaders
      *
      * @return $headers
@@ -249,6 +276,20 @@ class Controller_V1_Web_Base extends Controller
         $status = self::json_encode_template($status);
         echo $status;
         exit;
+    }
+
+    /**
+     *
+     * このページはご利用いただけません。リンクに問題があるか、ページが削除された可能性があります。 Gocciに戻る
+     *
+     */
+    public static function NotFoundPage()
+    {
+        $data = [
+            "message" => "This page is not available. There is a problem with the link or there is a possibility that the page has been deleted. Return to the Gocci."
+        ];
+        $base_data = self::base_template($api_code = "SUCCESS", $api_message = "SUCCESS ful API request", $login_flag =  1, $data, $jwt = "");
+        $status = self::output_json($base_data);
     }
 
     /**
@@ -335,7 +376,6 @@ class Controller_V1_Web_Base extends Controller
     }
 
 
-    /* ======= 以下使っていなかったら廃止 ======= */
     /**
      * error json output
      * @return string
@@ -358,7 +398,7 @@ class Controller_V1_Web_Base extends Controller
     }
 
     /**
-     * error json output
+     * timeline template
      * @return Array $data
      */
     public static function timeline_template()
@@ -389,6 +429,98 @@ class Controller_V1_Web_Base extends Controller
                 "post"     => $data[$i],
                 "comments" => $Comment_data
             ];
+        }
+        return $data;
+    }
+
+    /**
+     * timeline template
+     * @param String $target_username
+     * @param Int $limit
+     * @param String $sort_key
+     * @return Array $data
+     */
+    public static function user_template($target_username, $limit, $sort_key) {
+        if (ctype_digit($target_username)) { $this->notid();}
+        // 相手のユーザーID
+        $target_user_id = Model_User::get_id($target_username);
+        $user_id        = session::get('user_id');
+        $user_data      = Model_User::get_data($user_id, $target_user_id);
+        $post_data      = Model_Post::get_data(
+            $target_user_id, $sort_key, $target_user_id, $limit
+        );
+        for ($i = 0; $i<count($post_data); $i++) {
+            $post_id = $post_data[$i]['post_id'];
+            $Comment_data = Model_Comment::get_data($post_id);
+            $post_data[$i] = [
+                "post"     => $post_data[$i],
+                "comments" => $Comment_data
+            ];
+        }
+        $data = [
+            "header" => $user_data,
+            "posts"  => $post_data
+        ];
+
+        return $data;
+    }
+
+    /**
+     * rest template
+     * @param Int $user_id
+     * @param Int $rest_id
+     *
+     * @return Array $data
+     */
+    public static function rest_template($user_id, $rest_id, $sort_key) {
+        $rest_data= Model_Restaurant::get_data($user_id, $rest_id);
+        $rest_data['want_flag'] = Model_Want::get_flag($user_id, $rest_id);
+        $rest_data['cheer_num'] = Model_Post::get_rest_cheer_num($rest_id);
+        $post_data = Model_Post::get_data($user_id, $sort_key, $rest_id);
+
+        $loop_num = count($post_data);
+
+        for ($i = 0; $i<$loop_num; $i++) {
+            $post_id = $post_data[$i]['post_id'];
+            $Comment_data = Model_Comment::get_data($post_id);
+
+            $post_data[$i] = [
+                "post"     => $post_data[$i],
+                "comments" => $Comment_data
+            ];
+        }
+        if (empty($user_id)) {
+            $login_flag = 0;
+        } else {
+            $login_flag = 1;
+        }
+        $data = [
+            "header" => $rest_data,
+            "posts"  => $post_data
+        ];
+        return $data;
+    }
+
+    /**
+     * video template
+     * @param Int $user_id
+     * @param String $hash_id
+     *
+     * @return Array $data
+     */
+    public static function video_template($user_id, $hash_id)
+    {
+        $sort_key= "all";
+        $post_id = Model_Post::get_post_id($hash_id);
+
+        $data = Model_Post::get_one_data($user_id, $limit=1, $post_id);
+        for ($i = 0; $i<$limit; $i++) {
+            $Comment_data = Model_Comment::get_data($post_id);
+            $data[$i]['hash_id']  = $hash_id;
+                $data[$i] = [
+                    "post"     => $data[$i],
+                    "comments" => $Comment_data
+                ];
         }
         return $data;
     }

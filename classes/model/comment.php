@@ -81,7 +81,7 @@ class Model_Comment extends Model
         ->set(array(
         'comment_user_id' => "$user_id",
         'comment_post_id' => "$post_id",
-        'comment'             => "$comment"
+        'comment'         => "$comment"
         ))
         ->execute();
 

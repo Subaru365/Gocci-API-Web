@@ -9,10 +9,6 @@
  * @link       https://bitbucket.org/inase/gocci-web-api
  */
 
-header('Content-Type: application/json; charset=UTF-8');
-header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
-header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
-
 class Controller_V1_Web_Auth extends Controller_V1_Web_Base
 {
     /**
@@ -103,8 +99,11 @@ class Controller_V1_Web_Auth extends Controller_V1_Web_Base
         self::get_jwt_token($uri=Uri::string(), $login_flag=1);
         $user_id = session::get('user_id');
         if (empty($user_id)) {
-           self::error_json('ログインしていないためログアウトできません');
-        }
+           $base_data = self::base_template($api_code = "SUCCESS",
+                                $api_message = "UnAuthorized",
+                                $login_flag =  1,
+                                $data, $jwt);
+       }
         try {
             // ログアウトのためsessionデータ削除
             Session::delete('user_id');
