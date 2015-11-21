@@ -19,9 +19,10 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         // SCRIPT要素で埋め込まれないための対策
         if (! isset($_SERVER['HTTP_X_REQUESTED_WITH']) ||
             $_SERVER['HTTP_X_REQUEST_WITH'] !== 'XMLHttpRequest') {
-            // Ajaxリクエストではない
+            // Not Ajax Request
             // json output
         }
+        self::accessLog();
     }
 
     /**
@@ -29,7 +30,6 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
      * @param $uri
      * @param $login_flag
      */
-    // index_create_tokenとなっていないため呼び出せない/このメソッド使ってないのか？
     public function create_token($uri, $login_flag)
     {
         $jwt = self::get_jwt();
@@ -37,7 +37,11 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
             $data      = self::decode($jwt);
             $user_data = session::get('data');
             $obj       = json_decode($user_data);
-            if (empty($obj)) { self::unauth($uri, $login_flag);}
+
+            if (empty($obj)) {
+                self::unauth($uri, $login_flag);
+            }
+
             $user_id   = $obj->{'user_id'};
             session::set('user_id', $user_id);
             $username  = $obj->{'username'};
@@ -56,16 +60,15 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
      */
     public function action_timeline()
     {
-        $jwt       = self::get_jwt();
-        $data      = self::decode($jwt);
-        $user_data = session::get('data');
-        $obj       = json_decode($user_data);
-        if(empty($obj)) {
+        $jwt = self::get_jwt();
+        $obj = self::getJwtObject($jwt);
+
+        if (empty($obj)) {
             $data = self::timeline_template();
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "UnAuthorized", 
                 $login_flag = 0,$data, $jwt);
-            $status    = $this->output_json($base_data);
+            $this->output_json($base_data);
             exit;
         } else {
             self::create_token($uri=Uri::string(), $login_flag=0);	
@@ -73,38 +76,9 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
                 $login_flag =  1,$data, $jwt);
-            $status    = $this->output_json($base_data);
+            $this->output_json($base_data);
         }
      }
-
-    /**
-     * Timeline loading
-     */
-    public function action_timeline_loading()
-    {
-        self::create_token($uri=Uri::string(), $login_flag=2);
-        $sort_key = 'all';
-        $user_id  = session::get('user_id');
-        $page_num = Input::get('page');
-        $limit    = 20;
-        $exp      = session::get('exp');
-        $jwt      = self::check_jwtExp($exp);
-        $data     = Model_Post::get_data($user_id, $sort_key, $page_num);
-
-        for ($i = 0; $i<$limit; $i++) {
-            $post_id = $data[$i]['post_id'];
-            $Comment_data = Model_Comment::get_data($post_id);
-            $data[$i] = [
-                "post"     => $data[$i],
-                "comments" => $Comment_data
-            ];
-        }
-        $base_data = self::base_template($api_code = "SUCCESS", 
-                    $api_message = "Successful API request", 
-                    $login_flag =  1, 
-                    $data, $jwt);
-        $status    = $this->output_json($base_data);
-    }
 
     /**
      * badge数を取得するapi
@@ -314,6 +288,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         $user_id  = session::get('user_id');
         $exp      = session::get('exp');
         $jwt      = self::check_jwtExp($exp);
+        $sort_key = 'users';
 
         $option = [
             'call'        => Input::get('call', 0),
@@ -323,7 +298,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
             'lon'         => Input::get('lon', 0),
             'lat'         => Input::get('lat', 0)
         ];
-        $sort_key = 'all';
+
         $follow_user_id = Model_Follow::get_follow_id($user_id);
         $data = Model_Post::get_data($user_id, $sort_key, $follow_user_id, $option);
 
@@ -335,6 +310,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
                 "comments" => $Comment_data
             ];
         }
+        error_log('followline api');
         $base_data = self::base_template($api_code = 0, $api_message = "SUCCESS", $login_flag =  1,$data, $jwt);
         $status    = $this->output_json($base_data);
     }

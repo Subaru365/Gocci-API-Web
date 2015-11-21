@@ -20,17 +20,17 @@ class Controller_V1_Web_Base extends Controller
 
     /**
      * The Web Gocci api Version number.
-     * @var string
+     * @var String
      */
     public static $Version = '3.0';
 
     /**
-     * @var string
+     * @var String
      */
     public static $Successful_API_request_message = "Successful API request";
 
     /**
-     * @var string
+     * @var String
      */
     public static $Error_API_request_message = "Error_API_request";
 
@@ -40,6 +40,12 @@ class Controller_V1_Web_Base extends Controller
     public static $base_data = [];
 
     /**
+     * @var String
+     */
+    // const ENV = 'DEVELOPMENT';
+    public static $ENV = 'DEVELOPMENT';
+
+    /**
      * api base_data template
      *
      * @param string $api_code
@@ -47,7 +53,7 @@ class Controller_V1_Web_Base extends Controller
      * @param string $api_data
      * @param string $jwt
      *
-     * @return
+     * @return Array $base_data
      */
     public static function base_template($api_code, $api_message, $login_flag, $api_data, $jwt)
     {
@@ -64,9 +70,22 @@ class Controller_V1_Web_Base extends Controller
     }
 
     /**
+     * access time
+     */
+    public static function accessLog()
+    {
+        if (self::$ENV === 'DEVELOPMENT') {
+            $accessTime = date('Y-m-d H:i:s', strtotime("+ 9 hour"));
+            error_log('access time: ');
+            error_log($accessTime);
+        }
+    }
+
+    /**
      * json_encode template
      * @param Array $status
-     * @return $status
+     *
+     * @return Object $status
      */
     public static function json_encode_template($status)
     {
@@ -80,6 +99,7 @@ class Controller_V1_Web_Base extends Controller
     /**
      * debug_json_encode template
      * @param Array $status
+     *
      * @return $status
      */
     public static function debug_json_encode_template($status)
@@ -109,18 +129,7 @@ class Controller_V1_Web_Base extends Controller
     {
         $jwt = self::get_jwt();
         if(isset($jwt)) {
-            $data      = self::decode($jwt);
-            $user_data = session::get('data');
-            $obj       = json_decode($user_data);
-            if (empty($obj)) {
-                self::unauth();
-            }
-            $user_id   = $obj->{'user_id'};
-            session::set('user_id', $user_id);
-            $username  = $obj->{'username'};
-            session::set('username', $username);
-            $exp       = $obj->{'exp'};
-            session::set('exp', $exp);
+            self::setJwt($jwt);
         } else {
             self::unauth();
             error_log('UnAuthorized Accsess..');
@@ -129,8 +138,39 @@ class Controller_V1_Web_Base extends Controller
      }
 
     /**
+     * setter jwt
+     * @param  $jwt
+     */
+    public static function setJwt($jwt)
+    {
+        $obj = self::runDeocd($jwt);
+        if (empty($obj)) {
+            self::unauth();
+        }
+        $user_id   = $obj->{'user_id'};
+        session::set('user_id', $user_id);
+        $username  = $obj->{'username'};
+        session::set('username', $username);
+        $exp       = $obj->{'exp'};
+        session::set('exp', $exp);
+    }
+
+    /**
+     * @return Object $obj
+     */
+    public static function runDeocd($jwt)
+    {
+        $data      = self::decode($jwt);
+        $user_data = session::get('data');
+        $obj       = json_decode($user_data);
+
+        return $obj;
+    }
+
+    /**
      * decode
      * @param  $jwt
+     *
      * @return Object $decoded
      */
     public static function decode($jwt)
@@ -173,7 +213,7 @@ class Controller_V1_Web_Base extends Controller
     }
 
     /**
-     * jwt expire check
+     * Check if the JWT is valid.
      * @param $exp
      * @return String $jwt
      */
@@ -288,7 +328,7 @@ class Controller_V1_Web_Base extends Controller
         $data = [
             "message" => "This page is not available. There is a problem with the link or there is a possibility that the page has been deleted. Return to the Gocci."
         ];
-        $base_data = self::base_template($api_code = "SUCCESS", $api_message = "SUCCESS ful API request", $login_flag =  1, $data, $jwt = "");
+        $base_data = self::base_template($api_code = "NOTFOUND", $api_message = "SUCCESS ful API request", $login_flag =  1, $data, $jwt = "");
         $status = self::output_json($base_data);
     }
 
@@ -418,7 +458,9 @@ class Controller_V1_Web_Base extends Controller
             'lon'         => Input::get('lon', 0),
             'lat'         => Input::get('lat', 0)
         ];
-        $data = Model_Post::get_data($user_id, $sort_key, $sort_key, $limit);
+        // print_r($option);exit;
+        // $data = Model_Post::get_data($user_id, $sort_key, $option, $limit);
+        $data = Model_Post::get_data($user_id, $sort_key, 0, $option, $limit);
 
         for ($i = 0; $i<$limit; $i++) {
             $post_id = $data[$i]['post_id'];
@@ -533,6 +575,18 @@ class Controller_V1_Web_Base extends Controller
     {
         $jwt = @$_SERVER["HTTP_AUTHORIZATION"] ? @$_SERVER["HTTP_AUTHORIZATION"] : "";
         return $jwt;
+    }
+
+    /**
+     * get JWT object
+     * @return Object $obj
+     */
+    public static function getJwtObject($jwt)
+    {
+        $data      = self::decode($jwt);
+        $user_data = session::get('data');
+        $obj       = json_decode($user_data);
+        return $obj;
     }
 
     /**
