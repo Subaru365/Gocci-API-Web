@@ -1,6 +1,6 @@
 <?php
 /**
- * Post Class
+ * Post Model Class
  * @package    Gocci-Web
  * @version    3.0 <2015/10/20>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
@@ -46,7 +46,7 @@ class Model_Post extends Model
      * @param Array post_data
      */
     public static function get_data(
-            $user_id, $sort_key, 
+            $user_id, $sort_key,
             $sort_id, $option = 0, $limit = 20)
     {
         $query = DB::select(
@@ -125,9 +125,10 @@ class Model_Post extends Model
             }
         }
 
-        // next
+        // 追加読み込み
         if ($option['call'] != 0) {
             $call_num = $option['call'] * $limit;
+            // echo $call_num;exit;
             $query->offset($call_num);
         }
 
@@ -215,7 +216,6 @@ class Model_Post extends Model
             $post_data[$i]['gochi_flag']  = Model_Gochi::get_flag($user_id, $post_id);
             $post_data[$i]['post_date']   = Model_Date::get_data($post_date);
         }
-        // print_R($post_data);exit;
         return $post_data;
     }
 
