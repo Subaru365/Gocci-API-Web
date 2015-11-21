@@ -40,7 +40,26 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             error_log('UnAuthorized Accsess..');
             exit;
         }
-     }
+    }
+
+    /**
+     * @return $user_id
+     */
+    public function notLoginGetUserId() {
+        $jwt = @$_SERVER["HTTP_AUTHORIZATION"] ? @$_SERVER["HTTP_AUTHORIZATION"] : "";
+        if ( isset($jwt) ) {
+            $obj = self::runDeocd($jwt);
+            if (empty($obj)) {
+                $user_id = 1;
+            } else {
+                $user_id  = $obj->{'user_id'};
+            }
+        } else {
+            $user_id = 1;
+        }
+
+        return $user_id;
+    }
 
     /**
      * SNS連携
@@ -389,9 +408,10 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
      */
     public function action_postblock()
     {
-        self::create_token($uri=Uri::string(), $login_flag=0);
-        $keyword = '投稿を違反報告';
-        $user_id = session::get('user_id');
+        $keyword = '違反報告';
+        $user_id = self::notLoginGetUserId();
+        error_log('user_id: ');
+        error_log($user_id);
         $post_id = Input::post('post_id');
 
         try {
