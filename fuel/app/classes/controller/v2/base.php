@@ -1,35 +1,35 @@
 <?php
 /**
- * Base Class Api
+ * Base Class API
  * @package    Gocci-Web
- * @version    3.0 <2015/10/20>
+ * @version    2.0 - 2.5 <2015/11/18>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2014-2015 Inase,inc.
  * @link       https://bitbucket.org/inase/gocci-web-api
  */
-// require_once APPPATH . 'classes/middleware.php';
 
+// require_once APPPATH . 'classes/middleware.php';
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
 header('X-Content-Type-Options: nosniff');
 
-abstract class Controller_V1_Web_Base extends Controller
+class Controller_V2_Base extends Controller
 {
     /**
      * The Web Gocci api Version number.
-     * @var String
+     * @var string
      */
     public static $Version = '3.0';
 
     /**
-     * @var String
+     * @var string
      */
     public static $Successful_API_request_message = "Successful API request";
 
     /**
-     * @var String
+     * @var string
      */
     public static $Error_API_request_message = "Error_API_request";
 
@@ -39,12 +39,6 @@ abstract class Controller_V1_Web_Base extends Controller
     public static $base_data = [];
 
     /**
-     * @var String
-     */
-    // const ENV = 'DEVELOPMENT';
-    public static $ENV = 'DEVELOPMENT';
-
-    /**
      * api base_data template
      *
      * @param string $api_code
@@ -52,7 +46,7 @@ abstract class Controller_V1_Web_Base extends Controller
      * @param string $api_data
      * @param string $jwt
      *
-     * @return Array $base_data
+     * @return
      */
     public static function base_template($api_code, $api_message, $login_flag, $api_data, $jwt)
     {
@@ -71,19 +65,16 @@ abstract class Controller_V1_Web_Base extends Controller
     /**
      * access time
      */
-    public static function accessLog()
+    public static function access_date_log()
     {
-        if (self::$ENV === 'DEVELOPMENT') {
-            $accessTime = date('Y-m-d H:i:s', strtotime("+ 9 hour"));
-            error_log('access time: ');
-            error_log($accessTime);
-        }
+        $accessTime = date('Y-m-d H:i:s', strtotime("+ 9 hour"));
+        error_log('access time: ');
+        error_log($accessTime);
     }
 
     /**
      * json_encode template
      * @param Array $status
-     *
      * @return Object $status
      */
     public static function json_encode_template($status)
@@ -98,7 +89,6 @@ abstract class Controller_V1_Web_Base extends Controller
     /**
      * debug_json_encode template
      * @param Array $status
-     *
      * @return $status
      */
     public static function debug_json_encode_template($status)
@@ -124,15 +114,22 @@ abstract class Controller_V1_Web_Base extends Controller
       }
     }
 
-    /**
-     * @param $uri
-     * @param $login_flag
-     */
     public static function get_jwt_token($uri="", $login_flag)
     {
         $jwt = self::get_jwt();
         if(isset($jwt)) {
-            self::setJwt($jwt);
+            $data      = self::decode($jwt);
+            $user_data = session::get('data');
+            $obj       = json_decode($user_data);
+            if (empty($obj)) {
+                self::unauth();
+            }
+            $user_id   = $obj->{'user_id'};
+            session::set('user_id', $user_id);
+            $username  = $obj->{'username'};
+            session::set('username', $username);
+            $exp       = $obj->{'exp'};
+            session::set('exp', $exp);
         } else {
             self::unauth();
             error_log('UnAuthorized Accsess..');
@@ -141,39 +138,8 @@ abstract class Controller_V1_Web_Base extends Controller
      }
 
     /**
-     * setter jwt
-     * @param  $jwt
-     */
-    public static function setJwt($jwt)
-    {
-        $obj = self::runDeocd($jwt);
-        if (empty($obj)) {
-            self::unauth();
-        }
-        $user_id   = $obj->{'user_id'};
-        session::set('user_id', $user_id);
-        $username  = $obj->{'username'};
-        session::set('username', $username);
-        $exp       = $obj->{'exp'};
-        session::set('exp', $exp);
-    }
-
-    /**
-     * @return Object $obj
-     */
-    public static function runDeocd($jwt)
-    {
-        $data      = self::decode($jwt);
-        $user_data = session::get('data');
-        $obj       = json_decode($user_data);
-
-        return $obj;
-    }
-
-    /**
      * decode
      * @param  $jwt
-     *
      * @return Object $decoded
      */
     public static function decode($jwt)
@@ -194,13 +160,12 @@ abstract class Controller_V1_Web_Base extends Controller
      * encode (JWT create)
      * @param  $user_id
      * @param  $username
-     *
      * @return string $jwt
      */
     public static function encode($user_id, $username)
     {
         $key   = 'i_am_a_secret_key';
-        $exp = time() + 86400; // 24h
+        $exp = time() + 86400; // 24h/1 day
         $json  = [
             'user_id' => $user_id,
             'exp'     => $exp,
@@ -217,9 +182,8 @@ abstract class Controller_V1_Web_Base extends Controller
     }
 
     /**
-     * Check if the JWT is valid.
+     * jwt expire check
      * @param $exp
-     *
      * @return String $jwt
      */
     public static function check_jwtExp($exp)
@@ -324,7 +288,9 @@ abstract class Controller_V1_Web_Base extends Controller
     }
 
     /**
+     *
      * このページはご利用いただけません。リンクに問題があるか、ページが削除された可能性があります。 Gocciに戻る
+     *
      */
     public static function NotFoundPage()
     {
@@ -337,6 +303,7 @@ abstract class Controller_V1_Web_Base extends Controller
 
     /**
      * ユーザネームを入力しているかどうか
+     *
      */
     public static function notid()
     {
@@ -370,7 +337,7 @@ abstract class Controller_V1_Web_Base extends Controller
                "login_flag"  => 1
           ];
           $status = [
-              "api_version" => 3.0,
+              "api_version" => self::$Version, // 3.0,
               "api_uri"     => Uri::string(),
               "api_code"    => "SUCCESS",
               "api_message" => "$message Successful API request",
@@ -387,7 +354,7 @@ abstract class Controller_V1_Web_Base extends Controller
     public static function error_signin($message)
     {
         $status = [
-            "api_version" => 3.0,
+            "api_version" => self::$Version, // 3.0,
             "api_uri"     => Uri::string(),
             "api_code"    => 'ERR_SGNIN',
             "api_message" => $message,
@@ -405,7 +372,7 @@ abstract class Controller_V1_Web_Base extends Controller
     public static function error_register($message)
     {
         $status = [
-            "api_version" => 3.0,
+            "api_version" => self::$Version, // 3.0,
             "api_uri"     => Uri::string(),
             "api_code"    => 'ERROR_ALREADY_REGISTER',
             "api_message" => $message,
@@ -417,6 +384,7 @@ abstract class Controller_V1_Web_Base extends Controller
         exit;
     }
 
+
     /**
      * error json output
      * @return string
@@ -426,7 +394,7 @@ abstract class Controller_V1_Web_Base extends Controller
         $api_message = "UnAuthorized";
         // ver3 validation
         $status = [
-            "api_version" => 3.0,
+            "api_version" => self::$Version, //3.0,
             "api_uri"     => Uri::string(),
             "api_code"    => $api_message, #"VALIDATION ERROR",
             "api_message" => $message,
@@ -449,7 +417,8 @@ abstract class Controller_V1_Web_Base extends Controller
         $exp      = session::get('exp');
         $jwt      = self::check_jwtExp($exp);
         $sort_key = 'all';
-        $limit    = 15;
+        $limit    = 20;
+
         $option   = [
             'call'        => Input::get('call', 0),
             'order_id'    => Input::get('order_id', 0),
@@ -458,7 +427,7 @@ abstract class Controller_V1_Web_Base extends Controller
             'lon'         => Input::get('lon', 0),
             'lat'         => Input::get('lat', 0)
         ];
-        $data = Model_Post::get_data($user_id, $sort_key, 0, $option, $limit);
+        $data = Model_Post::get_data($user_id, $sort_key, $sort_key, $limit);
 
         for ($i = 0; $i<$limit; $i++) {
             $post_id = $data[$i]['post_id'];
@@ -576,25 +545,13 @@ abstract class Controller_V1_Web_Base extends Controller
     }
 
     /**
-     * get JWT object
-     * @return Object $obj
-     */
-    public static function getJwtObject($jwt)
-    {
-        $data      = self::decode($jwt);
-        $user_data = session::get('data');
-        $obj       = json_decode($user_data);
-        return $obj;
-    }
-
-    /**
      * expired token
      * @param  String $message
      */
     public static function expired_token($message)
     {
           $status = [
-            "api_version" => 3.0,
+            "api_version" => self::$Version, // 3.0,
             "api_uri"     => Uri::string(),
             "api_code"    => "Failed",
             "api_message" => $message,

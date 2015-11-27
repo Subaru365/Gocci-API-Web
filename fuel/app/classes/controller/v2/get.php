@@ -1,15 +1,15 @@
 <?php
 /**
- * GET  API    リソースの取得
+ * GET API     リソースの取得
  * @package    Gocci-Web
- * @version    3.0 <2015/10/20>
+ * @version    2.0 - 2.5 <2015/11/18>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2014-2015 Inase,inc.
  * @link       https://bitbucket.org/inase/gocci-web-api
  */
 
-class Controller_V1_Web_Get extends Controller_V1_Web_Base
+class Controller_V2_Get extends Controller_V2_Base
 {
     /**
      * before
@@ -19,10 +19,10 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         // SCRIPT要素で埋め込まれないための対策
         if (! isset($_SERVER['HTTP_X_REQUESTED_WITH']) ||
             $_SERVER['HTTP_X_REQUEST_WITH'] !== 'XMLHttpRequest') {
-            // Not Ajax Request
+            // Ajaxリクエストではない
             // json output
         }
-        self::accessLog();
+        self::access_date_log();
     }
 
     /**
@@ -37,17 +37,13 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
             $data      = self::decode($jwt);
             $user_data = session::get('data');
             $obj       = json_decode($user_data);
-
-            if (empty($obj)) {
-                self::unauth($uri, $login_flag);
-            }
-
-            $user_id   = $obj->{'user_id'};
-            session::set('user_id', $user_id);
-            $username  = $obj->{'username'};
-            session::set('username', $username);
-            $exp       = $obj->{'exp'};
-            session::set('exp', $exp);
+            if (empty($obj)) { self::unauth($uri, $login_flag);}
+                $user_id   = $obj->{'user_id'};
+                session::set('user_id', $user_id);
+                $username  = $obj->{'username'};
+                session::set('username', $username);
+                $exp       = $obj->{'exp'};
+                session::set('exp', $exp);
         } else {
             self::unauth();
             error_log('JWT nothing. UnAuthorized Accsess..');
@@ -60,15 +56,16 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
      */
     public function action_timeline()
     {
-        $jwt = self::get_jwt();
-        $obj = self::getJwtObject($jwt);
-
-        if (empty($obj)) {
+        $jwt       = self::get_jwt();
+        $data      = self::decode($jwt);
+        $user_data = session::get('data');
+        $obj       = json_decode($user_data);
+        if(empty($obj)) {
             $data = self::timeline_template();
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "UnAuthorized", 
                 $login_flag = 0,$data, $jwt);
-            $this->output_json($base_data);
+            $status    = $this->output_json($base_data);
             exit;
         } else {
             self::create_token($uri=Uri::string(), $login_flag=0);	
@@ -76,9 +73,38 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
                 $login_flag =  1,$data, $jwt);
-            $this->output_json($base_data);
+            $status    = $this->output_json($base_data);
         }
      }
+
+    /**
+     * Timeline loading
+     */
+    public function action_timeline_loading()
+    {
+        self::create_token($uri=Uri::string(), $login_flag=2);
+        $sort_key = 'all';
+        $user_id  = session::get('user_id');
+        $page_num = Input::get('page');
+        $limit    = 20;
+        $exp      = session::get('exp');
+        $jwt      = self::check_jwtExp($exp);
+        $data     = Model_Post::get_data($user_id, $sort_key, $page_num);
+
+        for ($i = 0; $i<$limit; $i++) {
+            $post_id = $data[$i]['post_id'];
+            $Comment_data = Model_Comment::get_data($post_id);
+            $data[$i] = [
+                "post"     => $data[$i],
+                "comments" => $Comment_data
+            ];
+        }
+        $base_data = self::base_template($api_code = "SUCCESS", 
+                    $api_message = "Successful API request", 
+                    $login_flag =  1, 
+                    $data, $jwt);
+        $status    = $this->output_json($base_data);
+    }
 
     /**
      * badge数を取得するapi
@@ -252,7 +278,6 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     {
         self::create_token($uri=Uri::string(), $login_flag=1);
         $user_id = session::get('user_id');
-        // $user_id = 4; // debug
         $exp     = session::get('exp');
         $jwt     = self::check_jwtExp($exp);
         $data    = Model_Notice::get_data($user_id);
@@ -286,10 +311,8 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
     {
         self::create_token($uri=Uri::string(), $login_flag=2);
         $user_id  = session::get('user_id');
-
         $exp      = session::get('exp');
         $jwt      = self::check_jwtExp($exp);
-        $sort_key = 'users';
 
         $option = [
             'call'        => Input::get('call', 0),
@@ -299,7 +322,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
             'lon'         => Input::get('lon', 0),
             'lat'         => Input::get('lat', 0)
         ];
-
+        $sort_key = 'all';
         $follow_user_id = Model_Follow::get_follow_id($user_id);
         $data = Model_Post::get_data($user_id, $sort_key, $follow_user_id, $option);
 
@@ -311,7 +334,6 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
                 "comments" => $Comment_data
             ];
         }
-        error_log('followline api');
         $base_data = self::base_template($api_code = 0, $api_message = "SUCCESS", $login_flag =  1,$data, $jwt);
         $status    = $this->output_json($base_data);
     }
@@ -343,6 +365,7 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
         $jwt            = self::check_jwtExp($exp);
         $data           = Model_Follow::get_follower($user_id, $target_user_id);
         $base_data      = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1,$data, $jwt);
+
         $status         = $this->output_json($base_data);
     }
 
@@ -441,11 +464,6 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
                 exit;
             }
         }
-        // このページにアクセスしたユーザーがログイン済みのユーザーなのか、
-        // もしくは、未ログインのユーザーなのかで、いいね、コメントの処理を分岐させる。
-        // 未ログインであれば、gochi/commentをしようとした際にダイアログを表示する。
-        // $user_id = session::get('user_id');
-        // sessionではなく、$objからuser_idを取得
         $user_id   = $obj->{'user_id'};
         error_log('user_id');
         error_log($user_id);

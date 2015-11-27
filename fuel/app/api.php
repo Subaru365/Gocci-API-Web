@@ -1,22 +1,28 @@
 <?php
-/**
- * Base Class Api
+/* Base GocciAPI
+ *
  * @package    Gocci-Web
- * @version    3.0 <2015/10/20>
+ * @version    3.0 <2015/11/24>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2014-2015 Inase,inc.
  * @link       https://bitbucket.org/inase/gocci-web-api
  */
-// require_once APPPATH . 'classes/middleware.php';
-
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
 header('X-Content-Type-Options: nosniff');
 
-abstract class Controller_V1_Web_Base extends Controller
-{
+trait GocciAPI {
+    /**
+     * @var $instance
+     */
+    private static $instance = [];
+
+    /**
+     * The Web Gocci api Version number.
+     * @var String
+     */
     /**
      * The Web Gocci api Version number.
      * @var String
@@ -474,6 +480,32 @@ abstract class Controller_V1_Web_Base extends Controller
     }
 
     /**
+     * get timelien result
+     * @param Object $obj
+     * @param String $jwt
+     *
+     * @return Array $data
+     */
+    public static function get_timeline_result($obj, $jwt)
+    {
+        if (empty($obj)) {
+            $data = self::timeline_template();
+            $base_data = self::base_template($api_code = "SUCCESS", 
+                $api_message = "UnAuthorized", 
+                $login_flag = 0, $data, $jwt);
+            return $status = self::output_json($base_data);
+            exit;
+        } else {
+            self::create_token($uri=Uri::string(), $login_flag=0);  
+            $data = self::timeline_template();
+            $base_data = self::base_template($api_code = "SUCCESS", 
+                $api_message = "Successful API request", 
+                $login_flag =  1, $data, $jwt);
+            return $status = self::output_json($base_data);
+        }
+    }
+
+    /**
      * timeline template
      * @param String $target_username
      * @param Int $limit
@@ -503,6 +535,33 @@ abstract class Controller_V1_Web_Base extends Controller
         ];
 
         return $data;
+    }
+
+    /**
+     * ログインしていないユーザがユーザー検索
+     * @param String $jwt
+     * @param String $target_username
+     *
+     * @return Array $data
+     */
+    public static function NotJwtUser($jwt, $target_username)
+    {
+        if(isset($jwt)) {
+
+            $data      = self::decode($jwt);
+            $user_data = session::get('data');
+            $obj       = json_decode($user_data);
+
+            if (empty($obj)) {
+                $sort_key       = 'user';
+                $limit          = 20;
+                $data = self::user_template($target_username, $limit, $sort_key);
+
+                $base_data = self::base_template($api_code = "SUCESS", $api_message = "UnAuthorized", $login_flag =  0, $data, $jwt);
+                self::output_json($base_data);
+                exit;
+            }
+        }
     }
 
     /**
@@ -566,6 +625,16 @@ abstract class Controller_V1_Web_Base extends Controller
     }
 
     /**
+     * @param 
+     * @param 
+     * @param 
+     */
+    public static function sign_up()
+    {
+
+    }
+
+    /**
      * get jwt method
      * @return String $jwt
      */
@@ -605,4 +674,27 @@ abstract class Controller_V1_Web_Base extends Controller
           echo $status;
           exit;
     }
+
+    // private function __construct() {}
+
+    /**
+     * @return String $instance
+     */
+    public static function getInstance()
+    {
+        $class = get_called_class();
+
+        if ( isset(self::$instance[$class])) {
+            self::$instance[$class] = new self;
+        }
+        return self::$instance;
+    }
+
+    /**
+     * @param String $instance
+     */
+    public static function setInstance($instance) {
+        $this->instance = $instance;
+    }
+
 }

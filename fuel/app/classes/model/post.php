@@ -47,7 +47,7 @@ class Model_Post extends Model
      */
     public static function get_data(
             $user_id, $sort_key,
-            $sort_id, $option = 0, $limit = 20)
+            $sort_id, $option = 0, $limit = 15)
     {
         $query = DB::select(
             'post_id', 'movie', 'thumbnail', 'category', 'tag', 'value',

@@ -19,7 +19,9 @@ Autoloader::add_namespace('Util', APPPATH.'vendor/util/');
 
 // Load trait
 \Fuel::load(APPPATH.DS.'traits.php');
-
+\Fuel::load(APPPATH.DS.'api.php');
+\Fuel::load(APPPATH.DS.'register.php');
+\Fuel::load(APPPATH.DS.'auth.php');
 
 /**
  * Your environment.  Can be set to any of the following:
