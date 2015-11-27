@@ -2,14 +2,14 @@
 /**
  * Register Class Api
  * @package    Gocci-Web
- * @version    3.0 <2015/10/20>
+ * @version    2.0 - 2.5 <2015/11/18>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2014-2015 Inase,inc.
  * @link       https://bitbucket.org/inase/gocci-web-api
  */
 
-class Controller_V1_Web_Register extends Controller_V1_Web_Base
+class Controller_V2_Register extends Controller_V2_Base
 {
     /**
      * username password register
@@ -72,7 +72,7 @@ class Controller_V1_Web_Register extends Controller_V1_Web_Base
 
             $status = $this->output_json($base_data);
         } catch(\Database_Exception $e) {
-
+            
         }
     }
 
@@ -98,7 +98,6 @@ class Controller_V1_Web_Register extends Controller_V1_Web_Base
         $register_id = $user_id;
 
         // getであれば、UnAuthorized
-        // Controller_V1_Web_Base::post_check();
         $this->post_check();
 
         try {

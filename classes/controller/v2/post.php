@@ -2,17 +2,18 @@
 /**
  * POST Api    リソースの新規作成
  * @package    Gocci-Web
- * @version    3.0 <2015/10/20>
+ * @version    2.0 - 2.5 <2015/11/18>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
- * @copyright  2015 Inase,inc.
+ * @copyright  2014-2015 Inase,inc.
  * @link       https://bitbucket.org/inase/gocci-web-api
  */
+
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
 
-class Controller_V1_Web_Post extends Controller_V1_Web_Base
+class Controller_V2_Post extends Controller_V2_Base
 {
     /**
      * jwt check
@@ -40,25 +41,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             error_log('UnAuthorized Accsess..');
             exit;
         }
-    }
-
-    /**
-     * @return $user_id
-     */
-    public function notLoginGetUserId() {
-        $jwt = @$_SERVER["HTTP_AUTHORIZATION"] ? @$_SERVER["HTTP_AUTHORIZATION"] : "";
-        if ( isset($jwt) ) {
-            $obj = self::runDeocd($jwt);
-            if (empty($obj)) {
-                $user_id = 1;
-            } else {
-                $user_id  = $obj->{'user_id'};
-            }
-        } else {
-            $user_id = 1;
-        }
-        return $user_id;
-    }
+     }
 
     /**
      * SNS連携
@@ -94,6 +77,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 
     /**
      * sns解除
+     *
      */
     public function action_unlink()
     {
@@ -144,9 +128,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
         $status = self::output_json($base_data);
     }
 
-    /**
-     * パスワードが登録されているか確認
-     */
+    // ==================処理的にModel ======================== 
     public static function action_password_check()
     {
         self::create_token($uri=Uri::string(), $login_flag=1);
@@ -191,10 +173,8 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             $data = [
                 "message" => "パスワードを登録しました"
             ];
-            $base_data = self::base_template($api_code = "SUCCESS", 
-                $api_message = "Successful API request", 
-                $login_flag =  1, $data, $jwt="");
-
+            $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1, $data, $jwt="");
+       
             $status = self::output_json($base_data);
         } catch (\Database_Exception $e) {
 
@@ -207,6 +187,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
      * @param string POST $token
      * @param string POST $keyword
      */
+    // ==================処理的にModel ========================
     public static function action_start_unlink($user_id, $provider, $token, $keyword)
     {
         try {
@@ -390,6 +371,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 
         try {
             $result = Model_Want::post_unwant($user_id, $rest_id);
+            // self::SUCCESS($keyword);
             $data = [
                 "message" => "行きたい店リストから削除しました"
             ];
@@ -408,10 +390,9 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
      */
     public function action_postblock()
     {
-        $keyword = '違反報告';
-        $user_id = self::notLoginGetUserId();
-        error_log('user_id: ');
-        error_log($user_id);
+        self::create_token($uri=Uri::string(), $login_flag=0);
+        $keyword = '投稿を違反報告';
+        $user_id = session::get('user_id');
         $post_id = Input::post('post_id');
 
         try {
@@ -470,7 +451,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
         try {
             if (empty($username) && empty($profile_img)) {
                  // do nothing
-                 Controller_V1_Web_Base::error_json('Username and profile_img are empty.');
+                 Controller_V2_Base::error_json('Username and profile_img are empty.');
             } elseif (empty($username)) {
                 // profile update S3にpictureをupload
                 Model_S3::input_img($user_id, $profile_img);
@@ -494,9 +475,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
                 "username"    => $username,
                 "profile_img" => $profile_img    
             ];
-            $base_data = self::base_template($api_code = "SUCCESS", 
-                $api_message = "Successful API request", 
-                $login_flag = 1, $data, $jwt = "");
+            $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag = 1, $data, $jwt = "");
 
             $status = $this->output_json($base_data); 
 
@@ -520,9 +499,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
             $data = [
                 "message" => "ご意見を投稿しました"
             ];
-            $base_data = self::base_template($api_code = "SUCCESS", 
-                $api_message = "Successful API request", 
-                $login_flag = 1, $data, $jwt = "");
+            $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag = 1, $data, $jwt = "");
 
             $status = $this->output_json($base_data);
         } catch(\Database_Exception $e) {
@@ -580,7 +557,7 @@ class Controller_V1_Web_Post extends Controller_V1_Web_Base
 
                 $status = $this->output_json($base_data);
             }  else {
-                Controller_V1_Web_Base::error_json("パスワードが正しくありません");
+                Controller_V2_Base::error_json("パスワードが正しくありません");
                 exit;
             }
         } catch (\Database_Exception $e) {
