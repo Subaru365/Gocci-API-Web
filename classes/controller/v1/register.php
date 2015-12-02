@@ -23,8 +23,9 @@ class Controller_V1_Register extends Controller_V1_Base
         $user_id  = Model_User::get_next_id();
         $username = Input::post('username');
         $password = Input::post('password');
-        $os       = "Web";
-        $model    = "PC";
+        $os    = "Web";
+        $ver   = "0.0";
+        $model = "PC";
         $register_id = $user_id; 
 
         // getであれば、UnAuthorized
@@ -53,10 +54,7 @@ class Controller_V1_Register extends Controller_V1_Base
             $hash_pass    = password_hash($password, PASSWORD_BCRYPT);
             $profile_img  = Model_User::insert_data($username, $identity_id, $hash_pass);
             $endpoint_arn = 0;
-            Model_Device::post_data($user_id, $os, $model, $register_id, $endpoint_arn);
-            // Model_User::user_pass_template($username, $password, $register_id, $os, $model);
-
-
+            Model_Device::post_data($user_id, $os, $ver, $model, $register_id, $endpoint_arn);
             $jwt = self::encode($user_id, $username);
 
             $data = [
@@ -88,6 +86,7 @@ class Controller_V1_Register extends Controller_V1_Base
     {
         $keyword     = "SNS登録";
         $os          = "Web";
+        $ver         = "0.0";
         $model       = "PC";
         $badge_num   = 0;
         $user_id     = Model_User::get_next_id();
@@ -97,8 +96,6 @@ class Controller_V1_Register extends Controller_V1_Base
         $provider    = Input::post('provider');
         $register_id = $user_id;
 
-        // getであれば、UnAuthorized
-        // Controller_V1_Web_Base::post_check();
         $this->post_check();
 
         try {
@@ -116,7 +113,7 @@ class Controller_V1_Register extends Controller_V1_Base
             $endpoint_arn = 0;
 
             // device insert
-            Model_Device::post_data($user_id, $os, $model, $register_id, $endpoint_arn);
+            Model_Device::post_data($user_id, $os, $ver, $model, $register_id, $endpoint_arn);
 
             // 連携したので、flagを更新
             Model_User::update_sns_flag($user_id, $provider);

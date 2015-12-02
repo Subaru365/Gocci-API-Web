@@ -54,8 +54,6 @@ class Controller_V2_Register extends Controller_V2_Base
             $profile_img  = Model_User::insert_data($username, $identity_id, $hash_pass);
             $endpoint_arn = 0;
             Model_Device::post_data($user_id, $os, $model, $register_id, $endpoint_arn);
-            // Model_User::user_pass_template($username, $password, $register_id, $os, $model);
-
 
             $jwt = self::encode($user_id, $username);
 

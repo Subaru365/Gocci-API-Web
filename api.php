@@ -28,6 +28,7 @@ trait GocciAPI {
      * @var String
      */
     public static $Version = '3.0';
+    // const Version = '3.0';
 
     /**
      * @var String
@@ -84,6 +85,18 @@ trait GocciAPI {
             error_log('access time: ');
             error_log($accessTime);
         }
+    }
+
+    /**
+     * sendMail
+     */
+    public static function sendMail($errUri)
+    {
+        $to = 'kazunoritani04@gmail.com';
+        $title = 'APIバグ通知';
+        $message = 'APIバグ通知の報告です' . $errUri . 'でバグ発生';
+        $header = 'From: k-tani@inase-inc.jp';
+        mb_send_mail($to, $title, $message, $header, '-f' . 'k-tani@inase-inc.jp');
     }
 
     /**
@@ -674,6 +687,15 @@ trait GocciAPI {
           echo $status;
           exit;
     }
+
+    /**
+     *
+     */
+    public static function e($message, $previous = null)
+    {
+        return new Exception($message, 0, $previous);
+    }
+
 
     // private function __construct() {}
 

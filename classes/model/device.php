@@ -73,15 +73,16 @@ class Model_Device extends Model
      * @param Int $register_id
      * @param String $register_id
      */
-    public static function post_data($user_id, $os, $model, $register_id, $endpoint_arn)
+    public static function post_data($user_id, $os, $ver, $model, $register_id, $endpoint_arn)
     {
         $query = DB::insert('devices')
         ->set(array(
-          'device_user_id' => "$user_id",
-          'os'             => "$os",
-          'model'          => "$model",
-          'register_id'    => "$register_id",
-          'endpoint_arn'   => "$endpoint_arn"
+          'device_user_id' => $user_id,
+          'os'             => $os,
+          'ver'            => $ver,
+          'model'          => $model,
+          'register_id'    => $register_id,
+          'endpoint_arn'   => $endpoint_arn
         ))
         ->execute();
     }

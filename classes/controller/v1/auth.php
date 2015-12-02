@@ -11,6 +11,7 @@
 
 class Controller_V1_Auth extends Controller_V1_Base
 {
+    use GocciAPI;
     /**
      * jwtがあるかどうかをcheckするメソッド
      * @var String $uri
@@ -89,7 +90,7 @@ class Controller_V1_Auth extends Controller_V1_Base
         }
     }
 
-    /**
+   /**
     * Logout メソッド
     *
     * @return string
@@ -119,7 +120,6 @@ class Controller_V1_Auth extends Controller_V1_Base
                                 $data, $jwt);
 
             self::output_json($base_data);
-            error_log('ログアウトしました');
 
        } catch (Exception $e) {
 
@@ -187,6 +187,7 @@ class Controller_V1_Auth extends Controller_V1_Base
             'identity_id' => $identity_id,
             'badge_num'   => $badge_num,
         ];
-        Controller_V1_Web_Base::output_json($data);
+        // Controller_V1_Web_Base::output_json($data);
+        GocciAPI::output_json($data);
     }
 }

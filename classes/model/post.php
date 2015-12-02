@@ -11,17 +11,19 @@
 
 class Model_Post extends Model
 {
+    use GocciAPI;
     /**
      * @param  Int $post_id
      *
-     * @return Int $post_id
+     * @return Int $user_id
      */
     public static function get_user_id($post_id)
     {
         $query = DB::select('user_id')->from('posts')
-        ->where('post_id', '=', 'post_id');
+        // ->where('post_id', '=', 'post_id');
+        ->where('post_id', '=', $post_id);
         $user_id = $query->execute()->as_array();
-        return $post_id = $user_id[0]['user_id'];
+        return $user_id = $user_id[0]['user_id'];
     }
 
     /**
@@ -32,9 +34,29 @@ class Model_Post extends Model
      */
     public static function get_post_id($hash_id)
     {
+        // echo $hash_id . "\n";
         $post_id = `/usr/local/bin/inasehash -d {$hash_id}`;
-
+        self::check_post_id_exist($post_id);
         return $post_id;
+    }
+
+    /**
+     * 変換されたpost_idがDBに存在するかチェックします。
+     * @param Int $post_id
+     */
+    public static function check_post_id_exist($post_id)
+    {
+        $query = DB::select('post_id')->from('posts')
+        ->where('post_id', '=', $post_id);
+
+        $post_id = $query->execute()->as_array();
+
+        if (isset($post_id[0]['post_id'])) {
+            // exists!
+        } else {
+             GocciAPI::error_json("Not Found");
+             exit;
+        }
     }
 
     /**
@@ -283,6 +305,13 @@ class Model_Post extends Model
 
         $value = $query->execute()->as_array();
 
+        try {
+            if (empty($value))
+                $value[0] = [];
+        } catch (Exception $e) {
+            var_dump($e);exit;
+        }
+        // print_r($value);exit;
         $re_user = array();
         array_push ($value[0], $re_user);
 
