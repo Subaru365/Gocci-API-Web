@@ -62,7 +62,6 @@ class Controller_V1_Get extends Controller_V1_Base
     {
         $jwt = self::get_jwt();
         $obj = self::getJwtObject($jwt);
-
         if (empty($obj)) {
             $data = self::timeline_template();
             $base_data = self::base_template($api_code = "SUCCESS", 
@@ -436,7 +435,9 @@ class Controller_V1_Get extends Controller_V1_Base
                 $jwt= "";
                 $user_id= 0;
                 $data = self::video_template($user_id, $hash_id);
-                $base_data = self::base_template($api_code = "SUCESS", $api_message = "UnAuthorized", $login_flag = 0, $data, $jwt);
+                $base_data = self::base_template($api_code = "SUCESS", 
+                    $api_message = "UnAuthorized", 
+                    $login_flag = 0, $data, $jwt);
                 $status = $this->output_json($base_data);
                 exit;
             }
@@ -452,7 +453,9 @@ class Controller_V1_Get extends Controller_V1_Base
 
         $data = self::video_template($user_id, $hash_id);
 
-        $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag = 1, $data, $jwt = "");
+        $base_data = self::base_template($api_code = "SUCCESS", 
+            $api_message = "Successful API request", 
+            $login_flag = 1, $data, $jwt = "");
         $status = $this->output_json($base_data);
     }
 }

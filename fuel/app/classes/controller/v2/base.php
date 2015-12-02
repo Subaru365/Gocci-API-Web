@@ -417,7 +417,7 @@ class Controller_V2_Base extends Controller
         $exp      = session::get('exp');
         $jwt      = self::check_jwtExp($exp);
         $sort_key = 'all';
-        $limit    = 20;
+        $limit    = 15;
 
         $option   = [
             'call'        => Input::get('call', 0),

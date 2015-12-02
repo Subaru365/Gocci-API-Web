@@ -217,8 +217,6 @@ class Controller_V2_Get extends Controller_V2_Base
             }
         }
         $user_id   = $obj->{'user_id'};
-        error_log('user_id');
-        error_log($user_id);
         session::set('user_id', $user_id);
         $username  = $obj->{'username'};
         session::set('username', $username);
