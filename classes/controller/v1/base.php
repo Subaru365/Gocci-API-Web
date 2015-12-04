@@ -8,8 +8,6 @@
  * @copyright  2014-2015 Inase,inc.
  * @link       https://bitbucket.org/inase/gocci-web-api
  */
-// require_once APPPATH . 'classes/middleware.php';
-
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
@@ -17,12 +15,6 @@ header('X-Content-Type-Options: nosniff');
 
 abstract class Controller_V1_Base extends Controller
 {
-    /**
-     * The Web Gocci api Version number.
-     * @var String
-     */
-    public static $Version = '3.0';
-
     /**
      * @var String
      */
@@ -41,23 +33,54 @@ abstract class Controller_V1_Base extends Controller
     /**
      * @var String
      */
-    // const ENV = 'DEVELOPMENT';
-    public static $ENV = 'DEVELOPMENT';
+    public static $ENV = self::ENV_DEV;
+
+    const API_VERSION                    = "3.0";
+    const ENV_PRO                        = "PRODUCTION";
+    const ENV_DEV                        = "DEVELOPMENT";
+    const SUCCESSFUL_API_REQUEST_MESSAGE = "SUCCESSFUL_API_REQUEST_MESSAGE";
+    const ERROR_API_REQUEST_MESSAGE      = "ERROR_API_REQUEST_MESSAGE";
+
+    public function before()
+    {
+        $this->session_check();
+    }
+
+    public function session_check()
+    {
+        if (session::get('user_id')) {
+
+        } else {
+
+        }
+    }
+
+    public function get_input_data() {
+
+        $input_data = array_merge(Input::get(), Input::post());
+
+        try {
+            if (!empty($input_data)) {
+
+            }
+        } catch (ErrorException $e) {
+            // echo 'error';
+        }
+    }
 
     /**
-     * api base_data template
+     * API BASE_DATA TEMPLATE
      *
-     * @param string $api_code
-     * @param string $api_message
-     * @param string $api_data
-     * @param string $jwt
-     *
-     * @return Array $base_data
+     * @param  string $api_code
+     * @param  string $api_message
+     * @param  string $api_data
+     * @param  string $jwt
+     * @return Array  $base_data
      */
     public static function base_template($api_code, $api_message, $login_flag, $api_data, $jwt)
     {
         $base_data  = [
-            "api_version" => self::$Version,
+            "api_version" => self::API_VERSION,
             "api_uri"     => Uri::string(),
             "api_code"    => $api_code,
             "api_message" => $api_message,
@@ -69,7 +92,7 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * access time
+     * ACCESS LOG
      */
     public static function accessLog()
     {
@@ -81,9 +104,8 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * json_encode template
-     * @param Array $status
-     *
+     * JSON_ENCODE TEMPLATE
+     * @param  Array  $status
      * @return Object $status
      */
     public static function json_encode_template($status)
@@ -96,10 +118,9 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * debug_json_encode template
-     * @param Array $status
-     *
-     * @return $status
+     * DEBUG_JSON_ENCODE_TEMPLATE
+     * @param  Array  $status
+     * @return Object $status
      */
     public static function debug_json_encode_template($status)
     {
@@ -111,22 +132,20 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * post check
-     * @return string
+     * POST CHECK
      */
     public static function post_check()
     {
-      if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // post
-      } else {
-        // get
-        self::unauth();
-      }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        } else {
+            self::unauth();
+        }
     }
 
     /**
-     * @param $uri
-     * @param $login_flag
+     * @param String $uri
+     * @param String $login_flag
      */
     public static function get_jwt_token($uri="", $login_flag)
     {
@@ -141,8 +160,8 @@ abstract class Controller_V1_Base extends Controller
      }
 
     /**
-     * setter jwt
-     * @param  $jwt
+     * SEETER JWT
+     * @param String $jwt
      */
     public static function setJwt($jwt)
     {
@@ -171,9 +190,8 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * decode
-     * @param  $jwt
-     *
+     * DECODE
+     * @param  String $jwt
      * @return Object $decoded
      */
     public static function decode($jwt)
@@ -191,10 +209,9 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * encode (JWT create)
-     * @param  $user_id
-     * @param  $username
-     *
+     * ENCODE (JWT CREATE)
+     * @param  Int    $user_id
+     * @param  String $username
      * @return string $jwt
      */
     public static function encode($user_id, $username)
@@ -217,9 +234,8 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * Check if the JWT is valid.
-     * @param $exp
-     *
+     * CHECK IF THE JWT IS VALID
+     * @param  String $exp
      * @return String $jwt
      */
     public static function check_jwtExp($exp)
@@ -236,15 +252,14 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * refresh token method
+     * REFRESH TOKEN METHOD
      * @return String $jwt
      */
     public static function _refresh_token()
     {
-        // jwt tokenのexpが有効なのでtokenの有効期限伸ばす(refreshする)
         $user_id  = session::get('user_id');
         $username = session::get('usernaem');
-        // 古いSessionデータexpを破棄する
+
         Session::delete('exp');
         $jwt = self::encode($user_id, $username);
         error_log('-*-*-*-*JWT was update!-*-*-*');
@@ -252,15 +267,15 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * Not JWT unauth
-     * @param $uri
-     * @param $login_flag
+     * NOT JWT UNAUTH
+     * @param String $uri
+     * @param String $login_flag
      */
     public static function unauth($uri="",$login_flag=0)
     {
         error_log('アクセス拒否 base unauth method.');
         $status = [
-            "api_version" => self::$Version,
+            "api_version" => self::API_VERSION,
             "api_uri"     => Uri::string(),
             "api_code"    => 1,
             "api_message" => "UnAuthorized",
@@ -273,8 +288,8 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * output json
-     * @param  $data
+     * OUTPUT JSON
+     * @param  Object $data
      */
     public static function output_json($api_data)
     {
@@ -283,8 +298,8 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * debug output json
-     * @param  $data
+     * DEBUG OUTPUT JSON
+     * @param Object $data
      */
     public static function debug_output_json($api_data)
     {
@@ -293,9 +308,8 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * getallheaders
-     *
-     * @return $headers
+     * GET ALL HEADERS
+     * @return Array $headers
      */
     public static function getallheaders()
     {
@@ -311,7 +325,7 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * UserIdが存在するかどうか
+     * NOT FOUND USER
      */
     public static function notfounduser()
     {
@@ -324,7 +338,7 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * このページはご利用いただけません。リンクに問題があるか、ページが削除された可能性があります。 Gocciに戻る
+     * NOT FOUND PAGE
      */
     public static function NotFoundPage()
     {
@@ -336,7 +350,7 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * ユーザネームを入力しているかどうか
+     * NOT ID
      */
     public static function notid()
     {
@@ -355,8 +369,8 @@ abstract class Controller_V1_Base extends Controller
     }
 
      /**
-      * Success JSON output
-      * @return string
+      * SUCCESS JSON OUTPUT
+      * @return Object string
       */
     public static function success_json($keyword, $user_id, $username, $profile_img, $identity_id, $badge_num, $token,$message)
     {
@@ -370,7 +384,7 @@ abstract class Controller_V1_Base extends Controller
                "login_flag"  => 1
           ];
           $status = [
-              "api_version" => 3.0,
+              "api_version" => self::API_VERSION,
               "api_uri"     => Uri::string(),
               "api_code"    => "SUCCESS",
               "api_message" => "$message Successful API request",
@@ -382,12 +396,12 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * error sigin
+     * ERROR SIGNIN
      */
     public static function error_signin($message)
     {
         $status = [
-            "api_version" => 3.0,
+            "api_version" => self::API_VERSION,
             "api_uri"     => Uri::string(),
             "api_code"    => 'ERR_SGNIN',
             "api_message" => $message,
@@ -400,12 +414,12 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * error json register
+     * ERROR JSON REGISTER
      */
     public static function error_register($message)
     {
         $status = [
-            "api_version" => 3.0,
+            "api_version" => self::API_VERSION,
             "api_uri"     => Uri::string(),
             "api_code"    => 'ERROR_ALREADY_REGISTER',
             "api_message" => $message,
@@ -418,15 +432,15 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * error json output
-     * @return string
+     * ERROR JSON OUTPUT
+     * @return Object $status
      */
     public static function error_json($message)
     {
         $api_message = "UnAuthorized";
-        // ver3 validation
+
         $status = [
-            "api_version" => 3.0,
+            "api_version" => self::API_VERSION,
             "api_uri"     => Uri::string(),
             "api_code"    => $api_message, #"VALIDATION ERROR",
             "api_message" => $message,
@@ -439,7 +453,7 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * timeline template
+     * TIMELIEN TEMPLATE
      * @return Array $data
      */
     public static function timeline_template()
@@ -474,15 +488,15 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * timeline template
-     * @param String $target_username
-     * @param Int $limit
-     * @param String $sort_key
-     * @return Array $data
+     * USER TEMPLATE
+     * @param  String $target_username
+     * @param  Int    $limit
+     * @param  String $sort_key
+     * @return Array  $data
      */
     public static function user_template($target_username, $limit, $sort_key) {
         if (ctype_digit($target_username)) { $this->notid();}
-        // 相手のユーザーID
+
         $target_user_id = Model_User::get_id($target_username);
         $user_id        = session::get('user_id');
         $user_data      = Model_User::get_data($user_id, $target_user_id);
@@ -506,10 +520,9 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * rest template
-     * @param Int $user_id
-     * @param Int $rest_id
-     *
+     * REST TEMPLATE
+     * @param  Int   $user_id
+     * @param  Int   $rest_id
      * @return Array $data
      */
     public static function rest_template($user_id, $rest_id, $sort_key) {
@@ -542,11 +555,10 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * video template
-     * @param Int $user_id
-     * @param String $hash_id
-     *
-     * @return Array $data
+     * VIDEO TEMPLATE
+     * @param  Int    $user_id
+     * @param  String $hash_id
+     * @return Array  $data
      */
     public static function video_template($user_id, $hash_id)
     {
@@ -566,7 +578,7 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * get jwt method
+     * GET JWT METHOD
      * @return String $jwt
      */
     public static function get_jwt()
@@ -576,7 +588,7 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * get JWT object
+     * GET JWT OBJECT
      * @return Object $obj
      */
     public static function getJwtObject($jwt)
@@ -588,13 +600,13 @@ abstract class Controller_V1_Base extends Controller
     }
 
     /**
-     * expired token
+     * EXPIRED TOKEN
      * @param  String $message
      */
     public static function expired_token($message)
     {
           $status = [
-            "api_version" => 3.0,
+            "api_version" => self::API_VERSION,
             "api_uri"     => Uri::string(),
             "api_code"    => "Failed",
             "api_message" => $message,

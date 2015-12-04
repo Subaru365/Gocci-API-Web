@@ -54,7 +54,7 @@ class Controller_V1_Register extends Controller_V1_Base
             $hash_pass    = password_hash($password, PASSWORD_BCRYPT);
             $profile_img  = Model_User::insert_data($username, $identity_id, $hash_pass);
             $endpoint_arn = 0;
-            Model_Device::post_data($user_id, $os, $ver, $model, $register_id, $endpoint_arn);
+            // Model_Device::post_data($user_id, $os, $ver, $model, $register_id, $endpoint_arn);
             $jwt = self::encode($user_id, $username);
 
             $data = [
@@ -113,7 +113,7 @@ class Controller_V1_Register extends Controller_V1_Base
             $endpoint_arn = 0;
 
             // device insert
-            Model_Device::post_data($user_id, $os, $ver, $model, $register_id, $endpoint_arn);
+            // Model_Device::post_data($user_id, $os, $ver, $model, $register_id, $endpoint_arn);
 
             // 連携したので、flagを更新
             Model_User::update_sns_flag($user_id, $provider);
