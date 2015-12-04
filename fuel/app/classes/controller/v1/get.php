@@ -16,13 +16,20 @@ class Controller_V1_Get extends Controller_V1_Base
      */
     public function before()
     {
+        $this->http_x_request_check();
+        self::accessLog();
+    }
+
+    public function http_x_request_check()
+    {
         // SCRIPT要素で埋め込まれないための対策
         if (! isset($_SERVER['HTTP_X_REQUESTED_WITH']) ||
             $_SERVER['HTTP_X_REQUEST_WITH'] !== 'XMLHttpRequest') {
+
             // Not Ajax Request
+
             // json output
         }
-        self::accessLog();
     }
 
     /**
@@ -184,7 +191,8 @@ class Controller_V1_Get extends Controller_V1_Base
                 $user_id= 0;
 
                 $data = self::rest_template($user_id, $rest_id, $sort_key);
-                $base_data = self::base_template($api_code = "SUCCESS", $api_message = "UnAuthorized", $login_flag, $data, $jwt);
+                $base_data = self::base_template($api_code = "SUCCESS", 
+                    $api_message = "UnAuthorized", $login_flag, $data, $jwt);
                 $status = $this->output_json($base_data);
                 exit;
             }
@@ -201,7 +209,9 @@ class Controller_V1_Get extends Controller_V1_Base
         $jwt    = self::check_jwtExp($exp);
         $data   = self::rest_template($user_id, $rest_id, $sort_key);
 
-        $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1, $data, $jwt);
+        $base_data = self::base_template($api_code = "SUCCESS", 
+            $api_message = "Successful API request", 
+            $login_flag =  1, $data, $jwt);
         $status = $this->output_json($base_data);
     }
 
@@ -223,7 +233,9 @@ class Controller_V1_Get extends Controller_V1_Base
                 $limit          = 20;
                 $data = self::user_template($target_username, $limit, $sort_key);
 
-                $base_data = self::base_template($api_code = "SUCESS", $api_message = "UnAuthorized", $login_flag =  0, $data, $jwt);
+                $base_data = self::base_template($api_code = "SUCESS", 
+                    $api_message = "UnAuthorized", 
+                    $login_flag =  0, $data, $jwt);
                 $status = $this->output_json($base_data);
                 exit;
             }
@@ -240,7 +252,9 @@ class Controller_V1_Get extends Controller_V1_Base
         $limit    = 20;
 
         $data = self::user_template($target_username, $limit, $sort_key);
-        $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1, $data, $jwt);
+        $base_data = self::base_template($api_code = "SUCCESS", 
+            $api_message = "Successful API request", 
+            $login_flag =  1, $data, $jwt);
         $status = $this->output_json($base_data);
     }
 
@@ -251,13 +265,13 @@ class Controller_V1_Get extends Controller_V1_Base
     {
         self::create_token($uri=Uri::string(), $login_flag=1);
         $user_id = session::get('user_id');
-        // $user_id = 4; // debug
         $exp     = session::get('exp');
         $jwt     = self::check_jwtExp($exp);
         $data    = Model_Notice::get_data($user_id);
         Model_User::reset_badge($user_id);
-        $base_data = self::base_template($api_code = 0, $api_message = "SUCCESS", $login_flag =  1,$data, $jwt);
-        // $status  = $this->debug_output_json($base_data);// debug
+        $base_data = self::base_template($api_code = 0, 
+            $api_message = "SUCCESS", 
+            $login_flag =  1,$data, $jwt);
         $status  = $this->output_json($base_data);
     }
 
@@ -310,8 +324,9 @@ class Controller_V1_Get extends Controller_V1_Base
                 "comments" => $Comment_data
             ];
         }
-        error_log('followline api');
-        $base_data = self::base_template($api_code = 0, $api_message = "SUCCESS", $login_flag =  1,$data, $jwt);
+        $base_data = self::base_template($api_code = 0, 
+            $api_message = "SUCCESS", 
+            $login_flag =  1,$data, $jwt);
         $status    = $this->output_json($base_data);
     }
 
@@ -326,7 +341,9 @@ class Controller_V1_Get extends Controller_V1_Base
         $exp            = session::get('exp');
         $jwt            = self::check_jwtExp($exp);
         $data           = Model_Follow::get_follow($user_id, $target_user_id);
-        $base_data      = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1,$data, $jwt);
+        $base_data      = self::base_template($api_code = "SUCCESS", 
+            $api_message = "Successful API request", 
+            $login_flag =  1,$data, $jwt);
         $stats          = $this->output_json($base_data);
     }
 
@@ -341,7 +358,9 @@ class Controller_V1_Get extends Controller_V1_Base
         $exp            = session::get('exp');
         $jwt            = self::check_jwtExp($exp);
         $data           = Model_Follow::get_follower($user_id, $target_user_id);
-        $base_data      = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag =  1,$data, $jwt);
+        $base_data      = self::base_template($api_code = "SUCCESS", 
+            $api_message = "Successful API request", 
+            $login_flag =  1,$data, $jwt);
         $status         = $this->output_json($base_data);
     }
 
@@ -356,7 +375,8 @@ class Controller_V1_Get extends Controller_V1_Base
         $jwt = self::check_jwtExp($exp);
         $data= Model_Want::get_want($target_user_id);
         $base_data = self::base_template($api_code = "SUCCESS", 
-            $api_message = "Successful API request", $login_flag =  1,$data, $jwt);
+            $api_message = "Successful API request", 
+            $login_flag =  1,$data, $jwt);
         $status = $this->output_json($data);
     }
 
@@ -421,14 +441,11 @@ class Controller_V1_Get extends Controller_V1_Base
      */
     public function action_video($hash_id)
     {
-
-        // jwtを取得して、そこからuser_idを取得しないと、いくらでも、gochi/commentで来てしまう。
         $jwt = self::get_jwt();
         if (isset($jwt)) {
             $data      = self::decode($jwt);
             $user_data = session::get('data');
             $obj       = json_decode($user_data);
-
 
             if (empty($obj)) {
                 // 未ログインユーザー
@@ -442,15 +459,7 @@ class Controller_V1_Get extends Controller_V1_Base
                 exit;
             }
         }
-        // このページにアクセスしたユーザーがログイン済みのユーザーなのか、
-        // もしくは、未ログインのユーザーなのかで、いいね、コメントの処理を分岐させる。
-        // 未ログインであれば、gochi/commentをしようとした際にダイアログを表示する。
-        // $user_id = session::get('user_id');
-        // sessionではなく、$objからuser_idを取得
         $user_id   = $obj->{'user_id'};
-        error_log('user_id');
-        error_log($user_id);
-
         $data = self::video_template($user_id, $hash_id);
 
         $base_data = self::base_template($api_code = "SUCCESS", 

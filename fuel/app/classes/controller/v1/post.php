@@ -8,12 +8,42 @@
  * @copyright  2015 Inase,inc.
  * @link       https://bitbucket.org/inase/gocci-web-api
  */
-header('Content-Type: application/json; charset=UTF-8');
-header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
-header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
 
 class Controller_V1_Post extends Controller_V1_Base
 {
+    // public $data = ["message" => ""];
+
+    /**
+     * @var Array $data
+     */
+    private $data = [];
+
+    /**
+     * @var String $msg
+     */
+    private $msg;
+
+    public function before()
+    {
+        // $this->setData($msg);
+    }
+
+    /**
+     * @return Array $data
+     */
+    public function getData()
+    {
+        return $this->$data;
+    }
+
+    /**
+     * @param String $msg
+     */
+    public function setData($msg)
+    {
+        $this->data = ["message" => "$msg"];
+    }
+
     /**
      * jwt check
      * @param string POST $uri
@@ -62,7 +92,6 @@ class Controller_V1_Post extends Controller_V1_Base
 
     /**
      * SNS連携
-     *
      */
     public function action_sns()
     {
@@ -151,8 +180,8 @@ class Controller_V1_Post extends Controller_V1_Base
     {
         self::create_token($uri=Uri::string(), $login_flag=1);
         $user_id  = session::get('user_id');
-        // パスワードが登録されているか
         $password = Model_User::get_password($user_id);
+
         if (empty($password)) {
             $data = [
                 "message" => "パスワードを登録してください"
@@ -165,28 +194,31 @@ class Controller_V1_Post extends Controller_V1_Base
                 "message" => "パスワードは既に登録されています"
             ];
             $base_data = self::base_template($api_code = "SUCCESS",
-                $api_message = "UnAuthorized", $login_flag =  1,$data, $jwt="");
+                $api_message = "UnAuthorized", 
+                $login_flag =  1,$data, $jwt="");
             self::output_json($base_data);
         }
     }
 
+    /**
+     * パスワード設定
+     */
     public static function action_create_password()
     {
         self::create_token($uri=Uri::string(), $login_flag=1);
+        error_log('a');
         $user_id  = session::get('user_id');
         $password = Input::post('password');
-        // passwordが入力されているか
+
         if (empty($password)) {
             self::failed($message = "passwordが空です。パスワードが生成");
         }
-        // passwordの文字数が制限範囲内か
+
         $password = Model_User::format_password_check($password);
 
-        // passwordをhash化させる
         $hash_pass = password_hash($password, PASSWORD_BCRYPT);
 
         try {
-            // パスワードを空から指定したパスワードに更新
             Model_User::update_password($user_id, $password);
             $data = [
                 "message" => "パスワードを登録しました"
@@ -196,6 +228,7 @@ class Controller_V1_Post extends Controller_V1_Base
                 $login_flag =  1, $data, $jwt="");
 
             $status = self::output_json($base_data);
+            error_log("パスワードを登録しました");
         } catch (\Database_Exception $e) {
 
         }
@@ -222,7 +255,6 @@ class Controller_V1_Post extends Controller_V1_Base
 
     /**
      * Gochi->Like
-     *
      * @param string POST $uri
      * @param string POST $login_flag
      */
@@ -236,12 +268,10 @@ class Controller_V1_Post extends Controller_V1_Base
         error_log($user_id);
 
         try {
-            // テーブルに格納
             $target_user_id = Model_Gochi::post_gochi(
                 $user_id, $post_id
             );
             if ((int)$user_id !== (int)$target_user_id) {
-                // noticeテーブルにインサート and 通知
                 $record = Model_Notice::notice_insert(
                     $keyword, $user_id, $target_user_id, $post_id
                 );
@@ -250,7 +280,8 @@ class Controller_V1_Post extends Controller_V1_Base
                 "message" => "gochiしました"
             ];
             $base_data = self::base_template($api_code = "SUCCESS", 
-                $api_message = "Successful API request", $login_flag = 1, $data, $jwt = "");
+                $api_message = "Successful API request", 
+                $login_flag = 1, $data, $jwt = "");
 
             $status = $this->output_json($base_data);
         } catch (\Database_Exception $e) {
@@ -368,7 +399,8 @@ class Controller_V1_Post extends Controller_V1_Base
                 "message" => "行きたいリストに追加しました"
             ];
             $base_data = self::base_template($api_code = "SUCCESS", 
-                $api_message = "Successful API request", $login_flag = 1, $data, $jwt = "");
+                $api_message = "Successful API request",
+                $login_flag = 1, $data, $jwt = "");
 
             $status = $this->output_json($base_data);
 
@@ -413,6 +445,9 @@ class Controller_V1_Post extends Controller_V1_Base
         error_log('user_id: ');
         error_log($user_id);
         $post_id = Input::post('post_id');
+        error_log('post_id: ');
+
+        error_log('block処理に入ります。');
 
         try {
             $result = Model_Block::post_block($user_id, $post_id);
@@ -424,6 +459,7 @@ class Controller_V1_Post extends Controller_V1_Base
                 $login_flag = 1, $data, $jwt = "");
 
             $status = $this->output_json($base_data);
+            error_log('投稿を違反報告しました');
         } catch (\Database_Exception $e) {
             self::failed($keyword);
             error_log($e);
@@ -469,22 +505,18 @@ class Controller_V1_Post extends Controller_V1_Base
 
         try {
             if (empty($username) && empty($profile_img)) {
-                 // do nothing
                  Controller_V1_Web_Base::error_json('Username and profile_img are empty.');
             } elseif (empty($username)) {
-                // profile update S3にpictureをupload
                 Model_S3::input_img($user_id, $profile_img);
                 Model_User::update_profile_img($user_id, $profile_img);
             } elseif (empty($profile_img)) {
-                // username update
                 Model_User::check_name($username);
                 Model_User::update_name($user_id, $username);
             } else {
-                // Both update
                 Model_User::check_name($username);
                 $profile_img = Model_S3::input_img($user_id, $profile_img);
                 $result = Model_User::update_profile(
-                            $user_id, $username, $profile_img
+                    $user_id, $username, $profile_img
                 );
             }
             $user_data   = Model_User::get_profile($user_id);
@@ -560,15 +592,13 @@ class Controller_V1_Post extends Controller_V1_Base
         // ログインしているユーザIDを取得
         self::create_token($uri=Uri::string(), $login_flag=0);
         $user_id = session::get('user_id');
-        // POST: ユーザーの現在のパスワード
         $current_password = Input::post('current_password');
-        // POST: 変更したい新しいパスワード
         $new_password     = Input::post('new_password');
+
         try {
             // ユーザのIDから登録時のパスワードを取得し、送信されたパスワードとDBパスワード一致するか調べる
             $db_password = Model_User::get_current_db_pass($user_id, $current_password);
             $match_pass = Model_User::web_verify_pass($current_password, $db_password[0]['password']);
-            // match_passの返り値がTrue 
             if ($match_pass) {
                 // 一致
                 Model_User::update_pass($user_id, $new_password);
