@@ -11,25 +11,9 @@
 
 class Controller_V1_Get extends Controller_V1_Base
 {
-    /**
-     * before
-     */
     public function before()
     {
-        $this->http_x_request_check();
-        self::accessLog();
-    }
-
-    public function http_x_request_check()
-    {
-        // SCRIPT要素で埋め込まれないための対策
-        if (! isset($_SERVER['HTTP_X_REQUESTED_WITH']) ||
-            $_SERVER['HTTP_X_REQUEST_WITH'] !== 'XMLHttpRequest') {
-
-            // Not Ajax Request
-
-            // json output
-        }
+        parent::before();
     }
 
     /**

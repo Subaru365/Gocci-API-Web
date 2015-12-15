@@ -23,6 +23,18 @@ class Controller_V1_Web_Get extends Controller_V1_Web_Base
             // json output
         }
         self::accessLog();
+        // $this->start_basic();
+    }
+
+    public function start_basic()
+    {
+        switch (true) {
+            case !isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']):
+            case $_SERVER['PHP_AUTH_USER'] !== 'gocci_web':
+            case $_SERVER['PHP_AUTH_PW']   !== 'gocci_web':
+                header('WWW-Authenticate: Basic realm="Enter username and password."');
+                die('ログインが必要です');
+        }
     }
 
     /**

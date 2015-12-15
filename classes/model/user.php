@@ -138,7 +138,7 @@ class Model_User extends Model
             // 6-25文字
             return $password;
         } else {
-            return Controller_V1_Web_Base::error_json("パスワードは6文字以上25文字以内です");
+            return Controller_V1_Base::error_json("パスワードは6文字以上25文字以内です");
         }
     }
 
