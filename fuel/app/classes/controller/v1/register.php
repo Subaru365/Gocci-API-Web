@@ -23,9 +23,6 @@ class Controller_V1_Register extends Controller_V1_Base
         $user_id  = Model_User::get_next_id();
         $username = Input::post('username');
         $password = Input::post('password');
-        $os    = "Web";
-        $ver   = "0.0";
-        $model = "PC";
         $register_id = $user_id; 
 
         // getであれば、UnAuthorized
@@ -44,6 +41,9 @@ class Controller_V1_Register extends Controller_V1_Base
             // usernameの文字数が制限以内か
             $username = Model_User::format_name_check($username);
 
+            // passwordの文字数チェックする(最低6文字以上)
+            $password = Model_User::format_password_check($password);
+
             Model_Device::check_register_id($register_id);
             $cognito_data = Model_Cognito::post_data($user_id);
 
@@ -54,7 +54,6 @@ class Controller_V1_Register extends Controller_V1_Base
             $hash_pass    = password_hash($password, PASSWORD_BCRYPT);
             $profile_img  = Model_User::insert_data($username, $identity_id, $hash_pass);
             $endpoint_arn = 0;
-            // Model_Device::post_data($user_id, $os, $ver, $model, $register_id, $endpoint_arn);
             $jwt = self::encode($user_id, $username);
 
             $data = [
@@ -66,7 +65,8 @@ class Controller_V1_Register extends Controller_V1_Base
             ];
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
-                $login_flag = 1, $data, $jwt);
+                $login_flag = 1, $data, $jwt
+            );
 
             $status = $this->output_json($base_data);
         } catch(\Database_Exception $e) {
@@ -85,9 +85,6 @@ class Controller_V1_Register extends Controller_V1_Base
     public function action_sns_sign_up()
     {
         $keyword     = "SNS登録";
-        $os          = "Web";
-        $ver         = "0.0";
-        $model       = "PC";
         $badge_num   = 0;
         $user_id     = Model_User::get_next_id();
         $username    = Input::post('username');
@@ -112,9 +109,6 @@ class Controller_V1_Register extends Controller_V1_Base
             $profile_img  = Model_User::sns_insert_data($username, $identity_id, $profile_img);
             $endpoint_arn = 0;
 
-            // device insert
-            // Model_Device::post_data($user_id, $os, $ver, $model, $register_id, $endpoint_arn);
-
             // 連携したので、flagを更新
             Model_User::update_sns_flag($user_id, $provider);
             // jwt 生成
@@ -129,7 +123,8 @@ class Controller_V1_Register extends Controller_V1_Base
             ];
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
-                $login_flag = 1, $data, $jwt);
+                $login_flag = 1, $data, $jwt
+            );
             $status = $this->output_json($base_data);
             exit;
         } catch (\Database_Exception $e) {

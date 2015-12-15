@@ -119,7 +119,7 @@ class Model_Validation extends Model
     {
         $val->add('pass', 'POST password')
             ->add_rule('required')
-            ->add_rule('min_length', 5)
+            ->add_rule('min_length', 6)
             ->add_rule('max_length', 20);
 
         return $val;

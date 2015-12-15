@@ -1,6 +1,6 @@
 <?php
 /**
- * Base Class Api
+ * Base Class
  * @package    Gocci-Web
  * @version    3.0 <2015/10/20>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
@@ -16,43 +16,87 @@ header('X-Content-Type-Options: nosniff');
 abstract class Controller_V1_Base extends Controller
 {
     /**
-     * @var String
-     */
-    public static $Successful_API_request_message = "Successful API request";
-
-    /**
-     * @var String
-     */
-    public static $Error_API_request_message = "Error_API_request";
-
-    /**
-     * @var Array
+     * @var Array $base_data
      */
     public static $base_data = [];
 
     /**
-     * @var String
+     * @var String $status
      */
-    public static $ENV = self::ENV_DEV;
+    public static $status;
 
-    const API_VERSION                    = "3.0";
-    const ENV_PRO                        = "PRODUCTION";
-    const ENV_DEV                        = "DEVELOPMENT";
-    const SUCCESSFUL_API_REQUEST_MESSAGE = "SUCCESSFUL_API_REQUEST_MESSAGE";
-    const ERROR_API_REQUEST_MESSAGE      = "ERROR_API_REQUEST_MESSAGE";
+    /**
+     * @var Int $user_id
+     */
+    private $user_id;
+
+    /**
+     * @var Object $jwt_obj;
+     */
+    private $jwt_obj;
+
+    const API_VERSION                     = "3.0";
+    const ENV_PRO                         = "PRODUCTION";
+    const ENV_DEV                         = "DEVELOPMENT";
+    const SUCCESSFUL_API_REQUEST_MESSAGE  = "SUCCESSFUL_API_REQUEST_MESSAGE";
+    const ERROR_API_REQUEST_MESSAGE       = "ERROR_API_REQUEST_MESSAGE";
+    const API_MESSAGE_UNAUTHORIZED        = "UnAuthorized";
+    const API_CODE_ERROR_ALREADY_REGISTER = "ERROR_ALREADY_REGISTER";
 
     public function before()
     {
         $this->session_check();
+        $this->http_x_request_check();
+        self::accessLog();
+        // $this->start_basic();
+    }
+
+    public function start_basic()
+    {
+        switch (true) {
+            case !isset($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']):
+            case $_SERVER['PHP_AUTH_USER'] !== 'gocci_web':
+            case $_SERVER['PHP_AUTH_PW']   !== 'gocci_web':
+                header('WWW-Authenticate: Basic realm="Enter username and password."');
+                die('ログインが必要です');
+        }
+    }
+
+    public function http_x_request_check()
+    {
+        // SCRIPT要素で埋め込まれないための対策
+        if (! isset($_SERVER['HTTP_X_REQUESTED_WITH']) ||
+            $_SERVER['HTTP_X_REQUEST_WITH'] !== 'XMLHttpRequest') {
+            // Not Ajax Request
+            // json output
+        }
     }
 
     public function session_check()
     {
         if (session::get('user_id')) {
-
+           self::set_user_id();
+           $user_id = self::get_user_id();
+           error_log($user_id);
         } else {
-
+            $jwt = self::get_jwt();
+            $this->obj = self::getJwtObject($jwt);
         }
+    }
+
+    public static function get_user_id()
+    {
+        return $this->user_id;
+    }
+
+    public static function get_jwt_obj()
+    {
+        return $this->jwt_obj;
+    }
+
+    public static function set_user_id()
+    {
+        $this->user_id = session::get('user_id');
     }
 
     public function get_input_data() {
@@ -64,7 +108,7 @@ abstract class Controller_V1_Base extends Controller
 
             }
         } catch (ErrorException $e) {
-            // echo 'error';
+            die('Error');
         }
     }
 
@@ -96,10 +140,12 @@ abstract class Controller_V1_Base extends Controller
      */
     public static function accessLog()
     {
-        if (self::$ENV === 'DEVELOPMENT') {
+        if (self::ENV_DEV === 'DEVELOPMENT') {
             $accessTime = date('Y-m-d H:i:s', strtotime("+ 9 hour"));
-            error_log('access time: ');
+            $ip = $_SERVER["REMOTE_ADDR"];
+            error_log('Access Time: ');
             error_log($accessTime);
+            error_log('Access IP:' . $ip);
         }
     }
 
@@ -345,7 +391,11 @@ abstract class Controller_V1_Base extends Controller
         $data = [
             "message" => "This page is not available. There is a problem with the link or there is a possibility that the page has been deleted. Return to the Gocci."
         ];
-        $base_data = self::base_template($api_code = "NOTFOUND", $api_message = "SUCCESS ful API request", $login_flag =  1, $data, $jwt = "");
+        $base_data = self::base_template($api_code = "NOTFOUND", 
+          $api_message = "SUCCESS ful API request", 
+          $login_flag =  1, 
+          $data, $jwt = ""
+        );
         $status = self::output_json($base_data);
     }
 
@@ -361,8 +411,8 @@ abstract class Controller_V1_Base extends Controller
                           $api_message = "Failed", 
                           $login_flag = 0, 
                           $api_data, 
-                          $jwt = "");
-
+                          $jwt = ""
+        );
         $status    = self::json_encode_template($base_data);
         echo $status;
         exit;
@@ -495,7 +545,7 @@ abstract class Controller_V1_Base extends Controller
      * @return Array  $data
      */
     public static function user_template($target_username, $limit, $sort_key) {
-        if (ctype_digit($target_username)) { $this->notid();}
+        if (ctype_digit($target_username)) { $this->notid(); }
 
         $target_user_id = Model_User::get_id($target_username);
         $user_id        = session::get('user_id');

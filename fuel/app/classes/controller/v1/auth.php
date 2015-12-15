@@ -11,7 +11,6 @@
 
 class Controller_V1_Auth extends Controller_V1_Base
 {
-    use GocciAPI;
     /**
      * jwtがあるかどうかをcheckするメソッド
      * @var String $uri
@@ -29,10 +28,10 @@ class Controller_V1_Auth extends Controller_V1_Base
                  self::unauth();
             }
             $user_id   = $obj->{'user_id'};
-            session::set('user_id', $user_id);
             $username  = $obj->{'username'};
-            session::set('username', $username);
             $exp       = $obj->{'exp'};
+            session::set('user_id', $user_id);
+            session::set('username', $username);
             session::set('exp', $exp);
         } else {
             self::unauth();
@@ -48,21 +47,31 @@ class Controller_V1_Auth extends Controller_V1_Base
     {
         $keyword   = 'ログイン';
         $provider  = Input::get('provider');
+        error_log('provider:');
+        error_log($provider);
         $token     = Input::get('token');
+        error_log('token:');
+        error_log($token);
 
         try
         {
+            error_log('1');
             if (empty($provider) && empty($token) || empty($provider) or empty($token) ) {
                 self::error_json("UnAuthorized");
             }
+            error_log('2');
             $identity_id = Model_Cognito::get_identity_id($provider, $token);
+            error_log('2.1');
             $user_data   = Model_User::web_get_auth($identity_id);
+            error_log('2.2');
             $user_id     = $user_data['user_id'];
             $username    = $user_data['username'];
             $profile_img = $user_data['profile_img'];
             $badge_num   = $user_data['badge_num'];
             $jwt = self::encode($user_id, $username);
+            error_log('2.3');
             Model_Login::post_login($user_id);
+            error_log('3');
             $data = [
                 "user_id"     => $user_id,
                 "username"    => $username,
@@ -70,11 +79,12 @@ class Controller_V1_Auth extends Controller_V1_Base
                 "identity_id" => $identity_id,
                 "badge_num"   => $badge_num,
             ];
+            error_log('4');
             $base_data = self::base_template($api_code = "SUCCESS",
-                                $api_message = "Successful API request",
-                                $login_flag =  1,
-                                $data, $jwt);
-
+                $api_message = "Successful API request",
+                $login_flag  =  1,
+                $data, $jwt
+            );
             self::output_json($base_data);
 
         } catch(\Database_Exception $e) {
@@ -100,11 +110,12 @@ class Controller_V1_Auth extends Controller_V1_Base
         self::get_jwt_token($uri=Uri::string(), $login_flag=1);
         $user_id = session::get('user_id');
         if (empty($user_id)) {
-           $base_data = self::base_template($api_code = "SUCCESS",
-                                $api_message = "UnAuthorized",
-                                $login_flag =  1,
-                                $data, $jwt);
-       }
+            $base_data = self::base_template($api_code = "SUCCESS",
+                $api_message = "UnAuthorized",
+                $login_flag  =  1,
+                $data, $jwt
+            );
+        }
         try {
             // ログアウトのためsessionデータ削除
             Session::delete('user_id');
@@ -115,9 +126,10 @@ class Controller_V1_Auth extends Controller_V1_Base
                 "message" => "ログアウトしました"
             ];
             $base_data = self::base_template($api_code = "SUCCESS",
-                                $api_message = "Successful API request",
-                                $login_flag =  1,
-                                $data, $jwt);
+                $api_message = "Successful API request",
+                $login_flag  =  1,
+                $data, $jwt
+            );
 
             self::output_json($base_data);
 
@@ -156,8 +168,9 @@ class Controller_V1_Auth extends Controller_V1_Base
                     "badge_num"   => $badge_num
                 ];
                 $base_data = self::base_template($api_code = "SUCCESS",
-                                    $api_message = "Successful API request",
-                                    $login_flag =  1,$data, $jwt);
+                    $api_message = "Successful API request",
+                    $login_flag  =  1,$data, $jwt
+                );
                 self::output_json($base_data);
             }
         } catch (Exception $e) {
@@ -188,6 +201,11 @@ class Controller_V1_Auth extends Controller_V1_Base
             'badge_num'   => $badge_num,
         ];
         // Controller_V1_Web_Base::output_json($data);
-        GocciAPI::output_json($data);
+        self::output_json($data);
+    }
+
+    public function action_test_login()
+    {
+
     }
 }
