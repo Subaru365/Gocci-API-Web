@@ -53,6 +53,7 @@ class Controller_V1_Auth extends Controller_V1_Base
         error_log('token:');
         error_log($token);
 
+        error_log('auth apiが叩かれました in auth api');
         try
         {
             error_log('1');
@@ -130,11 +131,14 @@ class Controller_V1_Auth extends Controller_V1_Base
                 $login_flag  =  1,
                 $data, $jwt
             );
+            error_log('jwtの中身:');
+            error_log($jwt);
 
             self::output_json($base_data);
 
        } catch (Exception $e) {
-
+            error_log($e);
+            exit;
        }
     }
 
@@ -176,6 +180,8 @@ class Controller_V1_Auth extends Controller_V1_Base
         } catch (Exception $e) {
             // JWT Exception
             // Not access
+            error_log($e);
+            exit;
         }
     }
     /**
