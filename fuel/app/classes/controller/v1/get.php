@@ -65,7 +65,8 @@ class Controller_V1_Get extends Controller_V1_Base
             $data = self::timeline_template();
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
-                $login_flag =  1,$data, $jwt);
+                $login_flag =  1,$data, $jwt
+            );
             $this->output_json($base_data);
         }
      }
@@ -86,7 +87,8 @@ class Controller_V1_Get extends Controller_V1_Base
             ];
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
-                $login_flag =  1, $data, $jwt);
+                $login_flag =  1, $data, $jwt
+            );
             $status = $this->output_json($base_data);
         } catch (\Database_Exception $e) {
 
@@ -151,7 +153,10 @@ class Controller_V1_Get extends Controller_V1_Base
             "post"     => $post_data[0],
             "comments" => $Comment_data
         ];
-        $base_data = self::base_template($api_code = "SUCCESS", $api_message = "Successful API request", $login_flag = 1, $data, $jwt);
+        $base_data = self::base_template($api_code = "SUCCESS", 
+            $api_message = "Successful API request", 
+            $login_flag = 1, $data, $jwt
+        );
         $status = $this->output_json($data);
     }
 
@@ -176,7 +181,8 @@ class Controller_V1_Get extends Controller_V1_Base
 
                 $data = self::rest_template($user_id, $rest_id, $sort_key);
                 $base_data = self::base_template($api_code = "SUCCESS", 
-                    $api_message = "UnAuthorized", $login_flag, $data, $jwt);
+                    $api_message = "UnAuthorized", $login_flag, $data, $jwt
+                );
                 $status = $this->output_json($base_data);
                 exit;
             }
@@ -195,7 +201,8 @@ class Controller_V1_Get extends Controller_V1_Base
 
         $base_data = self::base_template($api_code = "SUCCESS", 
             $api_message = "Successful API request", 
-            $login_flag =  1, $data, $jwt);
+            $login_flag =  1, $data, $jwt
+        );
         $status = $this->output_json($base_data);
     }
 
@@ -219,7 +226,8 @@ class Controller_V1_Get extends Controller_V1_Base
 
                 $base_data = self::base_template($api_code = "SUCESS", 
                     $api_message = "UnAuthorized", 
-                    $login_flag =  0, $data, $jwt);
+                    $login_flag =  0, $data, $jwt
+                );
                 $status = $this->output_json($base_data);
                 exit;
             }
@@ -238,7 +246,8 @@ class Controller_V1_Get extends Controller_V1_Base
         $data = self::user_template($target_username, $limit, $sort_key);
         $base_data = self::base_template($api_code = "SUCCESS", 
             $api_message = "Successful API request", 
-            $login_flag =  1, $data, $jwt);
+            $login_flag =  1, $data, $jwt
+        );
         $status = $this->output_json($base_data);
     }
 
@@ -255,7 +264,8 @@ class Controller_V1_Get extends Controller_V1_Base
         Model_User::reset_badge($user_id);
         $base_data = self::base_template($api_code = 0, 
             $api_message = "SUCCESS", 
-            $login_flag =  1,$data, $jwt);
+            $login_flag =  1,$data, $jwt
+        );
         $status  = $this->output_json($base_data);
     }
 
@@ -271,8 +281,9 @@ class Controller_V1_Get extends Controller_V1_Base
         $jwt  = self::check_jwtExp($exp);
         $data = Model_Restaurant::get_near($lon, $lat);
         $base_data = self::base_template($api_code = "SUCCESS", 
-        $api_message = "Successful API request", 
-        $login_flag =  1,$data, $jwt);
+            $api_message = "Successful API request", 
+            $login_flag =  1,$data, $jwt
+        );
         $status = $this->output_json($base_data);	
     }
 
@@ -310,7 +321,8 @@ class Controller_V1_Get extends Controller_V1_Base
         }
         $base_data = self::base_template($api_code = 0, 
             $api_message = "SUCCESS", 
-            $login_flag =  1,$data, $jwt);
+            $login_flag =  1,$data, $jwt
+        );
         $status    = $this->output_json($base_data);
     }
 
@@ -327,7 +339,8 @@ class Controller_V1_Get extends Controller_V1_Base
         $data           = Model_Follow::get_follow($user_id, $target_user_id);
         $base_data      = self::base_template($api_code = "SUCCESS", 
             $api_message = "Successful API request", 
-            $login_flag =  1,$data, $jwt);
+            $login_flag =  1,$data, $jwt
+        );
         $stats          = $this->output_json($base_data);
     }
 
@@ -344,7 +357,8 @@ class Controller_V1_Get extends Controller_V1_Base
         $data           = Model_Follow::get_follower($user_id, $target_user_id);
         $base_data      = self::base_template($api_code = "SUCCESS", 
             $api_message = "Successful API request", 
-            $login_flag =  1,$data, $jwt);
+            $login_flag =  1,$data, $jwt
+        );
         $status         = $this->output_json($base_data);
     }
 
@@ -360,7 +374,8 @@ class Controller_V1_Get extends Controller_V1_Base
         $data= Model_Want::get_want($target_user_id);
         $base_data = self::base_template($api_code = "SUCCESS", 
             $api_message = "Successful API request", 
-            $login_flag =  1,$data, $jwt);
+            $login_flag =  1,$data, $jwt
+        );
         $status = $this->output_json($data);
     }
 
@@ -376,7 +391,8 @@ class Controller_V1_Get extends Controller_V1_Base
         $data = Model_Post::get_user_cheer($target_user_id);
         $base_data = self::base_template($api_code = "SUCCESS", 
                     $api_message = "Successful API request",
-                    $login_flag =  1, $data, $jwt);
+                    $login_flag =  1, $data, $jwt
+        );
         $status = $this->output_json($base_data);
     }
 
@@ -399,7 +415,8 @@ class Controller_V1_Get extends Controller_V1_Base
         }
         $base_data = self::base_template($api_code = "SUCCESS", 
             $api_message = "Successful API request", 
-            $login_flag =  1,$data, $jwt);
+            $login_flag =  1,$data, $jwt
+        );
         $status = $this->output_json($base_data);
     }
 
@@ -416,8 +433,42 @@ class Controller_V1_Get extends Controller_V1_Base
         $targetUserId    = Model_User::get_id($targetUserName);
         $data            = Model_User::get_data($user_id, $targetUserId);
         $base_data       = self::base_template($api_code = 0, $api_message = "SUCCESS", 
-                            $login_flag =  1, $data, $jwt);
+                            $login_flag =  1, $data, $jwt
+        );
         $status          = $this->output_json($base_data);
+    }
+
+    /**
+     * restaurants search
+     */
+    public function action_search($target)
+    {
+        if (!empty($target)) {
+            // 「渋谷 ラーメン」と検索した場合、空白(スペース)を+に変換
+            // -> 渋谷+ラーメン
+            // URI: gocci.me/search/渋谷 ラーメン
+
+            if (strpos($target, '　') !== false) {
+                // 全角スペースを+に変換
+                // ※vineは全角スペースの場合何もしない
+                echo $target = str_replace('　',  "+", $target);
+
+            } elseif (strpos($target, ' ') !== false) {
+                // 半角スペースを+に変換
+                echo $target = str_replace(' ', "+", $target);
+                exit;
+            //} else if (){
+                // 文字の最初と最後が+の場合、%2Bにエンコードする
+            } else {
+                // 何もしない
+                echo $target;
+            }
+            // 再度、$targetの先頭と末尾に「+」があれば、
+
+            // $replace_targetの中に含まれる+の数をカウントする
+        } else {
+            // Oops! Couldn't find it.
+        }
     }
 
     /**
@@ -448,7 +499,8 @@ class Controller_V1_Get extends Controller_V1_Base
 
         $base_data = self::base_template($api_code = "SUCCESS", 
             $api_message = "Successful API request", 
-            $login_flag = 1, $data, $jwt = "");
+            $login_flag = 1, $data, $jwt = ""
+        );
         $status = $this->output_json($base_data);
     }
 }

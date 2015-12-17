@@ -10,6 +10,7 @@
  */
 class Model_Validation extends Model
 {
+    use GocciAPI;
     /**
      * 登録チェック
      * @param String $username
@@ -70,6 +71,22 @@ class Model_Validation extends Model
     }
 
     /**
+     * FEEDBACK EMPTY CHECK
+     * @param String $feedback
+     */
+    public static function check_empty($feedback)
+    {
+        if (empty($feedback)) {
+            $data = [
+                "message" => "入力されていません"
+            ];
+            error_log('入力されていません');
+            GocciAPI::debug_output_json($data);
+            exit;
+        }
+    }
+
+    /**
      * Valodation Check
      * @param String $val
      * @param Array $user_data
@@ -88,7 +105,7 @@ class Model_Validation extends Model
             $key        = implode(", ", $keys);
             $message    = implode(". ", $messages);
 
-            Controller_V2_Mobile_Base::output_validation_error($key, $message);
+            // Controller_V2_Mobile_Base::output_validation_error($key, $message);
             error_log("$message");
             exit;
         }
@@ -123,6 +140,35 @@ class Model_Validation extends Model
             ->add_rule('max_length', 20);
 
         return $val;
+    }
+
+    /**
+     * feedbackフォーマットチェック
+     * @param String $val
+     *
+     * @return $val
+     */
+    public static function format_feedback($val)
+    {
+        /*
+        $val = Validation::forge();
+        $val::
+        $val->add('feedback', 'POST feedback')
+            ->add_rule('required')
+            ->add_rule('min_length', 1)
+            ->add_rule('max_length', 300);
+
+        if ($val->run()) {
+            error_log('runの中');
+            error_log('val: ');
+            error_log($val);
+            return $val;
+        } else {
+            error_log('runの外');
+            error_log('文字数えラー');
+            exit;
+        }
+        */
     }
 
     /**
@@ -174,7 +220,7 @@ class Model_Validation extends Model
      * デバイス重複チェック
      * @param String $register_id
      */
-    private static function overlap_register_id($register_id)
+    public static function overlap_register_id($register_id)
     {
         $result = Model_V2_Db_Device::get_device_id($register_id);
 

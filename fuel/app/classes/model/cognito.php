@@ -14,6 +14,7 @@ use Aws\CognitoSync\CognitoSyncClient;
 
 class Model_Cognito extends Model
 {
+    use GocciAPI;
     /**
      * IdentityID取得 DataSet [User_Info]
      * @param  Int $user_id
@@ -75,6 +76,16 @@ class Model_Cognito extends Model
      */
     public static function post_web_sns($user_id, $provider, $token)
     {
+        error_log('user_id in cognito: ');
+        error_log($user_id);
+
+        error_log('provider in cognito: ');
+        error_log($provider);
+
+        error_log('token in cognito: ');
+        error_log($token);
+
+
         $cognito_data = Config::get('_cognito');
 
         $client = new CognitoIdentityClient([
@@ -172,26 +183,24 @@ class Model_Cognito extends Model
             'region'  => 'us-east-1',
             'version' => 'latest'
         ]);
-
+        error_log('client:');
+        error_log(print_r($client));
         error_log('Cognito Model内3');
         try {
-            // 例外が発生する際、$resultには何が入っているのか
+            // ここでエラー発生（Twitter）
             $result = $client->getOpenIdTokenForDeveloperIdentity([
                 'IdentityPoolId' => "$IdentityPoolId",
                 'Logins' => [
                     "$provider" => "$token",
                 ],
             ]);
-
-            if (!$result) {
-                return $result = [];
-            } else {
-                error_log('result IdentityId');
-                error_log($result);
-                return $result['IdentityId'];
-            }
+            return $result['IdentityId'];
         } catch (Exception $e) {
-            error_log('例外が発生しました');
+            // $data = ["message" => "例外が発生しました"];
+            error_log('例外が発生しました...');
+            error_log(Uri::string());
+            // error_log(GocciAPI::debug_output_json($data));
+            error_log($e);
             exit;
         }
     }

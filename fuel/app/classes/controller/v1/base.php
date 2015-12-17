@@ -48,7 +48,6 @@ abstract class Controller_V1_Base extends Controller
         $this->session_check();
         $this->http_x_request_check();
         self::accessLog();
-        // $this->start_basic();
     }
 
     public function start_basic()
@@ -513,7 +512,7 @@ abstract class Controller_V1_Base extends Controller
         $exp      = session::get('exp');
         $jwt      = self::check_jwtExp($exp);
         $sort_key = 'all';
-        $limit    = 15;
+        $limit    = 18;
         $option   = [
             'call'        => Input::get('call', 0),
             'order_id'    => Input::get('order_id', 0),

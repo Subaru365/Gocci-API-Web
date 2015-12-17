@@ -10,6 +10,7 @@
  */
 class Model_Feedback extends Model
 {
+    use GocciAPI;
     /**
      * 追加処理
      * @param Int $user_id
@@ -19,10 +20,21 @@ class Model_Feedback extends Model
      */
     public static function post_add($user_id, $feedback)
     {
+        // feedbackのバリデーション
+        // $feedback = Model_Validation::format_feedback($feedback);
+        if (empty($feedback)) {
+            $data = [
+                "message" => "入力されていません"
+            ];
+            error_log('入力されていません');
+            GocciAPI::debug_output_json($data);
+            exit;
+        }
+
         $query = DB::insert('feedbacks')
             ->set(array(
-            'feedback_user_id' => "$user_id",
-            'feedback'         => "$feedback"
+            'feedback_user_id' => $user_id,
+            'feedback'         => $feedback
             ))
             ->execute();
 

@@ -87,23 +87,48 @@ class Controller_V1_Register extends Controller_V1_Base
         $keyword     = "SNS登録";
         $badge_num   = 0;
         $user_id     = Model_User::get_next_id();
-        $username    = Input::post('username');
-        $profile_img = Input::post('profile_img');
-        $sns_token   = Input::post('token');
-        $provider    = Input::post('provider');
         $register_id = $user_id;
+
+        // provider facebookの時
+        if ($provider === 'graph.facebook.com)') {
+            $username    = Input::post('username');
+            $profile_img = Input::post('profile_img');
+            $sns_token   = Input::post('token');
+            $provider    = Input::post('provider');
+        } else {
+            $username    = Input::post('username');
+
+            // サーバ側で保持していたtwitte_proifile_img / tokenを持ってくる
+            // $profile_img = get_
+            // $snn_token = get?
+            // $provider = "api.twitter";
+        }
 
         $this->post_check();
 
+        error_log($user_id);
+        error_log($username);
+        error_log($profile_img);
+        error_log($sns_token);
+        error_log($provider);
+
         try {
+            error_log('register api 叩きました in try');
             // usernameが既に使われていないかエラーハンドリング
             $username = Model_User::check_web_name($username);
+            error_log('check ok name!');
             $username = Model_User::empty_name($username);
+            error_log('check ok not empty name!');
             $username = Model_User::format_name_check($username);
+            error_log('check ok name no prblem!');
 
-            // facebook/twitterアカウントデータをusers/devices に保存する
+            // facebook/twitterアカウントデータをusers
             $cognito_data = Model_Cognito::post_web_sns($user_id, $provider, $sns_token);
+            error_log('get cognito_data!');
             $identity_id  = $cognito_data['IdentityId'];
+
+            error_log('identity_id');
+            error_log($identity_id);
 
             // users table insert
             $profile_img  = Model_User::sns_insert_data($username, $identity_id, $profile_img);
@@ -128,7 +153,9 @@ class Controller_V1_Register extends Controller_V1_Base
             $status = $this->output_json($base_data);
             exit;
         } catch (\Database_Exception $e) {
-
+            error_log('Error: ');
+            error_log($e);
+            exit;
         }
     }
 }
