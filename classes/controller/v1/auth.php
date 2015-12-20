@@ -98,6 +98,7 @@ class Controller_V1_Auth extends Controller_V1_Base
                 $badge_num
             );
             error_log($e);
+            exit;
         }
     }
 
@@ -129,7 +130,7 @@ class Controller_V1_Auth extends Controller_V1_Base
             $base_data = self::base_template($api_code = "SUCCESS",
                 $api_message = "Successful API request",
                 $login_flag  =  1,
-                $data, $jwt
+                $data, $jwt = ""
             );
             error_log('jwtの中身:');
             error_log($jwt);

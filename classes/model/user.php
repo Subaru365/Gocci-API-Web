@@ -70,6 +70,9 @@ class Model_User extends Model
         $result = $query->execute()->as_array();
 
         if (!empty($result[0]['username'])) {
+             $username = $result[0]['username'];
+             error_log('登録されているusername:');
+             error_log($username);
              Controller_V1_Web_Base::error_register("username already registered.");
              // 既に登録されているusername
         } else {
