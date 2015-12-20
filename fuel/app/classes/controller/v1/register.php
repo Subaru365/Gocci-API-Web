@@ -70,7 +70,8 @@ class Controller_V1_Register extends Controller_V1_Base
 
             $status = $this->output_json($base_data);
         } catch(\Database_Exception $e) {
-
+            error_log($e);
+            exit;
         }
     }
 

@@ -100,6 +100,19 @@ class Controller_V1_Post extends Controller_V1_Base
         $provider    = Input::post('provider');
         $token       = Input::post('token');
         $profile_img = Input::post('profile_img');
+
+        error_log('user_id');
+        error_log($user_id);
+
+        error_log('provider');
+        error_log($provider);
+
+        error_log('token');
+        error_log($token);
+
+        error_log('profile_img');
+        error_log($profile_img);
+
         try {
             if ($profile_img !== 'none') {
                 $profile_img = Model_S3::input($user_id, $profile_img);
@@ -112,8 +125,8 @@ class Controller_V1_Post extends Controller_V1_Base
                 "profile_img" => $profile_img
             ];
             $base_data = self::base_template($api_code = 0, 
-                $api_message = "SUCCESS", 
-                $login_flag =  1,$data, $jwt
+                $api_message = "Successful API request", 
+                $login_flag =  1, $data, $jwt
             );
             self::output_json($base_data);
         } catch (\Database_Exception $e) {
@@ -133,7 +146,22 @@ class Controller_V1_Post extends Controller_V1_Base
         $provider = Input::post('provider');
         $token    = Input::post('token');
 
+        error_log('user_id: ');
+        error_log($user_id);
+
+        error_log('provider: ');
+        error_log($provider);
+
+        error_log('token: ');
+        error_log($token);
+
         try {
+            if (empty($provider) && empty($token) || empty($provider) || empty($token)) {
+                error_log("POSTされていない値があります");
+                // この場合なぜか、フロント側で「パスワードが設定されていません」と出力される。
+                self::failed($message = "POSTされていない値があります");
+                exit;
+            }
             // 他にSNS連携しているか確認
             $sns_flag = Model_User::check_sns_flag($user_id);
             $facebook_flag = $sns_flag[0]['facebook_flag'];
@@ -246,7 +274,7 @@ class Controller_V1_Post extends Controller_V1_Base
      * @param string POST $token
      * @param string POST $keyword
      */
-    public static function action_start_unlink($user_id, $provider, $token, $keyword)
+    public static function start_unlink($user_id, $provider, $token, $keyword)
     {
         try {
             $identity_id = Model_User::get_indentity_id($user_id);

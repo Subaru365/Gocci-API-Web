@@ -451,21 +451,29 @@ class Controller_V1_Get extends Controller_V1_Base
             if (strpos($target, '　') !== false) {
                 // 全角スペースを+に変換
                 // ※vineは全角スペースの場合何もしない
-                echo $target = str_replace('　',  "+", $target);
-
+                $target = str_replace('　',  "+", $target);
             } elseif (strpos($target, ' ') !== false) {
                 // 半角スペースを+に変換
-                echo $target = str_replace(' ', "+", $target);
-                exit;
+                $target = str_replace(' ', "+", $target);
             //} else if (){
                 // 文字の最初と最後が+の場合、%2Bにエンコードする
             } else {
                 // 何もしない
-                echo $target;
+                // echo $target;
             }
             // 再度、$targetの先頭と末尾に「+」があれば、
 
-            // $replace_targetの中に含まれる+の数をカウントする
+            // $replace_targetの中に含まれる単語を分割
+            $word = explode("+", $target);
+            $count = count($word);
+
+            for ($i=0; $i<$count;$i++) {
+                $word[$i] = $word[$i];
+                echo $word[$i] . "\n";
+            }
+
+
+
         } else {
             // Oops! Couldn't find it.
         }

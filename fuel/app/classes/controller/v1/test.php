@@ -34,13 +34,14 @@ class Controller_V1_Test extends Controller_V1_Base
 
     public function action_sns_sign_up_test()
     {
-        // 処理フロー
+        /* 処理フロー */
 
         // 1 access_tokenを取得
 
         // 2 フロントに返す
 
-        // 3 認証ページにフロントが飛んでもらう
+        // 3 認証ページにフロントが飛んでもらう[フロント]
+        // https://api.twitter.com/oauth/authorize?oauth_token=
 
         // 4 token/imageをサーバ側で保持
 
@@ -49,7 +50,8 @@ class Controller_V1_Test extends Controller_V1_Base
 
 
         $data = self::get_twitter_data();
-        print_R($data);exit;
+        print_R($data);
+        /*
         $access_token = $data[0]['access_token'];
         $image = $data[0]['image'];
 
@@ -62,6 +64,7 @@ class Controller_V1_Test extends Controller_V1_Base
                   $login_flag =  1, $data, $jwt = ""
         );
         echo self::output_json($base_data);
+        */
     }
 
     private static function get_twitter_data()
