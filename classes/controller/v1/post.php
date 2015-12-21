@@ -50,12 +50,17 @@ class Controller_V1_Post extends Controller_V1_Base
     public static function create_token($uri="", $login_flag)
     {
         $jwt = self::get_jwt();
-        if(isset($jwt)) {
+        error_log('jwt: ');
+        error_log($jwt);
+        if(isset($jwt) || !empty($jwt)) {
             $data      = self::decode($jwt);
             $user_data = session::get('data');
             $obj       = json_decode($user_data);
             if (empty($obj)) {
+                error_log('not obj!');
                 self::unauth();
+            } else {
+                error_log('Object is Exists!');
             }
             $user_id   = $obj->{'user_id'};
             $username  = $obj->{'username'};
@@ -65,6 +70,7 @@ class Controller_V1_Post extends Controller_V1_Base
             session::set('username', $username);
             session::set('exp', $exp);
         } else {
+            error_log('jwt is not set.');
             self::unauth();
             error_log('UnAuthorized Accsess..');
             exit;
@@ -101,33 +107,28 @@ class Controller_V1_Post extends Controller_V1_Base
         $token       = Input::post('token');
         $profile_img = Input::post('profile_img');
 
-        error_log('user_id');
-        error_log($user_id);
-
-        error_log('provider');
-        error_log($provider);
-
-        error_log('token');
-        error_log($token);
-
-        error_log('profile_img');
-        error_log($profile_img);
+        error_log('sns連携');
 
         try {
             if ($profile_img !== 'none') {
                 $profile_img = Model_S3::input($user_id, $profile_img);
-                $profile_img = Modle_User::update_profile_img($user_id, $profile_img);
+            } else {
+                error_log('none');
             }
+
             $identity_id = Model_User::get_identity_id($user_id);
             Model_User::update_sns_flag($user_id, $provider);
+
             Model_Cognito::post_sns($user_id, $identity_id, $provider, $token);
+
             $data = [
                 "profile_img" => $profile_img
             ];
-            $base_data = self::base_template($api_code = 0, 
+            $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
                 $login_flag =  1, $data, $jwt
             );
+            error_log('sns連携しました');
             self::output_json($base_data);
         } catch (\Database_Exception $e) {
             self::failed($keyword);
@@ -238,7 +239,6 @@ class Controller_V1_Post extends Controller_V1_Base
     public static function action_create_password()
     {
         self::create_token($uri=Uri::string(), $login_flag=1);
-        error_log('a');
         $user_id  = session::get('user_id');
         $password = Input::post('password');
 
@@ -277,10 +277,17 @@ class Controller_V1_Post extends Controller_V1_Base
     public static function start_unlink($user_id, $provider, $token, $keyword)
     {
         try {
-            $identity_id = Model_User::get_indentity_id($user_id);
-            Model_User::deleet_sns_flag($user_id, $provider);
+            $identity_id = Model_User::get_identity_id($user_id);
+            Model_User::delete_sns_flag($user_id, $provider);
             Model_Cognito::delete_sns($user_id, $identity_id, $provider, $token);
-            self::SUCCESS($keyword);
+            $data = [
+                "message" => "連携しました"
+            ];
+            $base_data = self::base_template($api_code = "SUCCESS", 
+                $api_message = "Successful API request", 
+                $login_flag =  1, $data, $jwt="");
+
+            $status = self::output_json($base_data);
         } catch (\Dataase_Exception $e) {
              self::failed($keyword);
              error_log($e);
@@ -534,6 +541,8 @@ class Controller_V1_Post extends Controller_V1_Base
         $user_id        = session::get('user_id');
         $username       = Input::post('username');
         $profile_img    = @$_FILES["profile_img"]["tmp_name"];
+        error_log('更新前のprofile_img');
+        error_log($profile_img);
         $save_filename  = $user_id . "_" . date('Y-m-d-H-i-s') . ".png";
 
         try {
@@ -553,11 +562,13 @@ class Controller_V1_Post extends Controller_V1_Base
                 );
             }
             $user_data   = Model_User::get_profile($user_id);
-            $username    = $user_data['username'];  
+            $username    = $user_data['username'];
+            error_log('更新後のprofile_img');
+            error_log($profile_img);
             $data = [
                 "message"     => "プロフィールを変更しました",
                 "username"    => $username,
-                "profile_img" => $profile_img    
+                "profile_img" => $profile_img
             ];
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 

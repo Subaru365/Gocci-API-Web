@@ -24,9 +24,17 @@ class Model_S3 extends Model
 
         $i = rand(1, 10);
         $code = 'wget -O /tmp/img/' . "$i" . '.png ' . "$profile_img_url";
-        error_log($code);
-        exec("$code");
 
+
+        // error_log($code);
+        // error_log('codeを実行します');
+
+        exec("$code");
+        /*
+        error_log('取得したprofile_img_url');
+        error_log($profile_img_url);
+        error_log('codeを実行します実行しました');
+        */
         $put_name = "$user_id" . '_' . date("Y-m-d-H-i-s") . '.png';
 
         $client = new S3Client([
@@ -34,13 +42,19 @@ class Model_S3 extends Model
             'version' => '2006-03-01'
         ]);
 
+        // error_log('S3Clinetをインスタンス化しました');
+        // error_log('obujectをputします。');
+
         $result = $client->putObject([
-            'Bucket' => "$bucket",
-            'Key' => "$put_name",
+            'Bucket'     => "$bucket",
+            'Key'        => "$put_name",
             'SourceFile' => '/tmp/img/' . "$i" . '.png',
         ]);
 
+        error_log('obujectをputしました');
+
         $name = explode('.', $put_name);
+        // error_log('returnします');
         return $name[0];
     }
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Auth Class Api
+ * Auth Class
  * @package    Gocci-Web
  * @version    3.0 <2015/10/20>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
@@ -25,7 +25,7 @@ class Controller_V1_Auth extends Controller_V1_Base
             $user_data = session::get('data');
             $obj       = json_decode($user_data);
             if (empty($obj)) {
-                 self::unauth();
+                self::unauth();
             }
             $user_id   = $obj->{'user_id'};
             $username  = $obj->{'username'};
@@ -58,10 +58,17 @@ class Controller_V1_Auth extends Controller_V1_Base
         {
             error_log('1');
             if (empty($provider) && empty($token) || empty($provider) or empty($token) ) {
+                error_log('paramがありません');
                 self::error_json("UnAuthorized");
             }
             error_log('2');
+
+            /* =============================== */
             $identity_id = Model_Cognito::get_identity_id($provider, $token);
+            /* =============================== */
+
+            error_log('identity_id: ');
+            error_log($identity_id);
             error_log('2.1');
             $user_data   = Model_User::web_get_auth($identity_id);
             error_log('2.2');
@@ -87,6 +94,7 @@ class Controller_V1_Auth extends Controller_V1_Base
                 $data, $jwt
             );
             self::output_json($base_data);
+            error_log('5');
 
         } catch(\Database_Exception $e) {
             self::failed(
@@ -97,6 +105,7 @@ class Controller_V1_Auth extends Controller_V1_Base
                 $identity_id,
                 $badge_num
             );
+            error_log('Exception: ');
             error_log($e);
             exit;
         }
@@ -115,7 +124,7 @@ class Controller_V1_Auth extends Controller_V1_Base
             $base_data = self::base_template($api_code = "SUCCESS",
                 $api_message = "UnAuthorized",
                 $login_flag  =  1,
-                $data, $jwt
+                $data, $jwt  = ""
             );
         }
         try {
@@ -132,9 +141,6 @@ class Controller_V1_Auth extends Controller_V1_Base
                 $login_flag  =  1,
                 $data, $jwt = ""
             );
-            error_log('jwtの中身:');
-            error_log($jwt);
-
             self::output_json($base_data);
 
        } catch (Exception $e) {
@@ -149,12 +155,24 @@ class Controller_V1_Auth extends Controller_V1_Base
     public function action_pass_login()
     {
         $username  = Input::post('username');
+        error_log('username: ');
+        error_log($username);
+
         $password  = Input::post('password');
+        error_log('password');
+        error_log($password);
+
 
         self::post_check();
         if (empty($username) && empty($password) || empty($username) or empty($password) ) {
             self::error_signin($message = "usernameもしくはpasswordが入力されていません");
         }
+        /*
+        error_log('username: ');
+        error_log($username);
+        error_log('password: ');
+        error_log($password);
+        */
         try {
             if (!empty($username) && !empty($password)) {
                 $user_data   = Model_User::check_pass($username, $password);
@@ -165,6 +183,10 @@ class Controller_V1_Auth extends Controller_V1_Base
                 Model_Login::post_login($user_id);
                 // JWT認証
                 $jwt = self::encode($user_id, $username);
+                /*
+                error_log('jwt');
+                error_log($jwt);
+                */
                 $data = [
                     "user_id"     => $user_id,
                     "username"    => $username,
@@ -181,6 +203,7 @@ class Controller_V1_Auth extends Controller_V1_Base
         } catch (Exception $e) {
             // JWT Exception
             // Not access
+            error_log('例外が発生しました. in auth/pass_login');
             error_log($e);
             exit;
         }
@@ -207,7 +230,6 @@ class Controller_V1_Auth extends Controller_V1_Base
             'identity_id' => $identity_id,
             'badge_num'   => $badge_num,
         ];
-        // Controller_V1_Web_Base::output_json($data);
         self::output_json($data);
     }
 

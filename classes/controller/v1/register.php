@@ -22,29 +22,42 @@ class Controller_V1_Register extends Controller_V1_Base
         $badge_num= 0;
         $user_id  = Model_User::get_next_id();
         $username = Input::post('username');
+        error_log('username: ');
+        error_log($username);
+
         $password = Input::post('password');
+        error_log('password: ');
+        error_log($password);
+
         $register_id = $user_id; 
 
         // getであれば、UnAuthorized
         $this->post_check();
 
+        error_log('register auth api叩きました');
+
         try {
+            error_log('check_name_pass');
             // usernameとpasswordが両方空か
             Model_User::check_name_pass($username, $password);
 
+            error_log('check_web_name');
             // 既に使用されていないか
             $username = Model_User::check_web_name($username);
 
+            error_log('empty_name');
             // usernameは空ではないか
             $username = Model_User::empty_name($username);
 
+            error_log('format_name_check');
             // usernameの文字数が制限以内か
             $username = Model_User::format_name_check($username);
 
+            error_log('format_password_check');
             // passwordの文字数チェックする(最低6文字以上)
             $password = Model_User::format_password_check($password);
 
-            Model_Device::check_register_id($register_id);
+            // Model_Device::check_register_id($register_id);
             $cognito_data = Model_Cognito::post_data($user_id);
 
             // コグニートID
@@ -70,6 +83,7 @@ class Controller_V1_Register extends Controller_V1_Base
 
             $status = $this->output_json($base_data);
         } catch(\Database_Exception $e) {
+            error_log('Exception sign_up');
             error_log($e);
             exit;
         }
@@ -89,8 +103,13 @@ class Controller_V1_Register extends Controller_V1_Base
         $badge_num   = 0;
         $user_id     = Model_User::get_next_id();
         $register_id = $user_id;
+        $username    = Input::post('username');
+        $profile_img = Input::post('profile_img');
+        $sns_token   = Input::post('token');
+        $provider    = Input::post('provider');
 
         // provider facebookの時
+        /*
         if ($provider === 'graph.facebook.com)') {
             $username    = Input::post('username');
             $profile_img = Input::post('profile_img');
@@ -104,17 +123,23 @@ class Controller_V1_Register extends Controller_V1_Base
             // $snn_token = get?
             // $provider = "api.twitter";
         }
+        */
 
         $this->post_check();
 
+        error_log('user_id');
         error_log($user_id);
+        error_log('username');
         error_log($username);
+        error_log('profile_img');
         error_log($profile_img);
+        error_log('sns_token');
         error_log($sns_token);
+        error_log('provider');
         error_log($provider);
 
         try {
-            error_log('register api 叩きました in try');
+            error_log('register action_sns_sign_up 叩きました in try');
             // usernameが既に使われていないかエラーハンドリング
             $username = Model_User::check_web_name($username);
             error_log('check ok name!');
