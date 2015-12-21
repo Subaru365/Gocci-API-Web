@@ -54,7 +54,10 @@ class Model_Cognito extends Model
             'region'  => 'us-east-1',
             'version' => 'latest'
         ]);
+        error_log('identity_id');
+        error_log($identity_id);
 
+        error_log('post_sns内');
         $result = $client->getOpenIdTokenForDeveloperIdentity([
             'IdentityId'     => "$identity_id",
             'IdentityPoolId' => "$cognito_data[IdentityPoolId]",
@@ -63,6 +66,7 @@ class Model_Cognito extends Model
                 "$provider" => "$token",
             ],
         ]);
+        error_log('returnします');
         return $result;
     }
 
@@ -86,12 +90,25 @@ class Model_Cognito extends Model
         error_log($token);
 
 
+        error_log('cognito_dataは');
         $cognito_data = Config::get('_cognito');
+
+        // error_log('cognito_data:');
+        /**
+         * (
+         * [IdentityPoolId] => us-east-1:b563cebf-1de2-4931-9f08-da7b4725ae35
+         *  [developer_provider] => test.login.gocci
+         * )
+         *
+         */
+        // error_log(print_r($cognito_data, true));
 
         $client = new CognitoIdentityClient([
             'region'  => 'us-east-1',
             'version' => 'latest'
         ]);
+
+        error_log('getOpenIdTokenForDeveloperIdentity呼びます');
 
         $result = $client->getOpenIdTokenForDeveloperIdentity([
             'IdentityPoolId' => "$cognito_data[IdentityPoolId]",
@@ -100,6 +117,8 @@ class Model_Cognito extends Model
                 "$provider" => "$token",
             ],
         ]);
+
+        error_log('returnします');
         return $result;
     }
      /**
@@ -183,25 +202,28 @@ class Model_Cognito extends Model
             'region'  => 'us-east-1',
             'version' => 'latest'
         ]);
-        error_log('client:');
-        error_log(print_r($client));
+
         error_log('Cognito Model内3');
+
         try {
-            // ここでエラー発生（Twitter）
+
+
+
             $result = $client->getOpenIdTokenForDeveloperIdentity([
                 'IdentityPoolId' => "$IdentityPoolId",
                 'Logins' => [
                     "$provider" => "$token",
                 ],
             ]);
+
+
+
             return $result['IdentityId'];
         } catch (Exception $e) {
             // $data = ["message" => "例外が発生しました"];
             error_log('例外が発生しました...');
-            error_log(Uri::string());
-            // error_log(GocciAPI::debug_output_json($data));
-            error_log($e);
-            exit;
+            //error_log($e);
+            // exit;
         }
     }
 
@@ -218,7 +240,9 @@ class Model_Cognito extends Model
      * @return Array $result
      */
     public static function post_dev_sns(
-        $user_id, $provider, $token, $username, $os, $model, $register_id)
+        $user_id, $provider, 
+        $token, $username, 
+        $os, $model, $register_id)
     {
         $cognito_data = Config::get('_cognito');
 

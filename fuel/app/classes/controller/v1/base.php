@@ -319,6 +319,7 @@ abstract class Controller_V1_Base extends Controller
     public static function unauth($uri="",$login_flag=0)
     {
         error_log('アクセス拒否 base unauth method.');
+        error_log('jwtが存在しません');
         $status = [
             "api_version" => self::API_VERSION,
             "api_uri"     => Uri::string(),
@@ -633,6 +634,8 @@ abstract class Controller_V1_Base extends Controller
     public static function get_jwt()
     {
         $jwt = @$_SERVER["HTTP_AUTHORIZATION"] ? @$_SERVER["HTTP_AUTHORIZATION"] : "";
+        error_log('返すjwt: ');
+        error_log($jwt);
         return $jwt;
     }
 

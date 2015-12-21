@@ -159,6 +159,25 @@ class Model_User extends Model
         ->where('username', "$username");
 
         $result = $query->execute()->as_array();
+        error_log('result: ');
+        error_log(print_r($result, true));
+
+        /**
+         * (
+         *   [0] => Array
+         *   (
+         *      [user_id] => 799
+         *      [profile_img] => 799_2015-11-17-01-55-43
+         *      [identity_id] => us-east-1:56874777-0db1-4a9f-91a9-c1cf1c4b3962
+         *       [badge_num] => 1
+         *      [password] => $2y$10$u16EZ70wcRmnjnCcgaQloO6MoBO3wzT/Bk2g3INs7d1GBkW3XMhNK
+         *  )
+         *
+         * )
+         */
+
+        error_log('result password: ');
+        error_log(print_r($result[0]['password'], true));
 
         self::verify_pass($password, $result[0]['password']);
 
@@ -568,6 +587,7 @@ class Model_User extends Model
      */
     public static function update_profile_img($user_id, $profile_img)
     {
+        error_log('update_profile_img');
         $query = DB::update('users')
         ->value('profile_img', "$profile_img")
         ->where('user_id', "$user_id")
@@ -695,12 +715,17 @@ class Model_User extends Model
     {
         if (password_verify($pass, $hash_pass)) {
             // 認証OK
+            error_log('一致しました verify_pass method');
         } else {
             $data = [
                'message' => 'パスワードが一致しません',
         ];
-        $base_data      = Controller_V1_Web_Base::base_template($api_code = "ERR_SIGNIN", $api_message = "パスワードが一致しません", $login_flag =  1, $data, $jwt = "");
-        $status = Controller_V1_Web_Base::output_json($base_data);
+        $base_data      = Controller_V1_Base::base_template($api_code = "ERR_SIGNIN", 
+            $api_message = "パスワードが一致しません", 
+            $login_flag =  1, $data, 
+            $jwt = ""
+        );
+        $status = Controller_V1_Base::output_json($base_data);
         exit;
         }
     }
@@ -719,7 +744,7 @@ class Model_User extends Model
             // 認証OK
             $match_pass = password_verify($pass, $hash_pass);
         } else{
-            Controller_V1_Web_Base::error_json("パスワードが正しくありません");
+            Controller_V1_Base::error_json("パスワードが正しくありません");
             exit;
         }
         return $match_pass;
