@@ -210,6 +210,7 @@ class Controller_V1_Get extends Controller_V1_Base
      */
     public function action_user($target_username)
     {
+        // GETのパラメータを$targeet_usernameから$user_hash_idに変える
         $uri = Uri::string();
         $jwt = @$_SERVER["HTTP_AUTHORIZATION"] ? @$_SERVER["HTTP_AUTHORIZATION"] : "";
 
