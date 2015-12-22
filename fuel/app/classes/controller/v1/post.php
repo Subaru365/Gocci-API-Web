@@ -2,7 +2,7 @@
 /**
  * POST Api    リソースの新規作成
  * @package    Gocci-Web
- * @version    3.0 <2015/10/20>
+ * @version    3.0 <2015/12/22>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2015 Inase,inc.
@@ -50,8 +50,7 @@ class Controller_V1_Post extends Controller_V1_Base
     public static function create_token($uri="", $login_flag)
     {
         $jwt = self::get_jwt();
-        error_log('jwt: ');
-        error_log($jwt);
+
         if(isset($jwt) || !empty($jwt)) {
             $data      = self::decode($jwt);
             $user_data = session::get('data');
@@ -113,7 +112,7 @@ class Controller_V1_Post extends Controller_V1_Base
             if ($profile_img !== 'none') {
                 $profile_img = Model_S3::input($user_id, $profile_img);
             } else {
-                error_log('none');
+                error_log('profile_img none');
             }
 
             $identity_id = Model_User::get_identity_id($user_id);
@@ -147,19 +146,9 @@ class Controller_V1_Post extends Controller_V1_Base
         $provider = Input::post('provider');
         $token    = Input::post('token');
 
-        error_log('user_id: ');
-        error_log($user_id);
-
-        error_log('provider: ');
-        error_log($provider);
-
-        error_log('token: ');
-        error_log($token);
-
         try {
             if (empty($provider) && empty($token) || empty($provider) || empty($token)) {
                 error_log("POSTされていない値があります");
-                // この場合なぜか、フロント側で「パスワードが設定されていません」と出力される。
                 self::failed($message = "POSTされていない値があります");
                 exit;
             }
@@ -249,8 +238,6 @@ class Controller_V1_Post extends Controller_V1_Base
         $password = Model_User::format_password_check($password);
 
         $hash_pass = password_hash($password, PASSWORD_BCRYPT);
-        error_log('hash_pass');
-        error_log($hash_pass);
 
         try {
             Model_User::update_password($user_id, $hash_pass);
@@ -259,12 +246,13 @@ class Controller_V1_Post extends Controller_V1_Base
             ];
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
-                $login_flag =  1, $data, $jwt="");
+                $login_flag =  1, $data, $jwt=""
+            );
 
             $status = self::output_json($base_data);
             error_log("パスワードを登録しました");
         } catch (\Database_Exception $e) {
-
+            error_log($e);
         }
     }
 
@@ -469,8 +457,8 @@ class Controller_V1_Post extends Controller_V1_Base
                 "message" => "行きたい店リストから削除しました"
             ];
             $base_data = self::base_template($api_code = "SUCCESS",
-              $api_message = "Successful API request", 
-              $login_flag = 1, $data, $jwt = ""
+                $api_message = "Successful API request", 
+                $login_flag = 1, $data, $jwt = ""
             );
 
             $status = $this->output_json($base_data);
@@ -541,8 +529,6 @@ class Controller_V1_Post extends Controller_V1_Base
         $user_id        = session::get('user_id');
         $username       = Input::post('username');
         $profile_img    = @$_FILES["profile_img"]["tmp_name"];
-        error_log('更新前のprofile_img');
-        error_log($profile_img);
         $save_filename  = $user_id . "_" . date('Y-m-d-H-i-s') . ".png";
 
         try {
@@ -663,7 +649,8 @@ class Controller_V1_Post extends Controller_V1_Base
                 exit;
             }
         } catch (\Database_Exception $e) {
-
+            error_log($e);
+            exit;
         }
     }
 }

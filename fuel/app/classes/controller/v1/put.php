@@ -2,7 +2,7 @@
 /**
  * PUT api     既存のリソースのアップデート
  * @package    Gocci-Web
- * @version    3.0 <2015/10/20>
+ * @version    3.0 <2015/12/22>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2015 Inase,inc.
@@ -30,8 +30,9 @@ class Controller_V1_Put extends Controller_V1_Base
             "message" => "jwtが更新されました"
         ];
         $base_data = self::base_template($api_code = "SUCCESS", 
-            $api_message = "Sucessful API request", 
-            $login_flag = 1, $data, $jwt);
+            $api_message = "Sucessful API request",
+            $login_flag = 1, $data, $jwt
+        );
         $status = self::output_json($base_data);
    }
 }

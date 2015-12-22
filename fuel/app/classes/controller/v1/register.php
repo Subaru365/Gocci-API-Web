@@ -2,7 +2,7 @@
 /**
  * Register Class Api
  * @package    Gocci-Web
- * @version    3.0 <2015/10/20>
+ * @version    3.0 <2015/12/22>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2014-2015 Inase,inc.
@@ -22,38 +22,24 @@ class Controller_V1_Register extends Controller_V1_Base
         $badge_num= 0;
         $user_id  = Model_User::get_next_id();
         $username = Input::post('username');
-        error_log('username: ');
-        error_log($username);
-
         $password = Input::post('password');
-        error_log('password: ');
-        error_log($password);
-
         $register_id = $user_id; 
 
-        // getであれば、UnAuthorized
         $this->post_check();
 
-        error_log('register auth api叩きました');
-
         try {
-            error_log('check_name_pass');
             // usernameとpasswordが両方空か
             Model_User::check_name_pass($username, $password);
 
-            error_log('check_web_name');
             // 既に使用されていないか
             $username = Model_User::check_web_name($username);
 
-            error_log('empty_name');
             // usernameは空ではないか
             $username = Model_User::empty_name($username);
 
-            error_log('format_name_check');
             // usernameの文字数が制限以内か
             $username = Model_User::format_name_check($username);
 
-            error_log('format_password_check');
             // passwordの文字数チェックする(最低6文字以上)
             $password = Model_User::format_password_check($password);
 
@@ -78,7 +64,7 @@ class Controller_V1_Register extends Controller_V1_Base
             ];
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
-                $login_flag = 1, $data, $jwt
+                $login_flag  = 1, $data, $jwt
             );
 
             $status = $this->output_json($base_data);
@@ -127,17 +113,6 @@ class Controller_V1_Register extends Controller_V1_Base
 
         $this->post_check();
 
-        error_log('user_id');
-        error_log($user_id);
-        error_log('username');
-        error_log($username);
-        error_log('profile_img');
-        error_log($profile_img);
-        error_log('sns_token');
-        error_log($sns_token);
-        error_log('provider');
-        error_log($provider);
-
         try {
             error_log('register action_sns_sign_up 叩きました in try');
             // usernameが既に使われていないかエラーハンドリング
@@ -150,11 +125,7 @@ class Controller_V1_Register extends Controller_V1_Base
 
             // facebook/twitterアカウントデータをusers
             $cognito_data = Model_Cognito::post_web_sns($user_id, $provider, $sns_token);
-            error_log('get cognito_data!');
             $identity_id  = $cognito_data['IdentityId'];
-
-            error_log('identity_id');
-            error_log($identity_id);
 
             // users table insert
             $profile_img  = Model_User::sns_insert_data($username, $identity_id, $profile_img);
@@ -174,12 +145,12 @@ class Controller_V1_Register extends Controller_V1_Base
             ];
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
-                $login_flag = 1, $data, $jwt
+                $login_flag  = 1, $data, $jwt
             );
             $status = $this->output_json($base_data);
             exit;
         } catch (\Database_Exception $e) {
-            error_log('Error: ');
+            error_log('sns sign_up Error: ');
             error_log($e);
             exit;
         }

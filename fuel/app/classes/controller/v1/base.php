@@ -634,8 +634,7 @@ abstract class Controller_V1_Base extends Controller
     public static function get_jwt()
     {
         $jwt = @$_SERVER["HTTP_AUTHORIZATION"] ? @$_SERVER["HTTP_AUTHORIZATION"] : "";
-        error_log('返すjwt: ');
-        error_log($jwt);
+
         return $jwt;
     }
 
