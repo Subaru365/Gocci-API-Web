@@ -12,10 +12,9 @@ use Aws\Sns\SnsClient;
 class Model_Sns extends Model
 {
     /**
-     * @param Int    $user_id
-     * @param Int    $register_id
-     * @param String $os
-     *
+     * @param  Int    $user_id
+     * @param  Int    $register_id
+     * @param  String $os
      * @return String $endpoint_arn
      */
 
@@ -46,9 +45,8 @@ class Model_Sns extends Model
     }
 
     /**
-     * @param Int    $user_id
-     * @param Int    $register_id
-     *
+     * @param  Int   $user_id
+     * @param  Int   $register_id
      * @return Array $result
      */
     private static function post_android($user_id, $register_id)
@@ -69,9 +67,8 @@ class Model_Sns extends Model
     }
 
     /**
-     * @param Int    $user_id
-     * @param Int    $register_id
-     *
+     * @param  Int   $user_id
+     * @param  Int   $register_id
      * @return Array $result
      */
     private static function post_iOS($user_id, $register_id)

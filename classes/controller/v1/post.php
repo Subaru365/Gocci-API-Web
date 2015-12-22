@@ -370,12 +370,10 @@ class Controller_V1_Post extends Controller_V1_Base
         error_log($follow_user_id);
         try {
             $result = Model_Follow::post_follow($user_id, $follow_user_id);
-            
+
             $record = Model_Notice::notice_insert(
                 $keyword, $user_id, $follow_user_id
             );
-
-
             $data = [
                 "message" => "フォローしました"
             ];
@@ -383,10 +381,7 @@ class Controller_V1_Post extends Controller_V1_Base
                 $api_message = "Successful API request", 
                 $login_flag  = 1, $data, $jwt = ""
             );
-            error_log('outputします');
             $status = $this->output_json($base_data);
-            // $status = self::output_json($base_data);
-            error_log(print_r($status, true));
 
         } catch(\Database_Exception $e) {
             error_log('Exception!');
