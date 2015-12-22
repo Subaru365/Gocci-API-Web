@@ -56,26 +56,13 @@ class Model_Notice extends Model
      */
     public static function get_badge($user_id)
     {
-	/*
-        $query = DB::select('read_flag')->from('notices')
-        ->where('read_flag', '=', 1)
-        ->and_where('notice_a_user_id', '=', $user_id)
+        $query = DB::select('badge_num')->from('users')
+        ->where('user_id', '=', $user_id)
         ->execute()->as_array();
 
-        if ( isset($query[0]['read_flag']) ) {
-            return count($query);
-        } else {
-            return 0;
+        if ( isset($query[0]['badge_num'])) {
+            return $query[0]['badge_num'];
         }
-	*/
-	$query = DB::select('badge_num')->from('users')
-	->where('user_id', '=', $user_id)
-	->execute()->as_array();
-
-	if ( isset($query[0]['badge_num'])) {
-	    return $query[0]['badge_num'];
-	}
-
     }
 
     /**
