@@ -2,7 +2,7 @@
 /**
  * GET  API    リソースの取得
  * @package    Gocci-Web
- * @version    3.0 <2015/10/20>
+ * @version    3.0 <2015/12/22>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2014-2015 Inase,inc.
@@ -91,7 +91,8 @@ class Controller_V1_Get extends Controller_V1_Base
             );
             $status = $this->output_json($base_data);
         } catch (\Database_Exception $e) {
-
+            error_log($e);
+            exit;
         }
     }
 
@@ -188,8 +189,6 @@ class Controller_V1_Get extends Controller_V1_Base
             }
         }
         $user_id   = $obj->{'user_id'};
-        error_log('user_id');
-        error_log($user_id);
         session::set('user_id', $user_id);
         $username  = $obj->{'username'};
         session::set('username', $username);
@@ -319,8 +318,8 @@ class Controller_V1_Get extends Controller_V1_Base
                 "comments" => $Comment_data
             ];
         }
-        $base_data = self::base_template($api_code = 0, 
-            $api_message = "SUCCESS", 
+        $base_data = self::base_template($api_code = 0,
+            $api_message = "SUCCESS",
             $login_flag =  1,$data, $jwt
         );
         $status    = $this->output_json($base_data);
@@ -338,7 +337,7 @@ class Controller_V1_Get extends Controller_V1_Base
         $jwt            = self::check_jwtExp($exp);
         $data           = Model_Follow::get_follow($user_id, $target_user_id);
         $base_data      = self::base_template($api_code = "SUCCESS", 
-            $api_message = "Successful API request", 
+            $api_message= "Successful API request", 
             $login_flag =  1,$data, $jwt
         );
         $stats          = $this->output_json($base_data);
@@ -355,8 +354,8 @@ class Controller_V1_Get extends Controller_V1_Base
         $exp            = session::get('exp');
         $jwt            = self::check_jwtExp($exp);
         $data           = Model_Follow::get_follower($user_id, $target_user_id);
-        $base_data      = self::base_template($api_code = "SUCCESS", 
-            $api_message = "Successful API request", 
+        $base_data      = self::base_template($api_code = "SUCCESS",
+            $api_message= "Successful API request",
             $login_flag =  1,$data, $jwt
         );
         $status         = $this->output_json($base_data);
@@ -372,15 +371,15 @@ class Controller_V1_Get extends Controller_V1_Base
         $exp = session::get('exp');
         $jwt = self::check_jwtExp($exp);
         $data= Model_Want::get_want($target_user_id);
-        $base_data = self::base_template($api_code = "SUCCESS", 
-            $api_message = "Successful API request", 
-            $login_flag =  1,$data, $jwt
+        $base_data = self::base_template($api_code = "SUCCESS",
+            $api_message = "Successful API request",
+            $login_flag  =  1,$data, $jwt
         );
         $status = $this->output_json($data);
     }
 
     /**
-     * 店舗登録 LIst
+     * 店舗登録 List
      */
     public function action_user_cheer()
     {
@@ -389,7 +388,7 @@ class Controller_V1_Get extends Controller_V1_Base
         $exp  = session::get('exp');
         $jwt  = self::check_jwtExp($exp);
         $data = Model_Post::get_user_cheer($target_user_id);
-        $base_data = self::base_template($api_code = "SUCCESS", 
+        $base_data = self::base_template($api_code = "SUCCESS",
                     $api_message = "Successful API request",
                     $login_flag =  1, $data, $jwt
         );
@@ -415,7 +414,7 @@ class Controller_V1_Get extends Controller_V1_Base
         }
         $base_data = self::base_template($api_code = "SUCCESS", 
             $api_message = "Successful API request", 
-            $login_flag =  1,$data, $jwt
+            $login_flag  =  1,$data, $jwt
         );
         $status = $this->output_json($base_data);
     }
@@ -432,8 +431,9 @@ class Controller_V1_Get extends Controller_V1_Base
         $jwt             = self::check_jwtExp($exp);
         $targetUserId    = Model_User::get_id($targetUserName);
         $data            = Model_User::get_data($user_id, $targetUserId);
-        $base_data       = self::base_template($api_code = 0, $api_message = "SUCCESS", 
-                            $login_flag =  1, $data, $jwt
+        $base_data       = self::base_template($api_code = 0,
+            $api_message = "SUCCESS",
+            $login_flag =  1, $data, $jwt
         );
         $status          = $this->output_json($base_data);
     }
@@ -495,9 +495,10 @@ class Controller_V1_Get extends Controller_V1_Base
                 $jwt= "";
                 $user_id= 0;
                 $data = self::video_template($user_id, $hash_id);
-                $base_data = self::base_template($api_code = "SUCESS", 
-                    $api_message = "UnAuthorized", 
-                    $login_flag = 0, $data, $jwt);
+                $base_data = self::base_template($api_code = "SUCESS",
+                    $api_message = "UnAuthorized",
+                    $login_flag = 0, $data, $jwt
+                );
                 $status = $this->output_json($base_data);
                 exit;
             }
@@ -505,8 +506,8 @@ class Controller_V1_Get extends Controller_V1_Base
         $user_id   = $obj->{'user_id'};
         $data = self::video_template($user_id, $hash_id);
 
-        $base_data = self::base_template($api_code = "SUCCESS", 
-            $api_message = "Successful API request", 
+        $base_data = self::base_template($api_code = "SUCCESS",
+            $api_message = "Successful API request",
             $login_flag = 1, $data, $jwt = ""
         );
         $status = $this->output_json($base_data);

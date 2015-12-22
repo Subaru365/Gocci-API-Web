@@ -47,39 +47,25 @@ class Controller_V1_Auth extends Controller_V1_Base
     {
         $keyword   = 'ログイン';
         $provider  = Input::get('provider');
-        error_log('provider:');
-        error_log($provider);
         $token     = Input::get('token');
-        error_log('token:');
-        error_log($token);
 
-        error_log('auth apiが叩かれました in auth api');
         try
         {
-            error_log('1');
             if (empty($provider) && empty($token) || empty($provider) or empty($token) ) {
                 error_log('paramがありません');
                 self::error_json("UnAuthorized");
             }
-            error_log('2');
-
             /* =============================== */
             $identity_id = Model_Cognito::get_identity_id($provider, $token);
             /* =============================== */
 
-            error_log('identity_id: ');
-            error_log($identity_id);
-            error_log('2.1');
             $user_data   = Model_User::web_get_auth($identity_id);
-            error_log('2.2');
             $user_id     = $user_data['user_id'];
             $username    = $user_data['username'];
             $profile_img = $user_data['profile_img'];
             $badge_num   = $user_data['badge_num'];
             $jwt = self::encode($user_id, $username);
-            error_log('2.3');
             Model_Login::post_login($user_id);
-            error_log('3');
             $data = [
                 "user_id"     => $user_id,
                 "username"    => $username,
@@ -87,14 +73,12 @@ class Controller_V1_Auth extends Controller_V1_Base
                 "identity_id" => $identity_id,
                 "badge_num"   => $badge_num,
             ];
-            error_log('4');
             $base_data = self::base_template($api_code = "SUCCESS",
                 $api_message = "Successful API request",
                 $login_flag  =  1,
                 $data, $jwt
             );
             self::output_json($base_data);
-            error_log('5');
 
         } catch(\Database_Exception $e) {
             self::failed(
@@ -155,24 +139,13 @@ class Controller_V1_Auth extends Controller_V1_Base
     public function action_pass_login()
     {
         $username  = Input::post('username');
-        error_log('username: ');
-        error_log($username);
-
         $password  = Input::post('password');
-        error_log('password');
-        error_log($password);
-
 
         self::post_check();
         if (empty($username) && empty($password) || empty($username) or empty($password) ) {
             self::error_signin($message = "usernameもしくはpasswordが入力されていません");
         }
-        /*
-        error_log('username: ');
-        error_log($username);
-        error_log('password: ');
-        error_log($password);
-        */
+
         try {
             if (!empty($username) && !empty($password)) {
                 $user_data   = Model_User::check_pass($username, $password);
@@ -181,12 +154,10 @@ class Controller_V1_Auth extends Controller_V1_Base
                 $identity_id = $user_data[0]['identity_id'];
                 $badge_num   = $user_data[0]['badge_num'];
                 Model_Login::post_login($user_id);
+
                 // JWT認証
                 $jwt = self::encode($user_id, $username);
-                /*
-                error_log('jwt');
-                error_log($jwt);
-                */
+
                 $data = [
                     "user_id"     => $user_id,
                     "username"    => $username,
