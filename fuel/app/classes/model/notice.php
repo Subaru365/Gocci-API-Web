@@ -91,9 +91,9 @@ class Model_Notice extends Model
             'notice_post_id'   => "$post_id"
         ))
         ->execute();
-
+	    Controller_V1_Background::publish($keyword, $a_user_id, $p_user_id);
+	    /*
         $ch = curl_init();
-
         curl_setopt($ch, CURLOPT_URL,
             'http://localhost:3000/v1/mobile/background/publish/'
             // 'http://localhost:3000/v1/background/publish/'
@@ -103,5 +103,6 @@ class Model_Notice extends Model
         );
         curl_exec($ch);
         curl_close($ch);
-    }
+	   */  
+  }
 }
