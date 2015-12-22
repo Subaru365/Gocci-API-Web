@@ -159,9 +159,8 @@ class Model_User extends Model
         ->where('username', "$username");
 
         $result = $query->execute()->as_array();
-        error_log('result: ');
-        error_log(print_r($result, true));
-
+        // error_log('result: ');
+        // error_log(print_r($result, true));
         /**
          * (
          *   [0] => Array
@@ -175,10 +174,8 @@ class Model_User extends Model
          *
          * )
          */
-
-        error_log('result password: ');
-        error_log(print_r($result[0]['password'], true));
-
+        // error_log('result password: ');
+        // error_log(print_r($result[0]['password'], true));
         self::verify_pass($password, $result[0]['password']);
 
         return $result;
@@ -426,8 +423,7 @@ class Model_User extends Model
             Controller_V1_Web_Base::NotFoundPage();
             exit;
         }
-        //付加情報格納(follow_num, fllower_num, cheer_num, status_flag)
-
+        // 付加情報格納(follow_num, fllower_num, cheer_num, status_flag)
         $user_data[0]['profile_img']  = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
         $user_data[0]['follow_num']   = Model_Follow::follow_num($target_user_id);
         $user_data[0]['follower_num'] = Model_Follow::follower_num($target_user_id);
@@ -566,7 +562,7 @@ class Model_User extends Model
      */
     public static function update_sns_flag($user_id, $provider)
     {
-        if ($provider == 'graph.facebook.com') {
+        if ($provider === 'graph.facebook.com') {
             $flag = 'facebook_flag';
         } else {
             $flag = 'twitter_flag';

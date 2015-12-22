@@ -74,9 +74,9 @@ abstract class Controller_V1_Base extends Controller
     public function session_check()
     {
         if (session::get('user_id')) {
-           self::set_user_id();
-           $user_id = self::get_user_id();
-           error_log($user_id);
+            self::set_user_id();
+            $user_id = self::get_user_id();
+            error_log($user_id);
         } else {
             $jwt = self::get_jwt();
             $this->obj = self::getJwtObject($jwt);
@@ -182,7 +182,7 @@ abstract class Controller_V1_Base extends Controller
     public static function post_check()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
+          
         } else {
             self::unauth();
         }
@@ -408,10 +408,10 @@ abstract class Controller_V1_Base extends Controller
           'message' => 'usernameを入力してください'
         ];
         $base_data = self::base_template($api_code = 1,
-                          $api_message = "Failed", 
-                          $login_flag = 0, 
-                          $api_data, 
-                          $jwt = ""
+            $api_message = "NOTFOUND", 
+            $login_flag = 0, 
+            $api_data, 
+            $jwt = ""
         );
         $status    = self::json_encode_template($base_data);
         echo $status;
@@ -545,7 +545,7 @@ abstract class Controller_V1_Base extends Controller
      * @return Array  $data
      */
     public static function user_template($target_username, $limit, $sort_key) {
-        if (ctype_digit($target_username)) { $this->notid(); }
+        if (ctype_digit($target_username)) { self::notid(); }
 
         $target_user_id = Model_User::get_id($target_username);
         $user_id        = session::get('user_id');
@@ -555,7 +555,7 @@ abstract class Controller_V1_Base extends Controller
         );
         for ($i = 0; $i<count($post_data); $i++) {
             $post_id = $post_data[$i]['post_id'];
-            $Comment_data = Model_Comment::get_data($post_id);
+            $Comment_data  = Model_Comment::get_data($post_id);
             $post_data[$i] = [
                 "post"     => $post_data[$i],
                 "comments" => $Comment_data

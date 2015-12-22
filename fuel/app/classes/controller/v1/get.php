@@ -225,7 +225,7 @@ class Controller_V1_Get extends Controller_V1_Base
 
                 $base_data = self::base_template($api_code = "SUCESS", 
                     $api_message = "UnAuthorized", 
-                    $login_flag =  0, $data, $jwt
+                    $login_flag  =  0, $data, $jwt
                 );
                 $status = $this->output_json($base_data);
                 exit;
