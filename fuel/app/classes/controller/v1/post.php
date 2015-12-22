@@ -125,7 +125,7 @@ class Controller_V1_Post extends Controller_V1_Base
             ];
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
-                $login_flag =  1, $data, $jwt
+                $login_flag  =  1, $data, $jwt
             );
             error_log('sns連携しました');
             self::output_json($base_data);
@@ -362,23 +362,34 @@ class Controller_V1_Post extends Controller_V1_Base
         self::create_token($uri=Uri::string(), $login_flag=0);
         $keyword        = 'フォロー';
         $user_id        = session::get('user_id');
-        $follow_user_id = Input::post('target_user_id');
+        error_log('user_id');
+        error_log($user_id);
 
+        $follow_user_id = Input::post('target_user_id');
+        error_log('follow_user_id');
+        error_log($follow_user_id);
         try {
             $result = Model_Follow::post_follow($user_id, $follow_user_id);
+            
             $record = Model_Notice::notice_insert(
                 $keyword, $user_id, $follow_user_id
             );
+
+
             $data = [
                 "message" => "フォローしました"
             ];
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
-                $login_flag = 1, $data, $jwt = ""
+                $login_flag  = 1, $data, $jwt = ""
             );
+            error_log('outputします');
             $status = $this->output_json($base_data);
+            // $status = self::output_json($base_data);
+            error_log(print_r($status, true));
 
         } catch(\Database_Exception $e) {
+            error_log('Exception!');
             self::failed($keyword);
             error_log($e);
         }
@@ -403,7 +414,7 @@ class Controller_V1_Post extends Controller_V1_Base
             ];
             $base_data = self::base_template($api_code = "SUCCESS",
                 $api_message = "Successful API request", 
-                $login_flag = 1, $data, $jwt = ""
+                $login_flag  = 1, $data, $jwt = ""
             );
 
             $status = $this->output_json($base_data);

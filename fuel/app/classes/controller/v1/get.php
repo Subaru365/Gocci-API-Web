@@ -219,8 +219,8 @@ class Controller_V1_Get extends Controller_V1_Base
             $obj       = json_decode($user_data);
 
             if (empty($obj)) {
-                $sort_key       = 'user';
-                $limit          = 20;
+                $sort_key = 'user';
+                $limit    = 20;
                 $data = self::user_template($target_username, $limit, $sort_key);
 
                 $base_data = self::base_template($api_code = "SUCESS", 

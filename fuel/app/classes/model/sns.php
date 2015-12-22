@@ -18,6 +18,17 @@ class Model_Sns extends Model
      *
      * @return String $endpoint_arn
      */
+
+    /**
+     * @var Instance $client
+     */
+    private $client;
+
+    /**
+     * @var Instance $type
+     */
+    public $type;
+
     public static function post_endpoint($user_id, $register_id, $os)
     {
         // AWS SNSに端末を登録
@@ -90,7 +101,14 @@ class Model_Sns extends Model
     {
         $username  = Model_User::get_name($user_id);
         $target_arn = Model_Device::get_arn($target_user_id);
-        $message = "$username" . 'さんから' . "$keyword" . 'されました！';
+        // $message = "$username" . 'さんから' . "$keyword" . 'されました！';
+
+        $message = [
+            'type'     => $this->type,
+            'id'       => $target_user_id,
+            'username' => $username
+        ];
+
         $client = new SnsClient([
             'region'  => 'ap-northeast-1',
             'version' => '2010-03-31'
