@@ -121,7 +121,7 @@ class Model_User extends Model
     public static function format_name_check($username)
     {
         // 文字数チェック
-        if (preg_match('/^[a-z\d_]{4,20}$/i', $username)) {
+		if (preg_match('/^[^\p{Cc}]{1,20}$/u', $username)) {
              // 4 - 20文字以内
              return $username;
         } else {
