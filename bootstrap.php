@@ -31,7 +31,19 @@ Autoloader::add_namespace('Util', APPPATH.'vendor/util/');
  * Fuel::STAGING
  * Fuel::PRODUCTION
  */
-\Fuel::$env = (isset($_SERVER['FUEL_ENV']) ? $_SERVER['FUEL_ENV'] : \Fuel::TEST);
+/*
+switch (isset($_SERVER['SEVER_NAME']) ? $_SERVER['SERVER_NAME'] : '')
+{
+    case 'https://web.api.gocci.me/':
+		Fuel::$env = Fuel::PRODUCTION;
+		break;
+
+	default:
+		Fuel::$env = Fuel::TEST;
+		break;
+}
+*/
+\Fuel::$env = (isset($_SERVER['FUEL_ENV']) ? $_SERVER['FUEL_ENV'] : \Fuel::PRODUCTION);
 
 // Initialize the framework with the config file.
 \Fuel::init('config.php');
