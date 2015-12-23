@@ -52,4 +52,22 @@ class Controller_V1_Check extends Controller
             throw new HttpInvalidInputException('Invalid input data');
         }
     }
+
+    /**
+     * user_idがDBに存在するIDかどうかチェックするメソッド
+     * @param $user_id
+     */
+    public static function check_user_id_exists($user_id)
+    {
+        $query = DB::select('user_id')->from('users')
+        ->where('user_id', '=', $user_id);
+
+        $user_id = $query->execute()->as_array();
+
+        if (isset($user_id[0]['user_id'])) {
+            // exists!
+        } else {
+            // error_json("Not Found");
+        }
+    }
 }

@@ -44,6 +44,9 @@ class Model_Notice extends Model
             // 日付情報を現在との差分に書き換え
             $notice_data[$i]['notice_date'] = Model_Date::get_data($notice_data[$i]['notice_date']);
             $notice_data[$i]['profile_img'] = Model_Transcode::decode_profile_img($notice_data[$i]['profile_img']);
+
+            $user_hash_id[$i] = Hash_Id::create_user_hash($notice_data[$i]['notice_a_user_id']);
+            $notice_data[$i]['user_hash_id'] = $user_hash_id[$i];
         }
         return $notice_data;
     }
@@ -92,6 +95,7 @@ class Model_Notice extends Model
         ))
         ->execute();
 
+        /*
         $ch = curl_init();
 
         curl_setopt($ch, CURLOPT_URL,
@@ -103,5 +107,6 @@ class Model_Notice extends Model
         );
         curl_exec($ch);
         curl_close($ch);
+        */
     }
 }

@@ -376,7 +376,7 @@ abstract class Controller_V1_Base extends Controller
     public static function notfounduser()
     {
         $status = [
-          'message' => 'Userが存在しません'
+          'message' => 'NOTFOUND'
         ];
         $status = self::json_encode_template($status);
         echo $status;
@@ -389,9 +389,9 @@ abstract class Controller_V1_Base extends Controller
     public static function NotFoundPage()
     {
         $data = [
-            "message" => "This page is not available. There is a problem with the link or there is a possibility that the page has been deleted. Return to the Gocci."
+          "message" => "NOTFOUND"
         ];
-        $base_data = self::base_template($api_code = "NOTFOUND", 
+        $base_data = self::base_template($api_code = "SUCCESS", 
           $api_message = "SUCCESS ful API request", 
           $login_flag =  1, 
           $data, $jwt = ""
@@ -526,9 +526,12 @@ abstract class Controller_V1_Base extends Controller
 
         for ($i = 0; $i<$limit; $i++) {
             $post_id = $data[$i]['post_id'];
+            $post_user_id = $data[$i]['user_id'];
             $Comment_data = Model_Comment::get_data($post_id);
             $hash_id = Hash_Id::video_hash($post_id);
+            $user_hash_id = Hash_Id::create_user_hash($post_user_id);
             $data[$i]['hash_id']  = $hash_id;
+            $data[$i]['user_hash_id'] = $user_hash_id;
             $data[$i] = [
                 "post"     => $data[$i],
                 "comments" => $Comment_data
@@ -544,11 +547,18 @@ abstract class Controller_V1_Base extends Controller
      * @param  String $sort_key
      * @return Array  $data
      */
-    public static function user_template($target_username, $limit, $sort_key) {
-        if (ctype_digit($target_username)) { self::notid(); }
+    // public static function user_template($target_username, $limit, $sort_key) {
+    public static function user_template($target_userhash, $limit, $sort_key) {
+        // if (ctype_digit($target_username)) { self::notid(); }
+      if (ctype_digit($target_userhash)) { self::notid(); }
 
-        $target_user_id = Model_User::get_id($target_username);
+        //$target_user_id = Model_User::get_id($target_username);
+        (int)$target_user_id = Hash_Id::get_user_hash($target_userhash);
         $user_id        = session::get('user_id');
+
+        if (is_int($target_user_id)) {die('user_idではない');}
+
+        $user_id        = Controller_V1_Check::check_user_id_exists($target_user_id);
         $user_data      = Model_User::get_data($user_id, $target_user_id);
         $post_data      = Model_Post::get_data(
             $target_user_id, $sort_key, $target_user_id, $limit

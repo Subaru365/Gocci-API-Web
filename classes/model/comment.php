@@ -41,6 +41,9 @@ class Model_Comment extends Model
             // 日付情報を現在との差分に書き換え
             $comment_data[$i]['comment_date'] =
             Model_Date::get_data($comment_data[$i]['comment_date']);
+
+            $user_hash_id[$i] = Hash_Id::create_user_hash($comment_data[$i]['comment_user_id']);
+            $comment_data[$i]['user_hash_id'] = $user_hash_id[$i];
         }
 
         for ($i=1; $i < $comment_num; $i++) {

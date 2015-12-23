@@ -208,8 +208,13 @@ class Controller_V1_Get extends Controller_V1_Base
     /**
      * User Page
      */
-    public function action_user($target_username)
+    //public function action_user($target_username)
+    public function action_user($target_userhash)
     {
+
+        error_log('target_userhash');
+        error_log($target_userhash);
+
         // GETのパラメータを$targeet_usernameから$user_hash_idに変える
         $uri = Uri::string();
         $jwt = @$_SERVER["HTTP_AUTHORIZATION"] ? @$_SERVER["HTTP_AUTHORIZATION"] : "";
@@ -222,7 +227,8 @@ class Controller_V1_Get extends Controller_V1_Base
             if (empty($obj)) {
                 $sort_key = 'user';
                 $limit    = 20;
-                $data = self::user_template($target_username, $limit, $sort_key);
+                // $data = self::user_template($target_username, $limit, $sort_key);
+                $data = self::user_template($target_userhash, $limit, $sort_key);
 
                 $base_data = self::base_template($api_code = "SUCESS", 
                     $api_message = "UnAuthorized", 
@@ -243,7 +249,8 @@ class Controller_V1_Get extends Controller_V1_Base
         $sort_key = 'user';
         $limit    = 20;
 
-        $data = self::user_template($target_username, $limit, $sort_key);
+        // $data = self::user_template($target_username, $limit, $sort_key);
+        $data = self::user_template($target_userhash, $limit, $sort_key);
         $base_data = self::base_template($api_code = "SUCCESS", 
             $api_message = "Successful API request", 
             $login_flag =  1, $data, $jwt
