@@ -40,7 +40,7 @@ class Controller_V1_Register extends Controller_V1_Base
             // usernameの文字数が制限以内か
             $username = Model_User::format_name_check($username);
 
-            // passwordの文字数チェックする(最低6文字以上)
+  		    // passwordの文字数チェックする(最低6文字以上)
             $password = Model_User::format_password_check($password);
 
             // Model_Device::check_register_id($register_id);
