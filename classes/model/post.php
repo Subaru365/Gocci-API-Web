@@ -181,6 +181,8 @@ class Model_Post extends Model
             $post_data[$i]['follow_flag'] = Model_Follow::get_flag($user_id, $post_user_id);
             $post_data[$i]['gochi_flag']  = Model_Gochi::get_flag($user_id, $post_id);
             $post_data[$i]['post_date']   = Model_Date::get_data($post_date);
+
+            $post_data[$i]['user_hash_id']= Hash_Id::create_user_hash($post_user_id);
         }
         return $post_data;
     }

@@ -95,6 +95,8 @@ class Model_Notice extends Model
         ))
         ->execute();
 
+        // 通知メソッド呼び出し
+        Controller_V1_Background::publish($keyword, $a_user_id, $p_user_id);
         /*
         $ch = curl_init();
 

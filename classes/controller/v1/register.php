@@ -54,9 +54,10 @@ class Controller_V1_Register extends Controller_V1_Base
             $profile_img  = Model_User::insert_data($username, $identity_id, $hash_pass);
             $endpoint_arn = 0;
             $jwt = self::encode($user_id, $username);
-
+            $user_hash_id = Hash_Id::create_user_hash($user_id);
             $data = [
                 "user_id"     => $user_id,
+                "user_hash_id"=> $user_hash_id,
                 "username"    => $username,
                 "profile_img" => $profile_img,
                 "identity_id" => $identity_id,
@@ -135,9 +136,10 @@ class Controller_V1_Register extends Controller_V1_Base
             Model_User::update_sns_flag($user_id, $provider);
             // jwt 生成
             $jwt = self::encode($user_id, $username);
-
+            $user_hash_id = Hash_Id::create_user_hash($user_id);
             $data = [
                 "user_id"     => $user_id,
+                "user_hash_id"=> $user_hash_id,
                 "username"    => $username,
                 "identity_id" => $identity_id,
                 "profile_img" => $profile_img,

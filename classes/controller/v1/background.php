@@ -5,11 +5,8 @@ use AWS\Sns\SnsClient;
 class Controller_V1_Background extends Cotroller
 {
     // SNS Push
-    public function action_publish()
+    public static function action_publish($keyword, $a_user_id, $p_user_id)
     {
-        $keyword    = Input::get('keyword');
-        $a_user_id  = Input::get('a_user_id');
-        $p_user_id  = Input::get('p_user_id');
         $login_flag = Model_V1_User::check_login($p_user_id);
 
         if ($login_flag == '1') {

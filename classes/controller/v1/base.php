@@ -405,10 +405,10 @@ abstract class Controller_V1_Base extends Controller
     public static function notid()
     {
         $api_data = [
-          'message' => 'usernameを入力してください'
+          'message' => 'NOTFOUND'
         ];
         $base_data = self::base_template($api_code = 1,
-            $api_message = "NOTFOUND", 
+            $api_message = "SUCCESS", 
             $login_flag = 0, 
             $api_data, 
             $jwt = ""
@@ -553,10 +553,10 @@ abstract class Controller_V1_Base extends Controller
       if (ctype_digit($target_userhash)) { self::notid(); }
 
         //$target_user_id = Model_User::get_id($target_username);
-        (int)$target_user_id = Hash_Id::get_user_hash($target_userhash);
+        $target_user_id = Hash_Id::get_user_hash($target_userhash);
         $user_id        = session::get('user_id');
 
-        if (is_int($target_user_id)) {die('user_idではない');}
+        // if (!is_int($target_user_id)) {self::notid();}
 
         $user_id        = Controller_V1_Check::check_user_id_exists($target_user_id);
         $user_data      = Model_User::get_data($user_id, $target_user_id);

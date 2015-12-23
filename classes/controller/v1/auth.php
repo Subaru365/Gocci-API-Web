@@ -66,8 +66,10 @@ class Controller_V1_Auth extends Controller_V1_Base
             $badge_num   = $user_data['badge_num'];
             $jwt = self::encode($user_id, $username);
             Model_Login::post_login($user_id);
+            $user_hash_id = Hash_Id::create_user_hash($user_id);
             $data = [
                 "user_id"     => $user_id,
+                "user_hash_id"=> $user_hash_id,
                 "username"    => $username,
                 "profile_img" => $profile_img,
                 "identity_id" => $identity_id,
@@ -154,12 +156,13 @@ class Controller_V1_Auth extends Controller_V1_Base
                 $identity_id = $user_data[0]['identity_id'];
                 $badge_num   = $user_data[0]['badge_num'];
                 Model_Login::post_login($user_id);
-
+                $user_hash_id = Hash_Id::create_user_hash($user_id);
                 // JWT認証
                 $jwt = self::encode($user_id, $username);
 
                 $data = [
                     "user_id"     => $user_id,
+                    "user_hash_id"=> $user_hash_id,
                     "username"    => $username,
                     "profile_img" => $profile_img,
                     "identity_id" => $identity_id,
