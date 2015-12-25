@@ -2,7 +2,7 @@
 
 use AWS\Sns\SnsClient;
 
-class Controller_V1_Background extends Cotroller
+class Controller_V1_Background extends Controller
 {
     // SNS Push
     public static function action_publish($keyword, $a_user_id, $p_user_id)

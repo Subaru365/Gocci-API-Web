@@ -47,6 +47,35 @@ class Controller_V1_Get extends Controller_V1_Base
     }
 
     /**
+     * Twitter Access TokenをgetするAPI
+     */
+    public function action_access_token()
+    {
+        try {
+            $token = self::getRequestToken();
+            error_log('Access_token: ');
+            error_log($token);
+            // フロントでhttps://api.twitter.com/oauth/authorize?oauth_token=にアクセス
+
+            $data = self::get_twitter_data();
+            // print_r($data);
+            // exit;
+            $data = [
+                "token" => $token
+            ];
+            $base_data = self::base_template($api_code = "SUCCESS", 
+                $api_message = "Successful API request", 
+                $login_flag =  1, $data, $jwt = ""
+            );
+            $status = $this->output_json($base_data);
+        } catch (Exception $e) {
+            print_r($e);
+            error_log($e);
+            exit;
+        }
+    }
+
+    /**
      * timeline
      */
     public function action_timeline()

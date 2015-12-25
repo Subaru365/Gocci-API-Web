@@ -106,8 +106,6 @@ class Controller_V1_Post extends Controller_V1_Base
         $token       = Input::post('token');
         $profile_img = Input::post('profile_img');
 
-        error_log('sns連携');
-
         try {
             if ($profile_img !== 'none') {
                 $profile_img = Model_S3::input($user_id, $profile_img);
@@ -127,7 +125,7 @@ class Controller_V1_Post extends Controller_V1_Base
                 $api_message = "Successful API request", 
                 $login_flag  =  1, $data, $jwt
             );
-            error_log('sns連携しました');
+
             self::output_json($base_data);
         } catch (\Database_Exception $e) {
             self::failed($keyword);

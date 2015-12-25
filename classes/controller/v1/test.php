@@ -3,22 +3,33 @@ class Controller_V1_Test extends Controller_V1_Base
 {
     const REQUEST_URL      = 'https://api.twitter.com/oauth/access_token';
     const PROVIDER_TWITTER = 'api.twitter.com';
-    // const API_KEY          = '3rrbNV3OXeBjKlZV3NRQRNS0k'; // 自前で用意したKEY
-    // const API_SECRET       = 'LEblop9pEOemasvddlGuvMzpkKc6608TuIhTaxU4YtiCaE3VjE'; // 自前
-    const API_KEY          = 'kurJalaArRFtwhnZCoMxB2kKU'; // コグニートに既に設定されていたKEY
-    const API_SECRET       = 'oOCDmf29DyJyfxOPAaj8tSASzSPAHNepvbxcfVLkA9dJw7inYa'; // コグニートに既に設定されていたKEY
 
+    // Twitter ログイン時のKEY(API_KEY/SECRET_KEY)の2つは自分で用意したのを使うのか、すでに作られているやつを使うのか(Android/iOS/コグニートで使っているKEY)
+
+    // const API_KEY_TEST          = '3rrbNV3OXeBjKlZV3NRQRNS0k'; // 自前で用意したKEY
+    // const API_SECRET_TEST       = 'LEblop9pEOemasvddlGuvMzpkKc6608TuIhTaxU4YtiCaE3VjE'; // 自前
+    const API_KEY_TEST          = 'kurJalaArRFtwhnZCoMxB2kKU'; // コグニートに既に設定されていたKEY
+    const API_SECRET_TEST       = 'oOCDmf29DyJyfxOPAaj8tSASzSPAHNepvbxcfVLkA9dJw7inYa'; // コグニートに既に設定されていたKEY
+
+    // const API_KEY_PRODUCTION = '';
+    // const API_SECRET_PRODUCTION = '';
+
+    /**
+     * twitter login test
+     *
+     */
+
+    /*
     public function action_login_test()
     {
         $data = [];
         $data = self::get_twitter_data();
 
         $access_token = $data;// [0]['access_token'];
-        error_log('access_tokenは');
-        error_log($access_token);
 
         // Auth API 叩く
-        $base_url  = 'http://btest.api.gocci.me';
+        // $base_url  = 'http://btest.api.gocci.me';
+        $base_url  = 'http://test.web.api.gocci.me/v1/'
         $token     = $access_token;
         $end_point = "/v1/auth/login/?provider=".self::PROVIDER_TWITTER."&token=".$token;
         $call_num  = 5;
@@ -31,7 +42,12 @@ class Controller_V1_Test extends Controller_V1_Base
         $result   = json_decode($response, true);
         curl_close($curl);
     }
+    */
 
+    /**
+     * twitter sign_up test
+     *
+     */
     public function action_sns_sign_up_test()
     {
         /* 処理フロー */
@@ -46,11 +62,18 @@ class Controller_V1_Test extends Controller_V1_Base
         // 4 token/imageをサーバ側で保持
 
         // 5 サーバ側でcallback_URLをusername入力してアカウント登録するのボタンのページをフロント側で出す。
+        // 例) CALLBACK_URLはgocci.me/reg/sign_up
+        // testはlocalhost:3000/reg/sign_in
 
+        $data  = self::get_twitter_data();
+        /*
+        $this->setToken($data);
+        $token = getToken();
+        print_r($token);
+        */
+        echo gettype($data);
+        exit;
 
-
-        $data = self::get_twitter_data();
-        print_R($data);
         /*
         $access_token = $data[0]['access_token'];
         $image = $data[0]['image'];
@@ -69,8 +92,8 @@ class Controller_V1_Test extends Controller_V1_Base
 
     private static function get_twitter_data()
     {
-        $api_key    = self::API_KEY;
-        $api_secret = self::API_SECRET;
+        $API_KEY_TEST    = self::API_KEY_TEST;
+        $API_SECRET_TEST = self::API_SECRET_TEST;
 
         // Callback URL
         $callback_url = ( !isset($_SERVER['HTTPS']) ||
@@ -86,10 +109,10 @@ class Controller_V1_Test extends Controller_V1_Base
             // リクエストメソッド
             $request_method = 'POST' ;
             // キーを作成する
-            $signature_key = rawurlencode( $api_secret ) . '&' . rawurlencode( $request_token_secret ) ;
+            $signature_key = rawurlencode( $API_SECRET_TEST ) . '&' . rawurlencode( $request_token_secret ) ;
             // パラメータ([oauth_signature]を除く)を連想配列で指定
             $params = [
-              'oauth_consumer_key'     => $api_key ,
+              'oauth_consumer_key'     => $API_KEY_TEST ,
               'oauth_token'            => $_GET['oauth_token'] ,
               'oauth_signature_method' => 'HMAC-SHA1' ,
               'oauth_timestamp'        => time() ,
@@ -237,8 +260,8 @@ class Controller_V1_Test extends Controller_V1_Base
     // Request Token
     public static function getRequestToken()
     {
-        $api_key    = '3rrbNV3OXeBjKlZV3NRQRNS0k' ;                         // APIキー
-        $api_secret = 'LEblop9pEOemasvddlGuvMzpkKc6608TuIhTaxU4YtiCaE3VjE'; // APIシークレット
+        $API_KEY_TEST    = '3rrbNV3OXeBjKlZV3NRQRNS0k' ;                         // APIキー
+        $API_SECRET_TEST = 'LEblop9pEOemasvddlGuvMzpkKc6608TuIhTaxU4YtiCaE3VjE'; // APIシークレット
         $callback_url = ( !isset($_SERVER['HTTPS']) || empty($_SERVER['HTTPS']) ? 'http://' : 'https://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ;
         // リクエストトークンの取得
         $access_token_secret = '' ;
@@ -247,11 +270,11 @@ class Controller_V1_Test extends Controller_V1_Base
         // リクエストメソッド
         $request_method = 'POST' ;
         // キーを作成する (URLエンコードする)
-        $signature_key = rawurlencode( $api_secret ) . '&' . rawurlencode( $access_token_secret ) ;
+        $signature_key = rawurlencode( $API_SECRET_TEST ) . '&' . rawurlencode( $access_token_secret ) ;
         // パラメータ([oauth_signature]を除く)を連想配列で指定
         $params = array(
           'oauth_callback' => $callback_url ,
-          'oauth_consumer_key' => $api_key ,
+          'oauth_consumer_key' => $API_KEY_TEST ,
           'oauth_signature_method' => 'HMAC-SHA1' ,
           'oauth_timestamp' => time() ,
           'oauth_nonce' => microtime() ,
@@ -347,7 +370,7 @@ class Controller_V1_Test extends Controller_V1_Base
         // エラーの場合
         if( isset( $error_msg ) && !empty( $error_msg ) ) {
             $error = '' ;
-            $error .= 'リクエストトークンを取得できませんでした…。[$api_key]と[$callback_url]、そしてTwitterのアプリケーションに設定している[Callback URL]を確認して下さい。' ;
+            $error .= 'リクエストトークンを取得できませんでした…。[$API_KEY_TEST]と[$callback_url]、そしてTwitterのアプリケーションに設定している[Callback URL]を確認して下さい。' ;
             $error .= '([Callback URLに設定されているURL]→<mark>' . $callback_url . '</mark>)' ;
             error_log($error);
         }
