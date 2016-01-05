@@ -47,7 +47,7 @@ class Controller_V1_Base extends Controller
     const PROVIDER_TWITTER                = 'api.twitter.com';
     const API_KEY_TEST                    = 'kurJalaArRFtwhnZCoMxB2kKU'; // コグニートに既に設定されていたKEY
     const API_SECRET_TEST                 = 'oOCDmf29DyJyfxOPAaj8tSASzSPAHNepvbxcfVLkA9dJw7inYa';
-    const CALLBACK_URL_TEST               = 'localhost:3000/reg/name';
+    const CALLBACK_URL_TEST               = 'localhost:3000/#/reg/name';
     const CALLBACK_URL_PRODUCTION         = 'gocci.me/reg/name';
 
     public function before()
@@ -189,7 +189,7 @@ class Controller_V1_Base extends Controller
     public static function post_check()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-          
+
         } else {
             self::unauth();
         }
