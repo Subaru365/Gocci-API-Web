@@ -144,13 +144,43 @@ class Model_Follow extends Model
         $follower_num = count($result);
         return $follower_num;
     }
+    /**
+     * 既にユーザーをフォロワーしていないかチェックする
+     * @param  Int $user_id
+     * @param  Int $target_user_id
+     *
+     * @return bool true
+     */
+    public static function check_follow($user_id, $target_user_id)
+    {
+        $query = DB::select('follow_id')
+        ->from ('follows')
+        ->where     ('follow_a_user_id', "$user_id")
+        ->and_where ('follow_p_user_id', "$target_user_id");
+
+        $result = $query->execute()->as_array();
+        try {
+          if ( (int) $result[0] === (int) 0) {
+            // まだユーザーをフォローしていない
+            return ture;
+          } else {
+            // 既にユーザーをフォローしている
+            error_log('既にユーザーをフォローしています');
+            die('既にユーザーをフォローしています');
+          }
+        } catch (ErrorException $e) {
+          error_log($e);
+          die('例外が発生しました');
+        }
+    }
+
 
     /**
      * フォロワー登録
      * @param  Int $user_id
      * @param  Int $target_user_id
      *
-     * @return Int $follow_num
+     * @return Int $result
      */
     public static function post_follow($user_id, $target_user_id)
     {
