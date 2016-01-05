@@ -369,7 +369,7 @@ class Controller_V1_Post extends Controller_V1_Base
         try {
 
             // 既にユーザーをフォローしていないかチェックする
-            // $result = Model_Follow::check_follow($user_id, $follow_user_id);
+            Model_Follow::check_follow($user_id, $follow_user_id);
 
             $result = Model_Follow::post_follow($user_id, $follow_user_id);
 

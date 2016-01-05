@@ -114,6 +114,7 @@ class Controller_V1_Base extends Controller
 
             }
         } catch (ErrorException $e) {
+            error_log($e);
             die('Error');
         }
     }
@@ -556,14 +557,10 @@ class Controller_V1_Base extends Controller
      */
     // public static function user_template($target_username, $limit, $sort_key) {
     public static function user_template($target_userhash, $limit, $sort_key) {
-        // if (ctype_digit($target_username)) { self::notid(); }
       if (ctype_digit($target_userhash)) { self::notid(); }
 
-        //$target_user_id = Model_User::get_id($target_username);
         $target_user_id = Hash_Id::get_user_hash($target_userhash);
         $user_id        = session::get('user_id');
-
-        // if (!is_int($target_user_id)) {self::notid();}
 
         $user_id        = Controller_V1_Check::check_user_id_exists($target_user_id);
         $user_data      = Model_User::get_data($user_id, $target_user_id);
@@ -692,7 +689,6 @@ class Controller_V1_Base extends Controller
         $API_KEY_TEST    = self::API_KEY_TEST;
         $API_SECRET_TEST = self::API_SECRET_TEST;
         $callback_url = ( !isset($_SERVER['HTTPS']) || empty($_SERVER['HTTPS']) ? 'http://' : 'https://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ;
-        // $callback_url = self::CALLBACK_URL_TEST;
         // リクエストトークンの取得
         $access_token_secret = '' ;
         // エンドポイントURL
@@ -752,11 +748,11 @@ class Controller_V1_Base extends Controller
         $curl = curl_init() ;
         curl_setopt( $curl , CURLOPT_URL , $request_url ) ;
         curl_setopt( $curl , CURLOPT_HEADER, 1 ) ; 
-        curl_setopt( $curl , CURLOPT_CUSTOMREQUEST , $content['http']['method'] );     // メソッド
-        curl_setopt( $curl , CURLOPT_SSL_VERIFYPEER , false );               // 証明書の検証を行わない
-        curl_setopt( $curl , CURLOPT_RETURNTRANSFER , true );                // curl_execの結果を文字列で返す
-        curl_setopt( $curl , CURLOPT_HTTPHEADER , $content['http']['header'] );      // ヘッダー
-        curl_setopt( $curl , CURLOPT_TIMEOUT , 5 );                    // タイムアウトの秒数
+        curl_setopt( $curl , CURLOPT_CUSTOMREQUEST , $content['http']['method'] ); // メソッド
+        curl_setopt( $curl , CURLOPT_SSL_VERIFYPEER , false );                     // 証明書の検証を行わない
+        curl_setopt( $curl , CURLOPT_RETURNTRANSFER , true );                      // curl_execの結果を文字列で返す
+        curl_setopt( $curl , CURLOPT_HTTPHEADER , $content['http']['header'] );    // ヘッダー
+        curl_setopt( $curl , CURLOPT_TIMEOUT , 5 );                                // タイムアウトの秒数
         $res1 = curl_exec( $curl );
         $res2 = curl_getinfo( $curl );
         curl_close( $curl );
@@ -789,14 +785,12 @@ class Controller_V1_Base extends Controller
                     }
                 }
                 // エラー判定
-
                 if( !isset( $query['oauth_token'] ) || !isset( $query['oauth_token_secret'] ) ) {
                     $error_msg = true ;
                 } else {
                     return $query['oauth_token'] .";" . $query['oauth_token_secret'];
                     exit;
                 }
-                
             }
             // エラーの場合
             if( isset( $error_msg ) && !empty( $error_msg ) ) {
@@ -827,9 +821,6 @@ class Controller_V1_Base extends Controller
         if (isset( $_GET['oauth_token'] ) && !empty( $_GET['oauth_token'] ) ) {
             session_start();
             @$request_token_secret = $_SESSION['oauth_token_secret'];
-            // print_r($request_token_secret);
-            // $request_token_secret = self::API_SECRET_TEST;
-
             $request_url = self::REQUEST_URL;
             $request_method = 'POST';
             $signature_key = rawurlencode($API_SECRET_TEST) . '&' . rawurlencode($request_token_secret);
@@ -889,12 +880,6 @@ class Controller_V1_Base extends Controller
             curl_close($curl);
             $response = substr($res1, $res2['header_size']);
             $header   = substr($res1, 0, $res2['header_size']);
-
-            /*
-            echo "response output: " . "\n";
-            print_r($response);
-            echo "response end: " . "\n";
-            */
 
             if (!isset($response) || empty($response)) {
                 $error = 'リクエストが失敗しました。Twitterの応答自体ありません';
@@ -968,17 +953,14 @@ class Controller_V1_Base extends Controller
             die('You have rejected the app');
             exit;
         } else {
-
             // 認証クリックしていない時
             /*
             $oauth_token = self::getRequestToken();
             */
-
             // $oauth_token = "base/get_twitter_data　in 956 line";
             // return $oauth_token;
             $tof = false;
             error_log('認証クリックしていない時');
-            // exit;
         }
         /*
         if ( isset ($error) && $error) {
@@ -996,13 +978,10 @@ class Controller_V1_Base extends Controller
           $_SERVER['profile_img'] = $image;
           $_SERVER['sns_token'] = $token;
           // print_r($_SERVER);
-
           error_log('リダイレクトします');
-
           // リダイレクト(localhost:3000/reg/name)
           header('Location: ' . self::CALLBACK_URL_TEST. "'"); // test
           exit;
         }
     }
-
 }
