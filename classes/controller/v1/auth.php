@@ -104,15 +104,16 @@ class Controller_V1_Auth extends Controller_V1_Base
     public function action_twitter_login()
     {
         // 1. access_tokenを取得
-
+        
         // 2. フロントにaccess_tokenを渡し、認証画面から
         // image/tokenを取得し、サーバ側で保持
 
         // 3. 認証画面完了後、サーバ側は
         // callback_urlのページ(gocci.me/reg/sigin_in)
         // に飛ばし、フロント側は、twitter/loginにtokneをPOST
+        // header('Location: ' . );
         
-
+        // echo self::CALLBACK_URL_TEST;
     }
 
    /**

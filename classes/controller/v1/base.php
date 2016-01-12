@@ -533,10 +533,10 @@ class Controller_V1_Base extends Controller
         $data = Model_Post::get_data($user_id, $sort_key, 0, $option, $limit);
 
         for ($i = 0; $i<$limit; $i++) {
-            $post_id = $data[$i]['post_id'];
+            $post_id      = $data[$i]['post_id'];
             $post_user_id = $data[$i]['user_id'];
             $Comment_data = Model_Comment::get_data($post_id);
-            $hash_id = Hash_Id::video_hash($post_id);
+            $hash_id      = Hash_Id::video_hash($post_id);
             $user_hash_id = Hash_Id::create_user_hash($post_user_id);
             $data[$i]['hash_id']  = $hash_id;
             $data[$i]['user_hash_id'] = $user_hash_id;
@@ -960,6 +960,7 @@ class Controller_V1_Base extends Controller
             // $oauth_token = "base/get_twitter_data　in 956 line";
             // return $oauth_token;
             $tof = false;
+            // echo '認証クリックしていません';
             error_log('認証クリックしていない時');
         }
         /*
@@ -976,10 +977,10 @@ class Controller_V1_Base extends Controller
         if ($tof) {
           session_start();
           $_SERVER['profile_img'] = $image;
-          $_SERVER['sns_token'] = $token;
+          $_SERVER['sns_token']   = $token;
           // print_r($_SERVER);
           error_log('リダイレクトします');
-          // リダイレクト(localhost:3000/reg/name)
+          // リダイレクト(localhost:3000/reg/name) コールバックURL フロントに返すURL
           header('Location: ' . self::CALLBACK_URL_TEST. "'"); // test
           exit;
         }
