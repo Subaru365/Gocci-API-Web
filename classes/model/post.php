@@ -297,12 +297,10 @@ class Model_Post extends Model
      */
     public static function get_memo($post_id)
     {
-        $query = DB::select('user_id', 'username', 'profile_img', 'memo', 'post_date')
+        $query = DB::select('post_id', 'user_id', 'username', 'profile_img', 'memo', 'post_date')
         ->from('posts')
-
         ->join('users', 'INNER')
         ->on('post_user_id', '=', 'user_id')
-
         ->where('post_id', "$post_id");
 
         $value = $query->execute()->as_array();
@@ -313,11 +311,10 @@ class Model_Post extends Model
         } catch (Exception $e) {
             var_dump($e);exit;
         }
-        // print_r($value);exit;
         $re_user = array();
         array_push ($value[0], $re_user);
 
-        $key = array('comment_user_id', 'username', 'profile_img', 'comment', 'comment_date', 're_user');
+        $key = array('post_id','comment_user_id', 'username', 'profile_img', 'comment', 'comment_date', 're_user');
         $post_comment = array_combine($key, $value[0]);
 
         return $post_comment;

@@ -20,7 +20,7 @@ class Model_Comment extends Model
     public static function get_data($post_id)
     {
         $query = DB::select(
-        'comment_id', 'comment_user_id', 'username',
+        array('comment_post_id', 'post_id'), 'comment_id', 'comment_user_id', 'username',
         'profile_img', 'comment', 'comment_date')
         ->from('comments')
         ->join('users', 'INNER')
@@ -31,6 +31,7 @@ class Model_Comment extends Model
 
         // 投稿者のコメントを$comment_data[0]に格納
         $post_comment = Model_Post::get_memo($post_id);
+        // $comment_dataの頭に、$post_commentの要素を配列の最初に加える。
         array_unshift($comment_data, $post_comment);
 
         $comment_num = count($comment_data);
