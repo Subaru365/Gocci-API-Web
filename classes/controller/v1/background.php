@@ -7,12 +7,20 @@ class Controller_V1_Background extends Controller
     // SNS Push
     public static function action_publish($keyword, $a_user_id, $p_user_id)
     {
-        $login_flag = Model_V1_User::check_login($p_user_id);
+        error_log('Background publish method a');
+
+        error_log('p_user_id: ');
+        error_log($p_user_id);
+
+        $login_flag = Model_User::check_login($p_user_id);
+
+        error_log('Background publish method b');
 
         if ($login_flag == '1') {
             // ログイン中
             Model_Sns::post_message($keyword, $a_user_id, $p_user_id);
         }
+        error_log('Background publish method c');
      }
 
      public function action_update_register()

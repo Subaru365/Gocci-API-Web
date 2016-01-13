@@ -352,41 +352,41 @@ class Controller_V1_Post extends Controller_V1_Base
 
     /**
      * Follow
-     * @param String POST $uri
-     * @param String POST $login_flag
      */
     public function action_follow()
     {
         self::create_token($uri=Uri::string(), $login_flag=0);
         $keyword        = 'フォロー';
         $user_id        = session::get('user_id');
-        error_log('user_id');
-        error_log($user_id);
-
         $follow_user_id = Input::post('target_user_id');
-        error_log('follow_user_id');
-        error_log($follow_user_id);
-        try {
 
+        try {
             // 既にユーザーをフォローしていないかチェックする
             Model_Follow::check_follow($user_id, $follow_user_id);
-
             $result = Model_Follow::post_follow($user_id, $follow_user_id);
+
+            error_log('root a');
 
             $record = Model_Notice::notice_insert(
                 $keyword, $user_id, $follow_user_id
             );
+
+            error_log('root b');
+
             $data = [
                 "message" => "フォローしました"
             ];
+
+            error_log('root c');
+
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
                 $login_flag  = 1, $data, $jwt = ""
             );
             $status = $this->output_json($base_data);
-
+            error_log('json output!');
+            error_log(print_r($status, true));
         } catch(\Database_Exception $e) {
-            error_log('Exception!');
             self::failed($keyword);
             error_log($e);
         }
@@ -438,11 +438,9 @@ class Controller_V1_Post extends Controller_V1_Base
             ];
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request",
-                $login_flag = 1, $data, $jwt = ""
+                $login_flag  = 1, $data, $jwt = ""
             );
-
             $status = $this->output_json($base_data);
-
         } catch (\Database_Exception $e) {
             self::failed($keyword);
             error_log($e);
