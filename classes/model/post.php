@@ -41,6 +41,22 @@ class Model_Post extends Model
     }
 
     /**
+     * ユーザーがgochiしたカテゴリーIDを取得
+     * @param  Int $user_id
+     * @return Array $category_id
+     */
+    public static function get_category_id($user_id)
+    {
+        $query = DB::select('post_category_id')->from('posts')
+        ->where('post_id', 'IN',
+                DB::select('gochi_post_id')->from('gochis')
+            ->where('gochi_user_id', '=', $user_id)
+        )->limit(300);;
+        $category_id = $query->execute()->as_array();
+        return $category_id;
+    }
+
+    /**
      * 変換されたpost_idがDBに存在するかチェックします。
      * @param Int $post_id
      */
