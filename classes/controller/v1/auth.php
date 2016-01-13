@@ -101,7 +101,7 @@ class Controller_V1_Auth extends Controller_V1_Base
     * SNS(Twitter)ログイン
     *
     */
-    public function action_twitter_login()
+    public function action_twitter_sigin_in()
     {
         // 1. access_tokenを取得
         
