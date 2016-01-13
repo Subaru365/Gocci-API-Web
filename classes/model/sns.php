@@ -96,24 +96,39 @@ class Model_Sns extends Model
      */
     public static function post_message($keyword, $user_id, $target_user_id)
     {
+        error_log('post_message root a');
         $username  = Model_User::get_name($user_id);
         $target_arn = Model_Device::get_arn($target_user_id);
-        // $message = "$username" . 'さんから' . "$keyword" . 'されました！';
 
-        $message = [
-            'type'     => $this->type,
-            'id'       => $target_user_id,
-            'username' => $username
-        ];
+        if (!empty($target_arn)) {
+            error_log('target_arn: ');
+            error_log($target_arn);
 
-        $client = new SnsClient([
-            'region'  => 'ap-northeast-1',
-            'version' => '2010-03-31'
-        ]);
-        $result = $client->publish([
-            'Message'   => "$message",
-            'TargetArn' => "$target_arn",
-        ]);
+            error_log('post_message root b');
+            $message = [
+                'type'     => $keyword,
+                'id'       => $target_user_id,
+                'username' => $username
+            ];
+            $message = json_encode(
+                $message,
+                JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|
+                JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT
+            );
+
+            error_log('post_message root c');
+            $client = new SnsClient([
+                'region'  => 'ap-northeast-1',
+                'version' => '2010-03-31'
+            ]);
+            error_log('post_message root d');
+
+            $result = $client->publish([
+                'Message'   => $message,
+                'TargetArn' => $target_arn,
+            ]);
+            error_log('post_message root e');
+        }
     }
 
     /**
@@ -130,8 +145,8 @@ class Model_Sns extends Model
         ]);
 
         $result = $client->publish([
-            'Message'   => "$message",
-            'TargetArn' => "$target_arn",
+            'Message'   => $message,
+            'TargetArn' => $target_arn,
         ]);
     }
 

@@ -77,6 +77,7 @@ class Model_Notice extends Model
     public static function notice_insert(
             $keyword, $a_user_id, $p_user_id, $post_id = 1)
     {
+        error_log('notice_insert method a');
         if ($keyword === 'gochi') {
             $notice = 'like';
         } elseif ($keyword === 'コメント') {
@@ -86,6 +87,8 @@ class Model_Notice extends Model
         } else{
             $notice = 'announce';
         }
+        error_log('notice_insert method b');
+
         $query = DB::insert('notices')
         ->set(array(
             'notice_a_user_id' => "$a_user_id",
@@ -95,8 +98,12 @@ class Model_Notice extends Model
         ))
         ->execute();
 
+        error_log('notice_insert method c');
+
         // 通知メソッド呼び出し
-        Controller_V1_Background::publish($keyword, $a_user_id, $p_user_id);
+        Controller_V1_Background::action_publish($keyword, $a_user_id, $p_user_id);
+
+        error_log('notice_insert method d');
         /*
         $ch = curl_init();
 
