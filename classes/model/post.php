@@ -12,6 +12,45 @@
 class Model_Post extends Model
 {
     use GocciAPI;
+
+    /**
+     * 送られてきたpost_idがDBに存在するか確認
+     * @param  Int $post_id
+     * @return Int $post_id
+     */
+    public static function check_post_id($post_id) 
+    {
+        // 送られてきたpost_idがDBに存在するか
+        $query = DB::select('post_id')->from('posts')
+        ->where('post_id', $post_id);
+
+        $post_id = $query->execute()->as_array();
+        if (empty($post_id[0])) {
+            exit;
+        } else {
+            return $post_id;
+        }
+    }
+
+    /**
+     * 変換されたpost_idがDBに存在するかチェックします。
+     * @param Int $post_id
+     */
+    public static function check_post_id_exist($post_id)
+    {
+        $query = DB::select('post_id')->from('posts')
+        ->where('post_id', '=', $post_id);
+
+        $post_id = $query->execute()->as_array();
+
+        if (isset($post_id[0]['post_id'])) {
+            // exists!
+        } else {
+             GocciAPI::error_json("Not Found");
+             exit;
+        }
+    }
+
     /**
      * @param  Int $post_id
      *
@@ -51,37 +90,18 @@ class Model_Post extends Model
         ->where('post_id', 'IN',
                 DB::select('gochi_post_id')->from('gochis')
             ->where('gochi_user_id', '=', $user_id)
-        )->limit(300);;
+        )->limit(300);
         $category_id = $query->execute()->as_array();
         return $category_id;
     }
 
     /**
-     * 変換されたpost_idがDBに存在するかチェックします。
-     * @param Int $post_id
-     */
-    public static function check_post_id_exist($post_id)
-    {
-        $query = DB::select('post_id')->from('posts')
-        ->where('post_id', '=', $post_id);
-
-        $post_id = $query->execute()->as_array();
-
-        if (isset($post_id[0]['post_id'])) {
-            // exists!
-        } else {
-             GocciAPI::error_json("Not Found");
-             exit;
-        }
-    }
-
-    /**
      * POST取得
-     * @param Int $user_id
-     * @param Int $sort_id
-     * @param Int $option
-     * @param Int $limit
-     * @param Array post_data
+     * @param  Int $user_id
+     * @param  Int $sort_id
+     * @param  Int $option
+     * @param  Int $limit
+     * @return Array post_data
      */
     public static function get_data(
             $user_id, $sort_key,
@@ -204,6 +224,135 @@ class Model_Post extends Model
     }
 
     /**
+     * @param  Array  $category_id
+     * @param  Int    $user_id
+     * @param  String $sort_key
+     * @param  Int    $sort_id [default : 0]
+     * @return Array  $post_data
+     */
+    public static function get_recommend_posts($category_id,
+            $user_id, $sort_key,
+            $sort_id, $option = 0, $limit = 15)
+    {
+        $query = DB::select(
+            'post_id', 'movie', 'thumbnail', 'category', 'tag', 'value',
+            'memo', 'post_date', 'cheer_flag',
+            'user_id', 'username', 'profile_img', 'rest_id', 'restname', 'locality',
+            DB::expr("GLength(GeomFromText(CONCAT('LineString(${option['lon']} ${option['lat']},', X(lon_lat),' ', Y(lon_lat),')'))) as distance")
+        )
+        ->from('posts')
+        ->join('restaurants', 'INNER')
+        ->on('post_rest_id', '=', 'rest_id')
+        ->join('users', 'INNER')
+        ->on('post_user_id', '=', 'user_id')
+        ->join('categories', 'LEFT OUTER')
+        ->on('post_category_id', '=', 'category_id')
+        ->join('tags', 'LEFT OUTER')
+        ->on('post_tag_id', '=', 'tag_id')
+        ->where('post_status_flag', '1')
+        ->and_where('post_category_id', 'IN', $category_id)
+        ->limit(18);
+
+        // $sort_keyによる絞り込み
+        if ($sort_key == 'all') {
+            // 何もせず全て出力。
+        } elseif ($sort_key == 'post') {
+            $query->where('post_id', $sort_id);
+        } elseif ($sort_key == 'rest') {
+            $query->where('post_rest_id', $sort_id);
+        } elseif ($sort_key == 'user') {
+            $query->where('user_id', $sort_id);
+        } elseif ($sort_key == 'users') {
+            $query->where('user_id', 'in', $sort_id);
+        } else {
+            error_log("Model_Post:${sort_key}が不正です");
+            exit;
+        }
+
+        // 並び替え
+        if ($option['order_id'] == 0) {
+            $query->order_by('post_date','desc');
+        } elseif ($option['order_id'] == 1) {
+            // 近い順
+            $query->order_by(DB::expr("GLength(GeomFromText(CONCAT('LineString(${option['lon']} ${option['lat']},', X(lon_lat),' ', Y(lon_lat),')')))"));
+        } elseif ($option['order_id'] == 2) {
+            // Gochi!ランキング
+            // 対象となる投稿の期間($interval)
+            $now_date = date("Y-m-d",strtotime("+1 day"));
+            $interval = date("Y-m-d",strtotime("-1 month"));
+
+            $query->join('gochis', 'RIGHT')
+            ->on('gochi_post_id', '=', 'post_id')
+
+            ->where('gochi_date', 'BETWEEN', array("$interval", "$now_date"))
+
+            ->group_by('gochi_post_id')
+            ->order_by(DB::expr('COUNT(gochi_post_id)'), 'desc');
+        }
+
+        // カテゴリー絞り込み
+        if ($option['category_id'] != 0) {
+            $query->where('category_id', $option['category_id']);
+        }
+
+        // 価格絞り込み
+        if ($option['value_id'] != 0) {
+            if ($option['value_id'] == 1) {
+                $query->where('value', 'between', array(1, 700));
+            }
+            if ($option['value_id'] == 2) {
+                $query->where('value', 'between', array(500, 1500));
+            }
+            if ($option['value_id'] == 3) {
+                $query->where('value', 'between', array(1500, 5000));
+            }
+            if ($option['value_id'] == 4) {
+                $query->where('value', '>', 3000);
+            }
+        }
+
+        // 追加読み込み
+        if ($option['call'] != 0) {
+            $call_num = $option['call'] * $limit;
+            // echo $call_num;exit;
+            $query->offset($call_num);
+        }
+
+        $query ->order_by('post_date','desc');
+        $post_data = $query->execute()->as_array();
+        $post_num  = count($post_data);
+
+        for ($i=0; $i < $post_num; $i++) {
+            $movie = $post_data[$i]['movie'];
+            $post_data[$i]['mp4_movie']   = Model_Transcode::decode_mp4_movie($post_data[$i]['movie']);
+            $post_data[$i]['movie']       = Model_Transcode::decode_hls_movie($post_data[$i]['movie']);
+            $post_data[$i]['thumbnail']   = Model_Transcode::decode_thumbnail($post_data[$i]['thumbnail']);
+            $post_data[$i]['profile_img'] = Model_Transcode::decode_profile_img($post_data[$i]['profile_img']);
+            $post_data[$i]['share'] = 'mp4/' . "$movie" . '.mp4';
+
+            $dis          = $post_data[$i]['distance'];
+            $dis_meter    = $dis * 112120;
+            $post_data[$i]['distance'] = round($dis_meter);
+
+            $post_id      = $post_data[$i]['post_id'];
+            $post_user_id = $post_data[$i]['user_id'];
+            $post_rest_id = $post_data[$i]['rest_id'];
+            $post_date    = $post_data[$i]['post_date'];
+
+            $post_data[$i]['gochi_num']   = Model_Gochi::get_num($post_id);
+            $post_data[$i]['comment_num'] = Model_Comment::get_num($post_id);
+            $post_data[$i]['want_flag']   = Model_Want::get_flag($user_id, $post_rest_id);
+            $post_data[$i]['follow_flag'] = Model_Follow::get_flag($user_id, $post_user_id);
+            $post_data[$i]['gochi_flag']  = Model_Gochi::get_flag($user_id, $post_id);
+            $post_data[$i]['post_date']   = Model_Date::get_data($post_date);
+
+            $post_data[$i]['user_hash_id']= Hash_Id::create_user_hash($post_user_id);
+        }
+
+        return $post_data;
+    }
+
+    /**
      * 1投稿分のデータを取得
      * @param Int $user_id
      * @param Int $limit
@@ -257,25 +406,6 @@ class Model_Post extends Model
             $post_data[$i]['post_date']   = Model_Date::get_data($post_date);
         }
         return $post_data;
-    }
-
-    /**
-     * 送られてきたpost_idがDBに存在するか確認
-     * @param  Int $post_id
-     * @return Int $post_id
-     */
-    public static function check_post_id($post_id) 
-    {
-        // 送られてきたpost_idがDBに存在するか
-        $query = DB::select('post_id')->from('posts')
-        ->where('post_id', $post_id);
-
-        $post_id = $query->execute()->as_array();
-        if (empty($post_id[0])) {
-            exit;
-        } else {
-            return $post_id;
-        }
     }
 
     /**
