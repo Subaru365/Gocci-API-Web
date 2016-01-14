@@ -103,6 +103,7 @@ class Controller_V1_Auth extends Controller_V1_Base
     */
     public function action_twitter_sigin_in()
     {
+        self::error_json("UnAuthorized");
         // 1. access_tokenを取得
         
         // 2. フロントにaccess_tokenを渡し、認証画面から

@@ -47,8 +47,10 @@ class Controller_V1_Base extends Controller
     const PROVIDER_TWITTER                = 'api.twitter.com';
     const API_KEY_TEST                    = 'kurJalaArRFtwhnZCoMxB2kKU'; // コグニートに既に設定されていたKEY
     const API_SECRET_TEST                 = 'oOCDmf29DyJyfxOPAaj8tSASzSPAHNepvbxcfVLkA9dJw7inYa';
-    const CALLBACK_URL_TEST               = 'localhost:3000/#/reg/name';
-    const CALLBACK_URL_PRODUCTION         = 'gocci.me/reg/name';
+    const CALLBACK_URL_TEST               = 'http://192.168.1.60:3000/#/reg/name';
+    const CALLBACK_URL_PRODUCTION         = 'gocci.me/#/reg/name';
+    const CALLBACK_HOME_URL_TEST          = 'http://192.168.1.60:3000/#/';
+    const CALLBACK_HOME_URL_PRODUCTION    = 'gocci.me/#/reg/name';
 
     public function before()
     {
@@ -927,48 +929,20 @@ class Controller_V1_Base extends Controller
                         $tof = true;
                     }
                 }
-                // エラーの場合
-                /*
-                if ( isset($error_msg) && !empty($error_msg)) {
-                    $error = '';
-                    $error .= 'アクセストークンを取得できませんでした。セッションが上手く働いていない可能性があります';
-                    $data = [
-                        "error_msg" => $error
-                    ];
-                    $base_data = self::base_template($api_code = "SUCCESS",
-                            $api_message = "Successful API request",
-                            $login_flag  = 1,
-                            $data,
-                            $jwt = ""
-                    );
-                    echo self::output_json($base_data);
-                }
-                */
             }
             // セッション終了
             $_SESSION = [];
             session_destroy();
         } else if( isset($_GET['denied']) && !empty( $_GET['denied'])) {
             // キャンセルクリックして返ってきた時、エラーメッセージを出力して終了
-            die('You have rejected the app');
+            header('Location: ' . self::CALLBACK_HOME_URL_TEST);
             exit;
         } else {
             // 認証クリックしていない時
-            /*
-            $oauth_token = self::getRequestToken();
-            */
-            // $oauth_token = "base/get_twitter_data　in 956 line";
-            // return $oauth_token;
             $tof = false;
-            // echo '認証クリックしていません';
             error_log('認証クリックしていない時');
         }
-        /*
-        if ( isset ($error) && $error) {
-            // die($error);
-            die('Session Error.');
-        }
-        */
+
         if ( empty($data)) {
             $data = [];
         } else {
@@ -978,10 +952,9 @@ class Controller_V1_Base extends Controller
           session_start();
           $_SERVER['profile_img'] = $image;
           $_SERVER['sns_token']   = $token;
-          // print_r($_SERVER);
           error_log('リダイレクトします');
           // リダイレクト(localhost:3000/reg/name) コールバックURL フロントに返すURL
-          header('Location: ' . self::CALLBACK_URL_TEST. "'"); // test
+          header('Location: ' . self::CALLBACK_URL_TEST); // test
           exit;
         }
     }
