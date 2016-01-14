@@ -30,11 +30,12 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
   const LON = "139.696193";
 
   private $currentPosition;
-  private $array = [];
   private $count;
   private $loginUserId;
+  private $categoryIdList = [];
+  private $array = [];
 
-  // 各IDを0で初期化
+  // 各IDの値を0で初期化
   private $categoryNumId_1  = 0;
   private $categoryNumId_2  = 0;
   private $categoryNumId_3  = 0;
@@ -46,19 +47,35 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
   private $categoryNumId_9  = 0;
   private $categoryNumId_10 = 0;
 
-  public function getCurrentPosition()
-  {
-    return $this->currentPosition;
-  }
+  private $option = [];
 
   public function SetCurrentPosition($currentPosition)
   {
     $this->$currentPosition = $currentPosition;
   }
 
+  public function getCurrentPosition()
+  {
+    return $this->currentPosition;
+  }
+
   public function getArray()
   {
     return $this->array;
+  }
+
+  public function getOption()
+  {
+    $this->option = [
+            'call'        => Input::get('call', 0),
+            'order_id'    => Input::get('order_id', 0),
+            'category_id' => Input::get('category_id', 0),
+            'value_id'    => Input::get('value_id', 0),
+            'lon'         => Input::get('lon', 0),
+            'lat'         => Input::get('lat', 0)
+    ];
+
+    return $this->option;
   }
 
   public function setArray($array)
@@ -68,11 +85,30 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
 
   /**
    * @param  Array $categoryidList
+   * @param  Int   $user_id
    * @return Array $data
    */
-  public function getRecommendRest($categoryIdList)
+  private function getRecommendRest($categoryIdList, $user_id)
   {
+    $limit  = 18;
+    $option = $this->getOption();
+    $data  = Model_Post::get_recommend_posts($categoryIdList, $user_id, $sort_key = 'all', 0, $option, $limit);
 
+    for ($i = 0; $i<$limit; $i++) {
+        $post_id      = $data[$i]['post_id'];
+        $post_user_id = $data[$i]['user_id'];
+        $Comment_data = Model_Comment::get_data($post_id);
+        $hash_id      = Hash_Id::video_hash($post_id);
+        $user_hash_id = Hash_Id::create_user_hash($post_user_id);
+        $data[$i]['hash_id']  = $hash_id;
+        $data[$i]['user_hash_id'] = $user_hash_id;
+        $data[$i] = [
+            "post"     => $data[$i],
+            "comments" => $Comment_data
+        ];
+    }
+
+    return $data;
   }
 
   /**
@@ -189,11 +225,39 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
 
     for ($i = 1; $i<=3; $i++) {
       $value =  max($aryCountData);
-      $key = array_search($value, $aryCountData); // $aryCountData[$value];
+      $key = array_search($value, $aryCountData);
       $selectId[] = $key;
       array_splice($aryCountData,$key,1,0);
     }
     return $selectId;
+  }
+
+  /**
+   * @param  Array $array
+   * @return Array $categoryIdList
+   */
+  private function begineRecommendEngine($cid)
+  {
+      foreach ($cid as $key => $value) {
+        $this->array[] = $value['post_category_id'];
+      }
+      $sortAry        = $this->ArraySort($this->array);
+      $aryCountData   = $this->getAryCountData($sortAry);
+      $selectIdList   = $this->getSelectId($aryCountData);
+      $categoryIdList = $this->bubble_sort($selectIdList);
+
+      return $categoryIdList;
+  }
+
+  /**
+   * @param Array $categoryIdList
+   */
+  private function checkRecommendExists($categoryIdList)
+  {
+    if (empty($categoryIdList)) {
+      echo 'あなたのオススメは見つかりませんでした。';
+      exit;
+    }
   }
 
   // ユーザーの現在値から周辺のお店をレコメンドする
@@ -213,38 +277,36 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
     // call python script
   }
 
+  /**
+   *
+   *
+   */
   public function action_rest()
   {
     // Controller_V1_Post::create_token($uri=Uri::string(), $login_flag=1);
-    // $jwt = self::get_jwt();
-    $user_id = 799;
-    $cid = Model_Post::get_category_id($user_id);
+    $jwt = self::get_jwt();
 
-    if (empty($cid))
-      echo 'あなたのオススメは見つかりませんでした.[test]';
-      exit;
-
-    $array = [];
-    foreach ($cid as $key => $value) {
-      $array[] = $value['post_category_id'];
+    @$user_id = session::get('user_id');
+    if (empty($user_id)) {
+      $user_id = 799; // test
     }
 
     try {
-      $sortAry = $this->ArraySort($array);
-      $aryCountData = $this->getAryCountData($sortAry);
-      $selectIdList = $this->getSelectId($aryCountData);
-      // print_r($this->bubble_sort($selectIdList));
-      $categoryIdList = $this->bubble_sort($selectIdList);
-      // $data = $this->getRecommendRest($categoryIdList);
-      /* $base_data = self::base_template($api_code = "SUCCESS",
+    $categoryIdList = Model_Post::get_category_id($user_id);
+      $this->checkRecommendExists($categoryIdList);
+      $categoryIdList = $this->begineRecommendEngine($categoryIdList);
+      $data = $this->getRecommendRest($categoryIdList, $user_id);
+
+      $base_data = self::base_template($api_code = "SUCCESS",
         $api_message = "Successful API request",
-        $login_flag = 1,
+        $login_flag  = 1,
         $data, $jwt);
-      */
+      self::debug_output_json($base_data);
+
     } catch (ErrorException $e) {
       error_log($e);
       exit;
     }
   } # end action_rest
 
-}
+} # class end

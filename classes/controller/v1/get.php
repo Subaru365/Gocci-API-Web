@@ -87,7 +87,7 @@ class Controller_V1_Get extends Controller_V1_Base
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "UnAuthorized", 
                 $login_flag = 0,$data, $jwt);
-            $this->output_json($base_data);
+            $this->debug_output_json($base_data);
             exit;
         } else {
             self::create_token($uri=Uri::string(), $login_flag=0);	
