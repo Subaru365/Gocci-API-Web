@@ -13,14 +13,14 @@
  * 協調フィルタリングインターフェース
  */
 interface CollaborativeFiltering {
-  public function action_cfr();
+    public function action_cfr();
 }
 
 /**
  * コンテンツベースインターフェース
  */
 interface ContentBasedFiltering {
-  public function action_cbfr();
+    public function action_cbfr();
 }
 
 class Controller_V1_Recommend extends Controller_V1_Base implements CollaborativeFiltering, ContentBasedFiltering {
@@ -90,7 +90,7 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
    */
   private function getRecommendRest($categoryIdList, $user_id)
   {
-    $limit  = 18;
+    $limit  = 18; // default
     $option = $this->getOption();
     $data  = Model_Post::get_recommend_posts($categoryIdList, $user_id, $sort_key = 'all', 0, $option, $limit);
 
@@ -107,7 +107,6 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
             "comments" => $Comment_data
         ];
     }
-
     return $data;
   }
 
@@ -224,10 +223,10 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
     $selectId = [];
 
     for ($i = 1; $i<=3; $i++) {
-      $value =  max($aryCountData);
-      $key = array_search($value, $aryCountData);
-      $selectId[] = $key;
-      array_splice($aryCountData,$key,1,0);
+        $value =  max($aryCountData);
+        $key = array_search($value, $aryCountData);
+        $selectId[] = $key;
+        array_splice($aryCountData,$key,1,0);
     }
     return $selectId;
   }
@@ -239,7 +238,7 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
   private function begineRecommendEngine($cid)
   {
       foreach ($cid as $key => $value) {
-        $this->array[] = $value['post_category_id'];
+          $this->array[] = $value['post_category_id'];
       }
       $sortAry        = $this->ArraySort($this->array);
       $aryCountData   = $this->getAryCountData($sortAry);
@@ -264,45 +263,45 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
   private function sim_distance()
   {
     // call python script
+    // echo `/usr/local/bin/python-recom/sim_distance`;
   }
 
   //
   public function action_cfr()
   {
     // call python script
+    // echo `/usr/local/bin/python-recom/cfr`;
   }
 
   public function action_cbfr()
   {
     // call python script
+    // echo `/usr/local/bin/python-recom/cbfr`;
   }
 
   /**
-   *
-   *
+   * ログインしているユーザーのお店をレコメンドします
    */
   public function action_rest()
   {
-    // Controller_V1_Post::create_token($uri=Uri::string(), $login_flag=1);
+    Controller_V1_Post::create_token($uri=Uri::string(), $login_flag=1);
     $jwt = self::get_jwt();
 
     @$user_id = session::get('user_id');
     if (empty($user_id)) {
-      $user_id = 799; // test
+        $user_id = 799; // Sample test User
     }
-
     try {
-    $categoryIdList = Model_Post::get_category_id($user_id);
-      $this->checkRecommendExists($categoryIdList);
-      $categoryIdList = $this->begineRecommendEngine($categoryIdList);
-      $data = $this->getRecommendRest($categoryIdList, $user_id);
+        $categoryIdList = Model_Post::get_category_id($user_id);
+        $this->checkRecommendExists($categoryIdList);
+        $categoryIdList = $this->begineRecommendEngine($categoryIdList);
+        $data = $this->getRecommendRest($categoryIdList, $user_id);
 
-      $base_data = self::base_template($api_code = "SUCCESS",
-        $api_message = "Successful API request",
-        $login_flag  = 1,
-        $data, $jwt);
-      self::debug_output_json($base_data);
-
+        $base_data = self::base_template($api_code = "SUCCESS",
+          $api_message = "Successful API request",
+          $login_flag  = 1,
+          $data, $jwt);
+        self::debug_output_json($base_data);
     } catch (ErrorException $e) {
       error_log($e);
       exit;
