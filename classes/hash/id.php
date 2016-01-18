@@ -11,7 +11,7 @@ class Hash_Id
 {
     public static function video_hash($post_id)
     {
-        $hash_id = `/usr/local/bin/inase-hash/inasehash {$post_id}`;	
+        $hash_id = `/usr/local/bin/inase-hash/inasehash {$post_id}`;
         $hash_id = rtrim($hash_id);
         return $hash_id;
     }
