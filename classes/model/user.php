@@ -370,20 +370,22 @@ class Model_User extends Model
       */
     public static function web_get_auth($identity_id)
     {
+        error_log('web_get_auth メソッドが呼ばれました');
         $query = DB::select('user_id', 'username', 'profile_img', 'badge_num')->from('users')
         ->where('identity_id', $identity_id);
         $user_data = $query->execute()->as_array();
 
+        error_log('queryを実行しました');
         if (empty($user_data)) {
-            // ================= コントローラー名を変更する。 =========================
-
-            Controller_V1_Web_Base::error_json('登録されていないユーザです');
+            error_log('登録されていないユーザです');
+            Controller_V1_Base::error_json('登録されていないユーザです');
             error_log('登録されていないユーザー' . $identity_id);
             // Cognitoから消去
             Model_Cognito::delete_identity_id($identity_id);
             exit;
         }
         $user_data[0]['profile_img'] = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
+        error_log('returnします');
         return $user_data[0];
     }
 

@@ -80,44 +80,39 @@ class Model_Cognito extends Model
      */
     public static function post_web_sns($user_id, $provider, $token)
     {
-        error_log('user_id in cognito: ');
-        error_log($user_id);
-
-        error_log('provider in cognito: ');
-        error_log($provider);
-
-        error_log('token in cognito: ');
-        error_log($token);
-
-
-        error_log('cognito_dataは');
+        error_log('post_web_sns');
         $cognito_data = Config::get('_cognito');
-
-        // error_log('cognito_data:');
-        /**
-         * (
-         * [IdentityPoolId] => us-east-1:b563cebf-1de2-4931-9f08-da7b4725ae35
-         *  [developer_provider] => test.login.gocci
-         * )
-         *
-         */
-        // error_log(print_r($cognito_data, true));
+        error_log(print_r($cognito_data, true));
+        error_log('identity_idを発行します');
+        // $identity_id = $cognito_data['IdentityId'];
+        // error_log('発行しました');
 
         $client = new CognitoIdentityClient([
             'region'  => 'us-east-1',
             'version' => 'latest'
         ]);
-
+        // error_log(print_r($client, true));
         error_log('getOpenIdTokenForDeveloperIdentity呼びます');
+        // error_log($provider);
+        // error_log($token);
 
-        $result = $client->getOpenIdTokenForDeveloperIdentity([
-            'IdentityPoolId' => "$cognito_data[IdentityPoolId]",
-            'Logins'         => [
-                "$cognito_data[developer_provider]" => "$user_id",
-                "$provider" => "$token",
-            ],
-        ]);
+        try {
+            // IdentityPoolId
+            $result = $client->getOpenIdTokenForDeveloperIdentity([
+                'IdentityPoolId' => "$cognito_data[IdentityPoolId]",
+                'Logins'         => [
+                    "$cognito_data[developer_provider]" => "$user_id",
+                    "$provider" => "$token",
+                ],
+            ]);
+            // error_log(print_r($result, true));
+            error_log('resutlに値を格納しました');
+        } catch (Exception $e) {
+            // 既に連携されているIdentity_idを削除する => しないと500エラー
 
+            // self::delete_sns($user_id, $identity_id, $provider, $token);
+            error_log($e);
+        }
         error_log('returnします');
         return $result;
     }
@@ -170,6 +165,7 @@ class Model_Cognito extends Model
      */
     public static function delete_sns($user_id, $identity_id, $provider, $token)
     {
+        error_log('delete_sns');
         $developer_provider = Config::get('_cognito.developer_provider');
 
         $client = new CognitoIdentityClient([
@@ -207,8 +203,6 @@ class Model_Cognito extends Model
 
         try {
 
-
-
             $result = $client->getOpenIdTokenForDeveloperIdentity([
                 'IdentityPoolId' => "$IdentityPoolId",
                 'Logins' => [
@@ -216,8 +210,7 @@ class Model_Cognito extends Model
                 ],
             ]);
 
-
-
+            error_log('identity_idを返します');
             return $result['IdentityId'];
         } catch (Exception $e) {
             // $data = ["message" => "例外が発生しました"];
