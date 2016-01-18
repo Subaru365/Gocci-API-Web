@@ -58,14 +58,12 @@ class Controller_V1_Get extends Controller_V1_Base
             // フロントでhttps://api.twitter.com/oauth/authorize?oauth_token=にアクセス
 
             $data = self::get_twitter_data();
-            // print_r($data);
-            // exit;
             $data = [
                 "token" => $token
             ];
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
-                $login_flag =  1, $data, $jwt = ""
+                $login_flag  =  1, $data, $jwt = ""
             );
             $status = $this->output_json($base_data);
         } catch (Exception $e) {

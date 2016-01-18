@@ -19,6 +19,17 @@ class Controller_V1_Register extends Controller_V1_Base
     // const API_SECRET_TEST       = 'LEblop9pEOemasvddlGuvMzpkKc6608TuIhTaxU4YtiCaE3VjE'; // 自前
     // const API_KEY_PRODUCTION = '';
     // const API_SECRET_PRODUCTION = '';
+    const CALLBACK_URL_TEST= 'http://192.168.1.93:3000/#/reg/name';
+
+    public static function getToken()
+    {
+        return parent::getToken();
+    }
+
+    public static function getImage()
+    {
+        return parent::getImage();
+    }
 
     /**
      * username password register
@@ -32,7 +43,7 @@ class Controller_V1_Register extends Controller_V1_Base
         $user_id  = Model_User::get_next_id();
         $username = Input::post('username');
         $password = Input::post('password');
-        $register_id = $user_id; 
+        $register_id = $user_id;
 
         $this->post_check();
 
@@ -115,28 +126,34 @@ class Controller_V1_Register extends Controller_V1_Base
     {
         $keyword  = "SNS登録";
         $user_id  = Model_User::get_next_id();
+        // $user_id = session::get('user_id');
         $badge_num= 0;
-        $provider = "api.twitter";
+        $provider = "api.twitter.com";
         $username = Input::post('username');
 
         session_start();
-        /*
-        $profile_img = Input::post('profile_img');
-        $sns_token   = Input::post('token');
-        */
+        error_log('いまここ1');
 
         // サーバ側で保持していたtwitte_proifile_img / tokenを持ってくる
-        if (isset($_SERVER['profile_img']) && isset($_SERVER['sns_token'])) {
-            echo $profile_img = $_SERVER['profile_img'];
-            echo $sns_token   = $_SERVER['sns_token'];
+        if (isset($_SESSION['profile_img']) && isset($_SESSION['sns_token'])) {
+            error_log('sessionに値が保持されてました');
+            $sns_token = $_SESSION['sns_token'];
+            $image     = $_SESSION['profile_img'];
         } else {
-            error_log('no session');
-            $profile_img = '';
-            $sns_token   = '';
+
+            $data = Model_Token::get_token_data($user_id);
+
+            $sns_token = $data[0]['token'];
+            $image     = $data[0]['image'];
         }
         $this->post_check();
 
-        self::register_user($username, $user_id, $provider, $sns_token, $profile_img, $badge_num);
+        if (empty($image) || empty($sns_token)) {
+            error_log('img/tokenどちらも空のため終了します');
+            exit;
+        }
+        error_log('いまここ2');
+        self::register_user($username, $user_id, $provider, $sns_token, $image, $badge_num);
     }
 
     public static function register_user(
@@ -149,17 +166,15 @@ class Controller_V1_Register extends Controller_V1_Base
     )
     {
         try {
-            error_log('register action_sns_sign_up 叩きました in try');
             // usernameが既に使われていないかエラーハンドリング
             $username = Model_User::check_web_name($username);
-            error_log('check ok name!');
             $username = Model_User::empty_name($username);
-            error_log('check ok not empty name!');
             $username = Model_User::format_name_check($username);
-            error_log('check ok name no prblem!');
 
             // facebook/twitterアカウントデータをusers
+            error_log('Cognitoにuser情報を追加してidentityidを発行しSNS連携します');
             $cognito_data = Model_Cognito::post_web_sns($user_id, $provider, $sns_token);
+            error_log('identityidを発行しましt');
             $identity_id  = $cognito_data['IdentityId'];
 
             // users table insert
@@ -169,8 +184,23 @@ class Controller_V1_Register extends Controller_V1_Base
             // 連携したので、flagを更新
             Model_User::update_sns_flag($user_id, $provider);
             // jwt 生成
-            $jwt = self::encode($user_id, $username);
+            try {
+                $jwt = self::encode($user_id, $username);
+                error_log('jwt:  ');
+                error_log($jwt);
+            } catch (Exception $e) {
+                error_log($e);
+                $jwt = "";
+            }
             $user_hash_id = Hash_Id::create_user_hash($user_id);
+            
+            error_log($user_id);
+            error_log($user_hash_id);
+            error_log($username);
+            error_log($identity_id);
+            error_log($profile_img);
+            error_log($badge_num);
+            
             $data = [
                 "user_id"     => $user_id,
                 "user_hash_id"=> $user_hash_id,
@@ -179,11 +209,13 @@ class Controller_V1_Register extends Controller_V1_Base
                 "profile_img" => $profile_img,
                 "badge_num"   => $badge_num
             ];
+            error_log('jsonを出力します');
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
                 $login_flag  = 1, $data, $jwt
             );
             $status = $this->output_json($base_data);
+            error_log('json出力しました');
             exit;
         } catch (\Database_Exception $e) {
             error_log('sns sign_up Error: ');
