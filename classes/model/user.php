@@ -159,23 +159,6 @@ class Model_User extends Model
         ->where('username', "$username");
 
         $result = $query->execute()->as_array();
-        // error_log('result: ');
-        // error_log(print_r($result, true));
-        /**
-         * (
-         *   [0] => Array
-         *   (
-         *      [user_id] => 799
-         *      [profile_img] => 799_2015-11-17-01-55-43
-         *      [identity_id] => us-east-1:56874777-0db1-4a9f-91a9-c1cf1c4b3962
-         *       [badge_num] => 1
-         *      [password] => $2y$10$u16EZ70wcRmnjnCcgaQloO6MoBO3wzT/Bk2g3INs7d1GBkW3XMhNK
-         *  )
-         *
-         * )
-         */
-        // error_log('result password: ');
-        // error_log(print_r($result[0]['password'], true));
         self::verify_pass($password, $result[0]['password']);
 
         return $result;
@@ -368,7 +351,7 @@ class Model_User extends Model
       *
       * @return Array $user_data
       */
-    public static function web_get_auth($identity_id)
+    public static function web_get_auth($identity_id, $token)
     {
         error_log('web_get_auth メソッドが呼ばれました');
         $query = DB::select('user_id', 'username', 'profile_img', 'badge_num')->from('users')
@@ -378,15 +361,20 @@ class Model_User extends Model
         error_log('queryを実行しました');
         if (empty($user_data)) {
             error_log('登録されていないユーザです');
-            Controller_V1_Base::error_json('登録されていないユーザです');
             error_log('登録されていないユーザー' . $identity_id);
             // Cognitoから消去
             Model_Cognito::delete_identity_id($identity_id);
+            error_log('CognitoからidentityIdを消去しました');
+
+            // 登録されていないアカウントだからregister処理をする。
+            header('Location: ' . Controller_V1_Base::CALLBACK_URL_TEST);
+            // header('Location: ' . Controller_V1_Base::CALLBACK_URL_PRODUCTION);// production
             exit;
+        } else {
+            $user_data[0]['profile_img'] = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
+            error_log('returnします');
+            return $user_data[0];
         }
-        $user_data[0]['profile_img'] = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
-        error_log('returnします');
-        return $user_data[0];
     }
 
     /**
@@ -494,6 +482,7 @@ class Model_User extends Model
      */
     public static function sns_insert_data($username, $identity_id, $profile_img)
     {
+        error_log('sns_insert_data method');
         $query = DB::insert('users')
         ->set(array(
             'username'    => $username,
@@ -536,7 +525,6 @@ class Model_User extends Model
 
         return $query;
     }
-
 
     /**
      * パスワードアップデート
@@ -594,7 +582,6 @@ class Model_User extends Model
         $profile_img = Model_Transcode::decode_profile_img($profile_img);
         return $profile_img;
     }
-
 
     /**
      * ユーザー名変更
