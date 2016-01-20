@@ -30,15 +30,57 @@ class Model_Token extends Model
     } catch (ExcepitonError $e) {
       error_log($e);
     }
-    // error_log(print_r($query, true));
     if (isset($query[0]['token'])) {
       error_log('既に登録されたアカウントです');
-      // return false;
       return $query[0]['token'];
       exit;
     }
     // まだ登録されていないので処理続行
     return true;
+  }
+
+  /**
+   * @param  String $token
+   * @return String $image
+   */
+  public static function getImage($token) {
+    $num = 1;
+    try {
+      $query = DB::select('image')->from('tokens')
+      ->where('token','=', $token)
+      ->order_by('token_date', 'desc')
+      ->limit($num)
+      ->execute()->as_array();
+    } catch (ExcepitonError $e) {
+      error_log($e);
+    }
+    if (!isset($query[0]['iamge'])) {
+      error_log('登録されていないアカウントです');
+      exit;
+    }
+    return $query[0]['image'];
+  }
+
+  /**
+   * @param  String $token
+   * @return Int    $user_id
+   */
+  public static function getUserId($token) {
+    $num = 1;
+    try {
+      $query = DB::select('user_id')->from('tokens')
+      ->where('token','=', $token)
+      ->order_by('token_date', 'desc')
+      ->limit($num)
+      ->execute()->as_array();
+    } catch (ExcepitonError $e) {
+      error_log($e);
+    }
+    if (!isset($query[0]['user_id'])) {
+      error_log('登録されていないアカウントです');
+      exit;
+    }
+    return $query[0]['user_id'];
   }
 
   /**
