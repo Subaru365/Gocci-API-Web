@@ -21,11 +21,6 @@ class Controller_V1_Post extends Controller_V1_Base
      */
     private $msg;
 
-    public function before()
-    {
-        // $this->setData($msg);
-    }
-
     /**
      * @return Array $data
      */
