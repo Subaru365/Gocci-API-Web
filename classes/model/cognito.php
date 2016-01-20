@@ -84,17 +84,12 @@ class Model_Cognito extends Model
         $cognito_data = Config::get('_cognito');
         error_log(print_r($cognito_data, true));
         error_log('identity_idを発行します');
-        // $identity_id = $cognito_data['IdentityId'];
-        // error_log('発行しました');
 
         $client = new CognitoIdentityClient([
             'region'  => 'us-east-1',
             'version' => 'latest'
         ]);
-        // error_log(print_r($client, true));
         error_log('getOpenIdTokenForDeveloperIdentity呼びます');
-        // error_log($provider);
-        // error_log($token);
 
         try {
             // IdentityPoolId
@@ -108,8 +103,6 @@ class Model_Cognito extends Model
             // error_log(print_r($result, true));
             error_log('resutlに値を格納しました');
         } catch (Exception $e) {
-            // 既に連携されているIdentity_idを削除する => しないと500エラー
-
             // self::delete_sns($user_id, $identity_id, $provider, $token);
             error_log($e);
         }
@@ -213,9 +206,8 @@ class Model_Cognito extends Model
             error_log('identity_idを返します');
             return $result['IdentityId'];
         } catch (Exception $e) {
-            // $data = ["message" => "例外が発生しました"];
             error_log('例外が発生しました...');
-            //error_log($e);
+            error_log($e);
             // exit;
         }
     }
