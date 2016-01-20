@@ -28,12 +28,15 @@ class Controller_V1_Base extends Controller
     /**
      * @var Int $user_id
      */
-    private $user_id;
+    public static $user_id;
 
     /**
      * @var Object $jwt_obj
      */
-    private $jwt_obj;
+    // private $jwt_obj;
+    public static $jwt_obj;
+
+    public static $obj;
 
     /**
      * @var String $token
@@ -56,7 +59,7 @@ class Controller_V1_Base extends Controller
     const PROVIDER_TWITTER                = 'api.twitter.com';
     const API_KEY_TEST                    = 'kurJalaArRFtwhnZCoMxB2kKU'; // コグニートに既に設定されていたKEY
     const API_SECRET_TEST                 = 'oOCDmf29DyJyfxOPAaj8tSASzSPAHNepvbxcfVLkA9dJw7inYa';
-    const CALLBACK_URL_TEST               = 'http://192.168.1.93:3000/#/reg/name';
+    const CALLBACK_URL_TEST               = 'http://127.0.0.1:3000/#/reg/name';
     const CALLBACK_URL_PRODUCTION         = 'gocci.me/#/reg/name';
     const CALLBACK_HOME_URL_TEST          = 'http://192.168.1.93:3000/#/';
     const CALLBACK_HOME_URL_PRODUCTION    = 'gocci.me/#/reg/name';
@@ -75,7 +78,6 @@ class Controller_V1_Base extends Controller
       self::$image = $image;
     }
 
-    
     public static function getToken()
     {
       error_log('getTokenが呼ばれました');
@@ -90,13 +92,10 @@ class Controller_V1_Base extends Controller
 
     public function before()
     {
-        /*
-        $param = Model_Param::getInstance();
-        error_log('オブジェクトかどうか');
-        error_log(is_object($param));
-        */
-        $this->session_check();
-        $this->http_x_request_check();
+        self::session_check();
+        // $this->session_check();
+        // $this->http_x_request_check();
+        self::http_x_request_check();
         self::accessLog();
     }
 
@@ -111,7 +110,7 @@ class Controller_V1_Base extends Controller
         }
     }
 
-    public function http_x_request_check()
+    public static function http_x_request_check()
     {
         // SCRIPT要素で埋め込まれないための対策
         if (! isset($_SERVER['HTTP_X_REQUESTED_WITH']) ||
@@ -121,22 +120,30 @@ class Controller_V1_Base extends Controller
         }
     }
 
-    public function session_check()
+    public static function session_check()
     {
         if (session::get('user_id')) {
+            error_log('sessionがあったので、user_idを更新/取得');
             self::set_user_id();
             $user_id = self::get_user_id();
             error_log($user_id);
         } else {
+            error_log('sessionは存在しませんでした.jwtを取得します');
             $jwt = self::get_jwt();
-            $this->obj = self::getJwtObject($jwt);
+            if ($jwt === "null" || is_null($jwt)) {
+                error_log('jwtがnullでした');
+                // self::unauth();
+            }
+            // $this->obj = self::getJwtObject($jwt);
+            self::$obj = self::getJwtObject($jwt);
         }
     }
 
     // public static function get_user_id()
-    public function get_user_id()
+    public static function get_user_id()
     {
-        return $this->user_id;
+        // return $this->user_id;
+        return self::$user_id;
     }
 
     public static function get_jwt_obj()
@@ -145,9 +152,9 @@ class Controller_V1_Base extends Controller
     }
 
     // public static function set_user_id()
-    public function set_user_id()
+    public static function set_user_id()
     {
-        $this->user_id = session::get('user_id');
+        self::$user_id = session::get('user_id');
     }
 
     public function get_input_data() {
@@ -276,24 +283,6 @@ class Controller_V1_Base extends Controller
     }
 
     /**
-     * SET TWITTER JWT
-     * @param String $jwt
-     */
-    public static function setTwitterJwt($jwt)
-    {
-        $obj = self::runDeocd($jwt);
-        if (empty($boj)) {
-          self::unauth();
-        }
-        $token = $obj->{'sns_token'};
-        session::set('sns_token', $token);
-        $image = $obj->{'profile_img'};
-        session::set('profile_img', $profile_img);
-        $exp   = $obj->{'exp'};
-        session::set('exp', $exp);
-    }
-
-    /**
      * @return Object $obj
      */
     public static function runDeocd($jwt)
@@ -314,10 +303,11 @@ class Controller_V1_Base extends Controller
     {
         $key = 'i_am_a_secret_key';
         try {
+          error_log('decode Methodに渡された引数: ');
+          error_log($jwt);
             $decoded = JWT::decode($jwt, $key, array('HS256'));
             $decoded = session::set('data', $decoded);
             error_log('decodedの中身を確認 by base decode');
-            // error_log($decoded);
         } catch (Exception $e){
             error_log($e);
             $decoded = "";
@@ -351,31 +341,6 @@ class Controller_V1_Base extends Controller
     }
 
     /**
-     * ENCODE (JWT CREATE) -> TWITTER DATA
-     * @param  String $token
-     * @param  String $image
-     * @return String $jwt
-     */
-    public static function encodeTwitterData($token, $image)
-    {
-      $key   = 'i_am_a_secret_key';
-      $exp   = time() + 86400;
-      $json  = [
-        'sns_token' => $token,
-        'exp'       => $exp,
-        'image'     => $image
-      ];
-      $json = json_encode($json);
-
-      if ($json === NULL) {
-        exit("[Error]\n");
-      }
-      $jwt = JWT::encode($json, $key);
-
-      return $jwt;
-    }
-
-    /**
      * CHECK IF THE JWT IS VALID
      * @param  String $exp
      * @return String $jwt
@@ -400,7 +365,7 @@ class Controller_V1_Base extends Controller
     public static function _refresh_token()
     {
         $user_id  = session::get('user_id');
-        $username = session::get('usernaem');
+        $username = session::get('username');
 
         Session::delete('exp');
         $jwt = self::encode($user_id, $username);
@@ -428,6 +393,15 @@ class Controller_V1_Base extends Controller
         $status = self::json_encode_template($status);
         echo $status;
         exit;
+    }
+
+    /**
+     * @param $base_data
+     *
+     */
+    public static function assignment_json($base_data)
+    {
+        return $json = self::json_encode_template($base_data);
     }
 
     /**
@@ -747,6 +721,13 @@ class Controller_V1_Base extends Controller
      */
     public static function getJwtObject($jwt)
     {
+        error_log('jwtがあるかチェックします');
+        error_log($jwt);
+        if (empty($jwt)) {
+            error_log('jwtが存在しないためencodeします');
+            // self::unauth(Uri::string(), $login_flag=0);
+            // exit;
+        }
         $data      = self::decode($jwt);
         $user_data = session::get('data');
         $obj       = json_decode($user_data);
@@ -1020,9 +1001,6 @@ class Controller_V1_Base extends Controller
                         $user_id = Model_User::get_next_id();
                         session::set('user_id', $user_id);
 
-                        // 登録しようとしているユーザーのuser_idを取得する必要がある。
-                        // $user_id = 
-                        // insertする前に、既にDBに同じtokenがないかを調べる。
                         error_log('checkするtoken');
                         error_log($token);
                         $judge = Model_Token::check_tokne($token); // $そいつのuser_idを引数に渡す
@@ -1033,45 +1011,17 @@ class Controller_V1_Base extends Controller
                           error_log('insert done');
                         } else {
                           // すでに登録してある。
-                          error_log('既にそのtwitterアカウントは登録されていました');
+                          error_log('既にそのtwitterアカウントは登録されていましたので、処理を終了します');
                           $token = $judge;
-                          // error_log('cURLでリクエストするtoken');
-                          // error_log($token);
-                          // ログイン APIを叩いて、ログインする
-                          // Controller_V1_Auth::curl_req_twitter($token);
-                          // error_log('curl_req_twitterが呼ばれました');
-                          error_log('----↓↓↓↓↓↓↓----');
-
-                          $url = "http://test.web.api.gocci.me/v1/auth/twitter_sign_in/";
-                          $ch = curl_init();
-
-                          // postするデータの配列
-                          $account_data = array('token' => $token);
-                          curl_setopt($ch, CURLOPT_URL, $url.'?token='.$token);
-                          curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-                          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                          curl_setopt($ch, CURLOPT_HEADER, true); // ヘッダも出力したい場合
-
-                          // POST送信
-                          /*
-                          curl_setopt($ch, CURLOPT_POST, true);
-                          curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($account_data));
-                          */
-
-                          curl_exec($ch);
-                          curl_close($ch);
-                          error_log('----↑↑↑↑↑↑↑------');
-                          error_log('post完了');
-                          // header('Location: ' . self::CALLBACK_HOME_URL_TEST);
-                          error_log('処理を終了します');
+                          error_log($token);
+                          error_log('reg/nameへリダイレクトします!!');
+                          header('Location: http://test.web.api.gocci.me/v1/auth/twitter_sign_in/?token=' .$token);
+                          // header('Location: https://web.api.gocci.me/v1/auth/twitter_sign_in/?token=' .$token);
                           exit;
                         }
                     }
                 }
             }
-            // セッション終了 // なぜsessionを終了しているのか。
-            // $_SESSION = [];
-            // session_destroy();
         } else if( isset($_GET['denied']) && !empty( $_GET['denied'])) {
             // キャンセルクリックして返ってきた時、エラーメッセージを出力して終了
           error_log('キャンセルクリックが押されました');
@@ -1082,17 +1032,17 @@ class Controller_V1_Base extends Controller
             $tof = false;
             error_log('認証クリックしていない時');
         }
-
         if ( empty($data)) {
             $data = [];
         } else {
             $access_token = $data['oauth_token'];
         }
-
         if ($tof) {
           // twitter認証ボタンクリック完了後
-          error_log('リダイレクトします');
+          error_log('reg/nameへリダイレクトします');
+          error_log('register 1回目のリダイレクト');
           header('Location: ' . self::CALLBACK_URL_TEST); // test /reg/nameへ。(register)
+          // header('Location: ' . self::CALLBACK_URL_PRODUCTION); // production
           exit;
         } else {
           error_log('tofがtrueではないのでリダイレクトしない');

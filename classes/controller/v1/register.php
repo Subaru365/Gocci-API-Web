@@ -15,11 +15,6 @@ class Controller_V1_Register extends Controller_V1_Base
     const PROVIDER_TWITTER = 'api.twitter.com';
     const API_KEY_TEST     = 'kurJalaArRFtwhnZCoMxB2kKU'; // コグニートに既に設定されていたKEY
     const API_SECRET_TEST  = 'oOCDmf29DyJyfxOPAaj8tSASzSPAHNepvbxcfVLkA9dJw7inYa'; //
-    // const API_KEY_TEST          = '3rrbNV3OXeBjKlZV3NRQRNS0k'; // 自前で用意したKEY
-    // const API_SECRET_TEST       = 'LEblop9pEOemasvddlGuvMzpkKc6608TuIhTaxU4YtiCaE3VjE'; // 自前
-    // const API_KEY_PRODUCTION = '';
-    // const API_SECRET_PRODUCTION = '';
-    const CALLBACK_URL_TEST= 'http://192.168.1.93:3000/#/reg/name';
 
     public static function getToken()
     {
@@ -126,26 +121,24 @@ class Controller_V1_Register extends Controller_V1_Base
     {
         $keyword  = "SNS登録";
         $user_id  = Model_User::get_next_id();
-        // $user_id = session::get('user_id');
         $badge_num= 0;
         $provider = "api.twitter.com";
         $username = Input::post('username');
+        // $sns_token= Input::post('token');
+        error_log($username);
 
         session_start();
         error_log('いまここ1');
-
-        // サーバ側で保持していたtwitte_proifile_img / tokenを持ってくる
-        if (isset($_SESSION['profile_img']) && isset($_SESSION['sns_token'])) {
-            error_log('sessionに値が保持されてました');
-            $sns_token = $_SESSION['sns_token'];
-            $image     = $_SESSION['profile_img'];
-        } else {
-
-            $data = Model_Token::get_token_data($user_id);
-
-            $sns_token = $data[0]['token'];
-            $image     = $data[0]['image'];
+        error_log('user_idを取得します');
+        error_log($user_id);
+        $data = Model_Token::get_token_data($user_id);
+        if (empty($data)) {
+            error_log('tokenが空です');
+            Controller_V1_Base::error_json('empty token.');
+            exit;
         }
+        $sns_token = $data[0]['token'];
+        $image     = $data[0]['image'];
         $this->post_check();
 
         if (empty($image) || empty($sns_token)) {
@@ -193,14 +186,7 @@ class Controller_V1_Register extends Controller_V1_Base
                 $jwt = "";
             }
             $user_hash_id = Hash_Id::create_user_hash($user_id);
-            
-            error_log($user_id);
-            error_log($user_hash_id);
-            error_log($username);
-            error_log($identity_id);
-            error_log($profile_img);
-            error_log($badge_num);
-            
+
             $data = [
                 "user_id"     => $user_id,
                 "user_hash_id"=> $user_hash_id,
@@ -214,9 +200,11 @@ class Controller_V1_Register extends Controller_V1_Base
                 $api_message = "Successful API request", 
                 $login_flag  = 1, $data, $jwt
             );
-            $status = $this->output_json($base_data);
+            // $json =  Controller_V1_Base::assignment_json($base_data);
+            // header('Location: http://127.0.0.1:3000/#/reg/name/?json=' .$json); 
+            $status = self::output_json($base_data);
+            // $status = $this->output_json($base_data);
             error_log('json出力しました');
-            exit;
         } catch (\Database_Exception $e) {
             error_log('sns sign_up Error: ');
             error_log($e);

@@ -46,8 +46,8 @@ class Controller_V1_Auth extends Controller_V1_Base
     public function action_login()
     {
         $keyword   = 'ログイン';
-        $provider  = Input::get('provider'); // postに変えること！
-        $token     = Input::get('token');    // postに変えること！
+        $provider  = Input::get('provider'); // postに変える
+        $token     = Input::get('token');    // postに変える
 
         try
         {
@@ -55,10 +55,7 @@ class Controller_V1_Auth extends Controller_V1_Base
                 error_log('paramがありません');
                 self::error_json("UnAuthorized");
             }
-            /* =============================== */
             $identity_id = Model_Cognito::get_identity_id($provider, $token);
-            /* =============================== */
-
             $user_data   = Model_User::web_get_auth($identity_id);
             $user_id     = $user_data['user_id'];
             $username    = $user_data['username'];
@@ -104,13 +101,6 @@ class Controller_V1_Auth extends Controller_V1_Base
     public function action_twitter_sign_in()
     {
         error_log('twitter_sign_inが叩かれました');
-        // 1)フロントがget/access_tokenを叩き、access_tokenを取得
-        // 2)取得したtokenをtwtterの認証URIにつけて叩く。
-        // 3)サーバ側で、既に登録されているかどうかチェックしあればsuccess_jsonを吐き出す。以上
-
-        // self::error_json("UnAuthorized"); // 強制
-        // user_id取得
-        // user_modelからtokenを取得
         $provider = "api.twitter.com";
         $token = input::get('token'); // test
         // $token = input::post('token');
@@ -120,28 +110,25 @@ class Controller_V1_Auth extends Controller_V1_Base
             error_log('paramがありません');
             self::error_json("UnAuthorized");
         }
-        error_log('identity_idを取得します');
         error_log('provider:');
         error_log($provider);
         error_log('token');
         error_log($token);
 
         $identity_id = Model_Cognito::get_identity_id($provider, $token);
-        error_log('取得したidentity_id');
+        error_log('取得したidentity_id: ');
         error_log($identity_id);
 
-        error_log('user_dataを取得します');
-        $user_data   = Model_User::web_get_auth($identity_id);
-        error_log('user_dataを取得しました');
-
+        if (empty($identity_id)) {
+            self::error_json('tokenが違います');
+        }
+        $user_data   = Model_User::web_get_auth($identity_id, $token);
         $user_id     = $user_data['user_id'];
         $username    = $user_data['username'];
         $profile_img = $user_data['profile_img'];
         $badge_num   = $user_data['badge_num'];
-
-        error_log('jwtを取得します');
         $jwt = self::encode($user_id, $username);
-        error_log('Loginします');
+
         Model_Login::post_login($user_id);
         $user_hash_id = Hash_Id::create_user_hash($user_id);
         $data = [
@@ -152,29 +139,16 @@ class Controller_V1_Auth extends Controller_V1_Base
             "identity_id" => $identity_id,
             "badge_num"   => $badge_num,
         ];
-        error_log('dataの中身');
-        error_log(print_r($data, true));
+
         $base_data = self::base_template($api_code = "SUCCESS",
             $api_message = "Successful API request",
             $login_flag  =  1,
             $data, $jwt
         );
-        self::output_json($base_data);
-        error_log('jsonを出力');
 
-        // json返す。
-
-        // 1. access_tokenを取得
-        
-        // 2. フロントにaccess_tokenを渡し、認証画面から
-        // image/tokenを取得し、サーバ側で保持
-
-        // 3. 認証画面完了後、サーバ側は
-        // callback_urlのページ(gocci.me/reg/sigin_in)
-        // に飛ばし、フロント側は、twitter/loginにtokneをPOST
-        // header('Location: ' . );
-        
-        // echo self::CALLBACK_URL_TEST;
+        $json = self::assignment_json($base_data);
+        header('Location: http://127.0.0.1:3000/#/reg/name/?json=' .$json); // test
+        // header('Location: http://gocci.me/#/reg/name/?json=' .$json); // production
     }
 
    /**
@@ -262,32 +236,6 @@ class Controller_V1_Auth extends Controller_V1_Base
             exit;
         }
     }
-    /**
-     * CURLでtwitter apiを叩きます
-     */
-    /*
-    public static function curl_req_twitter($token)
-    {
-        error_log('curl_req_twitterが呼ばれました');
-        error_log('----↓↓↓↓↓↓↓----');
-
-        $url = "http://test.web.api.gocci.me/v1/auth/twitter_sign_in/";
-        $ch = curl_init();
-
-        // postするデータの配列
-        $account_data = array('token' => $token);
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        // POST送信
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($account_data));
-
-        curl_exec($ch);
-        error_log('----↑↑↑↑↑↑↑------');
-        error_log('post完了');
-    }
-    */
 
     /**
      * DBデータ入力エラー
@@ -312,10 +260,5 @@ class Controller_V1_Auth extends Controller_V1_Base
             'badge_num'   => $badge_num,
         ];
         self::output_json($data);
-    }
-
-    public function action_test_login()
-    {
-
     }
 }

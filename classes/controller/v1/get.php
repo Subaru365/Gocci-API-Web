@@ -11,11 +11,6 @@
 
 class Controller_V1_Get extends Controller_V1_Base
 {
-    public function before()
-    {
-        parent::before();
-    }
-
     /**
      * jwtがあるかどうかをcheckするメソッド
      * @param $uri
@@ -25,6 +20,7 @@ class Controller_V1_Get extends Controller_V1_Base
     {
         $jwt = self::get_jwt();
         if(isset($jwt)) {
+            error_log('jwtはあります');
             $data      = self::decode($jwt);
             $user_data = session::get('data');
             $obj       = json_decode($user_data);
@@ -79,6 +75,8 @@ class Controller_V1_Get extends Controller_V1_Base
     public function action_timeline()
     {
         $jwt = self::get_jwt();
+        error_log('timelineのjwt: ');
+        error_log($jwt);
         $obj = self::getJwtObject($jwt);
         if (empty($obj)) {
             $data = self::timeline_template();
