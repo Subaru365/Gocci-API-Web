@@ -690,7 +690,10 @@ class Controller_V1_Base extends Controller
     public static function video_template($user_id, $hash_id)
     {
         $sort_key= "all";
+        error_log('video_template内');
         $post_id = Model_Post::get_post_id($hash_id);
+        error_log('変換したpost_id');
+        error_log($post_id);
 
         $data = Model_Post::get_one_data($user_id, $limit=1, $post_id);
         for ($i = 0; $i<$limit; $i++) {
@@ -1043,6 +1046,149 @@ class Controller_V1_Base extends Controller
           error_log('register 1回目のリダイレクト');
           header('Location: ' . self::CALLBACK_URL_TEST); // test /reg/nameへ。(register)
           // header('Location: ' . self::CALLBACK_URL_PRODUCTION); // production
+          exit;
+        } else {
+          error_log('tofがtrueではないのでリダイレクトしない');
+        }
+    }
+
+    public static function get_twitter_access_token()
+    {
+        $API_KEY_TEST    = self::API_KEY_TEST;
+        $API_SECRET_TEST = self::API_SECRET_TEST;
+        $tof = "";
+
+        // Callback URL
+        $Callback_url = ( !isset($_SERVER['HTTPS']) ||
+        empty($_SERVER['HTTPS']) ? 'http://' : 'https://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+
+        // 連携アプリを認証をクリックして帰ってきた時
+        if (isset( $_GET['oauth_token'] ) && !empty( $_GET['oauth_token'] ) ) {
+            session_start();
+            @$request_token_secret = $_SESSION['oauth_token_secret'];
+            $request_url = self::REQUEST_URL;
+            $request_method = 'POST';
+            $signature_key = rawurlencode($API_SECRET_TEST) . '&' . rawurlencode($request_token_secret);
+
+            $params = [
+                'oauth_consumer_key'    => $API_KEY_TEST,
+                'oauth_token'           => $_GET['oauth_token'],
+                'oauth_signature_method'=> 'HMAC-SHA1',
+                'oauth_timestamp'       => time(),
+                'oauth_verifier'        => @$_GET['oauth_verifier'],
+                'oauth_nonce'           => microtime(),
+                'oauth_version'         => '1.0',
+            ];
+
+            foreach ($params as $key => $value)
+            {
+                $params[$key] = rawurldecode($value);
+            }
+            // 連想配列をアルファベット順に並び替え
+            ksort($params);
+            // パラメータの連想配列を[キー=値&キー=値...]の文字列に変換
+            $request_params = http_build_query($params, '', '&');
+            // 変更した文字列をURLエンコードする
+            $request_params = rawurlencode($request_params);
+            // リクエストUメソッドをURLエンコードする
+            $encoded_request_method = rawurlencode($request_method);
+            // リクエストURLをURLエンコードする
+            $signature_data = $encoded_request_method . '&' . $encoded_request_method . '&' . $request_params;
+            // キー[$signature_key]とデータ[$signature_data]を利用して、HMAC-SHA1方式のハッシュ値に変換する
+            $hash = hash_hmac('sha1', $signature_data, $signature_key, TRUE);
+            // base64エンコードして、著名[$signature]が完成
+            $signature = base64_encode($hash);
+            // パラメータの連想配列、[$params]に、作成した著名を加える
+            $params['oauth_signature'] = $signature;
+            // パラメータの連想配列を[キー=値,キー=値,...]の文字列に変換する
+            $header_params = http_build_query($params, '', ',');
+            // リクエスト用のコンテキストを作成する
+            $context = [
+                'http' => [
+                    'method' => $request_method,
+                    'header' => [
+                        'Authorization: OAuth ' . $header_params,
+                    ],
+                ],
+            ];
+            // cURLでリクエスト
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $request_url);
+            curl_setopt($curl, CURLOPT_HEADER, 1);
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $context['http']['method']);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $context['http']['header']);
+            curl_setopt($curl, CURLOPT_TIMEOUT, 5);
+            $res1 = curl_exec($curl);
+            $res2 = curl_getinfo($curl);
+            curl_close($curl);
+            $response = substr($res1, $res2['header_size']);
+            $header   = substr($res1, 0, $res2['header_size']);
+
+            if (!isset($response) || empty($response)) {
+                $error = 'リクエストが失敗しました。Twitterの応答自体ありません';
+                $data = [
+                    "error_msg" => $error,
+                ];
+                $base_data = self::base_template($api_code = "SUCCESS",
+                    $api_message = "Successful API request",
+                    $login_flag  = 1, $data, $jwt = ""
+                );
+                echo self::output_json($base_data);
+            } else {
+                error_log('文字列を区切ります');
+                // 文字列を[&]で区切る
+                $parameters = explode('&', $response);
+                // エラー判定
+                if ( !isset($parameters[1] ) || empty( $parameters[1])) {
+                    error_log('errror1');
+                    $error_msg = true;
+                } else {
+                    // それぞれの値を格納する配列
+                    $query = [];
+                    // [$parameters]をループ処理
+                    foreach ($parameters as $parameter)
+                    {
+                        // 文字列を[=]で区切る
+                        $pair = explode('=', $parameter);
+                        // 配列に格納
+                        if (isset($pair[1])) {
+                            $query[$pair[0]] = $pair[1];
+                        }
+                    }
+                    if (!isset($query['oauth_token']) ) {
+                        $error_msg = true;
+                    } else {
+                        $oauth_token = $query['oauth_token'];
+                        $oauth_token_secret = $query['oauth_token_secret'];
+                        $token = $oauth_token . ";" . $oauth_token_secret;
+                        $screen_name = $query['screen_name'];
+                        $image = "http://www.paper-glasses.com/api/twipi/" . $screen_name;
+                        $tof = true;
+                    }
+                }
+            }
+        } else if( isset($_GET['denied']) && !empty( $_GET['denied'])) {
+            // キャンセルクリックして返ってきた時、エラーメッセージを出力して終了
+            error_log('キャンセルクリックが押されました');
+            header('Location: ' . self::CALLBACK_HOME_URL_TEST);
+            exit;
+        } else {
+            // 認証クリックしていない時
+            $tof = false;
+            error_log('認証クリックしていない時');
+        }
+        if ( empty($data)) {
+            $data = [];
+        } else {
+            $access_token = $data['oauth_token'];
+        }
+        if ($tof) {
+          // twitter認証ボタンクリック完了後
+
+          header('Location: http://127.0.0.1:3000/#/setting/cooperation/?token='.$token .'&image=' . $image); // test
+          // header('Location: http://gocci.me/#/setting/cooperation/?token='.$token .'&image' . $image); // production
           exit;
         } else {
           error_log('tofがtrueではないのでリダイレクトしない');

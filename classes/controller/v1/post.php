@@ -102,11 +102,19 @@ class Controller_V1_Post extends Controller_V1_Base
         $profile_img = Input::post('profile_img');
 
         try {
+            if ($provider === "api.twitter.com") {
+                // user_idからtokenとprofile_imgを取得する
+                $userData = Model_Token::get_token_data($user_id);
+                $token = $userData[0]['token'];
+                $profile_img = $userData[0]['profile_img'];
+            }
+
             if ($profile_img !== 'none') {
                 $profile_img = Model_S3::input($user_id, $profile_img);
             } else {
                 error_log('profile_img none');
             }
+
 
             $identity_id = Model_User::get_identity_id($user_id);
             Model_User::update_sns_flag($user_id, $provider);
@@ -140,6 +148,13 @@ class Controller_V1_Post extends Controller_V1_Base
         $token    = Input::post('token');
 
         try {
+            if ($provider === "api.twitter.com") {
+                // user_idからtokenとprofile_imgを取得する
+                $userData = Model_Token::get_token_data($user_id);
+                $token = $userData[0]['token'];
+                $profile_img = $userData[0]['profile_img'];
+            }
+
             if (empty($provider) && empty($token) || empty($provider) || empty($token)) {
                 error_log("POSTされていない値があります");
                 self::failed($message = "POSTされていない値があります");
@@ -175,9 +190,16 @@ class Controller_V1_Post extends Controller_V1_Base
         $sns_flag = Model_User::check_sns_flag($user_id);
         $facebook_flag = $sns_flag[0]['facebook_flag'];
         $twitter_flag  = $sns_flag[0]['twitter_flag'];
+        $password = Model_User::get_password($user_id);
+        if (empty($password)) {
+            $message = "UNREGISTER";
+        } else {
+            $message = "REGISTER";
+        }
         $data = [
             "facebook_flag" => (int)$facebook_flag,
-            "twitter_flag"  => (int)$twitter_flag
+            "twitter_flag"  => (int)$twitter_flag,
+            "message"       => $message
         ];
         $base_data = self::base_template($api_code = 0, 
             $api_message = "SUCCESS", 

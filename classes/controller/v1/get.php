@@ -51,7 +51,6 @@ class Controller_V1_Get extends Controller_V1_Base
             $token = self::getRequestToken();
             error_log('Access_token: ');
             error_log($token);
-            // フロントでhttps://api.twitter.com/oauth/authorize?oauth_token=にアクセス
 
             $data = self::get_twitter_data();
             $data = [
@@ -67,6 +66,22 @@ class Controller_V1_Get extends Controller_V1_Base
             error_log($e);
             exit;
         }
+    }
+
+    public function action_twitter_token()
+    {
+
+        $token= self::getRequestToken();
+        $data = self::get_twitter_access_token();
+        $data = [
+            "token" => $token
+        ];
+        $base_data = self::base_template($api_code = "SUCCESS", 
+            $api_message = "Successful API request", 
+            $login_flag  =  1, $data, $jwt = ""
+        );
+        $status = $this->output_json($base_data);
+        // self::get_twitter_access_token();
     }
 
     /**
@@ -119,17 +134,6 @@ class Controller_V1_Get extends Controller_V1_Base
             error_log($e);
             exit;
         }
-    }
-
-    /**
-     * Restaurant recommendation
-     */
-    public function action_recommendation()
-    {
-        self::create_token($uri=Uri::string(), $login_flag=1);
-        $user_id = session::get('user_id');
-        $exp     = session::get('exp');
-        $jwt     = self::check_jwtExp($exp);
     }
 
     /**
@@ -517,6 +521,8 @@ class Controller_V1_Get extends Controller_V1_Base
      */
     public function action_video($hash_id)
     {
+        error_log('hash_id');
+        error_log($hash_id);
         $jwt = self::get_jwt();
         if (isset($jwt)) {
             $data      = self::decode($jwt);
@@ -524,9 +530,11 @@ class Controller_V1_Get extends Controller_V1_Base
             $obj       = json_decode($user_data);
 
             if (empty($obj)) {
+                error_log('now1');
                 // 未ログインユーザー
                 $jwt= "";
                 $user_id= 0;
+                error_log('video template呼び出し');
                 $data = self::video_template($user_id, $hash_id);
                 $base_data = self::base_template($api_code = "SUCESS",
                     $api_message = "UnAuthorized",
@@ -536,7 +544,9 @@ class Controller_V1_Get extends Controller_V1_Base
                 exit;
             }
         }
+        error_log('now2');
         $user_id   = $obj->{'user_id'};
+        error_log('video template呼び出し');
         $data = self::video_template($user_id, $hash_id);
 
         $base_data = self::base_template($api_code = "SUCCESS",
