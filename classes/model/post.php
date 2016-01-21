@@ -42,9 +42,12 @@ class Model_Post extends Model
         ->where('post_id', '=', $post_id);
 
         $post_id = $query->execute()->as_array();
+        error_log('post_id');
+        error_log(print_r($post_id, true));
 
         if (isset($post_id[0]['post_id'])) {
             // exists!
+            error_log('post_idは存在する');
         } else {
              GocciAPI::error_json("Not Found");
              exit;
@@ -73,8 +76,7 @@ class Model_Post extends Model
      */
     public static function get_post_id($hash_id)
     {
-        // echo $hash_id . "\n";
-        $post_id = `/usr/local/bin/inasehash -d {$hash_id}`;
+        $post_id = `/usr/local/bin/inase-hash/inasehash -d {$hash_id}`;
         self::check_post_id_exist($post_id);
         return $post_id;
     }
