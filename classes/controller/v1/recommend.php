@@ -251,12 +251,28 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
   /**
    * @param Array $categoryIdList
    */
-  private function checkRecommendExists($categoryIdList)
+  private function checkRecommendExists($categoryIdList, $user_id, $jwt)
   {
     if (empty($categoryIdList)) {
-      echo 'あなたのオススメは見つかりませんでした。';
-      exit;
+          $categoryIdList = [rand(1,3),rand(4,6),rand(7,9)];
+          $data = $this->getRecommendRest($categoryIdList, $user_id);
+          $base_data = self::base_template($api_code = "SUCCESS",
+            $api_message = "Successful API request",
+            $login_flag  = 1,
+            $data, $jwt);
+          self::debug_output_json($base_data);
+          // error_log('オススメは見つかりませんでした。');
+          // Controller_V1_Base::error_json('オススメは見つかりませんでした。');
+          exit;
     }
+
+    return $categoryIdList;
+  }
+
+  private function similarity($tfid1, $tfid2)
+  {
+    // call python script
+    // echo `/usr/local/bin/python-recom/cosinesimilarity`;
   }
 
   // ユーザーの現在値から周辺のお店をレコメンドする
@@ -271,6 +287,18 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
   {
     // call python script
     // echo `/usr/local/bin/python-recom/cfr`;
+
+    /**
+     * 特徴の種類:    アイテムの特徴、個人属性特徴、コンテキスト特徴
+     * 入力の形式:    「嗜好データ」と「検索質問」
+     * 推薦規則の獲得: 学習による獲得と人手による定義
+     *Pr[𝑥, 𝑦, 𝐟] =∑𝑧∈Pr[𝑧|𝑥] Pr[𝑦|𝑧] Pr[𝐟|𝑧] Pr[𝑧]
+     */
+
+    // 店舗データの取得(Category)
+
+    // 店舗のデータ間の類似性を計算
+
   }
 
   public function action_cbfr()
@@ -280,23 +308,27 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
   }
 
   /**
-   * ログインしているユーザーのお店をレコメンドします
+   * ログインしているユーザーにお店をレコメンドします
    */
   public function action_rest()
   {
     Controller_V1_Post::create_token($uri=Uri::string(), $login_flag=1);
     $jwt = self::get_jwt();
-
     @$user_id = session::get('user_id');
+    /*
+    // test
+    $jwt = "";
+    $user_id  = "";
     if (empty($user_id)) {
         $user_id = 799; // Sample test User
+        $user_id = 965; //729;
     }
+    */
     try {
         $categoryIdList = Model_Post::get_category_id($user_id);
-        $this->checkRecommendExists($categoryIdList);
+        $categoryIdList = $this->checkRecommendExists($categoryIdList, $user_id, $jwt);
         $categoryIdList = $this->begineRecommendEngine($categoryIdList);
         $data = $this->getRecommendRest($categoryIdList, $user_id);
-
         $base_data = self::base_template($api_code = "SUCCESS",
           $api_message = "Successful API request",
           $login_flag  = 1,
