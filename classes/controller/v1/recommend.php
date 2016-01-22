@@ -315,15 +315,7 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
     Controller_V1_Post::create_token($uri=Uri::string(), $login_flag=1);
     $jwt = self::get_jwt();
     @$user_id = session::get('user_id');
-    /*
-    // test
-    $jwt = "";
-    $user_id  = "";
-    if (empty($user_id)) {
-        $user_id = 799; // Sample test User
-        $user_id = 965; //729;
-    }
-    */
+
     try {
         $categoryIdList = Model_Post::get_category_id($user_id);
         $categoryIdList = $this->checkRecommendExists($categoryIdList, $user_id, $jwt);

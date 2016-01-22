@@ -45,8 +45,11 @@ class Controller_V1_Post extends Controller_V1_Base
     public static function create_token($uri="", $login_flag)
     {
         $jwt = self::get_jwt();
-
         if(isset($jwt) || !empty($jwt)) {
+            // error_log('ここ1');
+            if (empty($jwt)) {
+                error_log('jwtが空です');
+            }
             $data      = self::decode($jwt);
             $user_data = session::get('data');
             $obj       = json_decode($user_data);
@@ -59,7 +62,6 @@ class Controller_V1_Post extends Controller_V1_Base
             $user_id   = $obj->{'user_id'};
             $username  = $obj->{'username'};
             $exp       = $obj->{'exp'};
-
             session::set('user_id', $user_id);
             session::set('username', $username);
             session::set('exp', $exp);
@@ -94,41 +96,45 @@ class Controller_V1_Post extends Controller_V1_Base
      */
     public function action_sns_link()
     {
-        self::create_token($uri=Uri::string(), $login_flag=0);
+        error_log('sns_link');
+        if (!isset($_GET['token'])) {
+             self::create_token($uri=Uri::string(), $login_flag=0);
+        }
+
         $keyword     = 'SNS連携';
         $user_id     = session::get('user_id');
-        $provider    = Input::post('provider');
-        $token       = Input::post('token');
-        $profile_img = Input::post('profile_img');
+        $provider    = Input::get('provider');
+        $token       = Input::get('token');
+        $profile_img = Input::get('profile_img');
 
         try {
-            if ($provider === "api.twitter.com") {
-                // user_idからtokenとprofile_imgを取得する
-                $userData = Model_Token::get_token_data($user_id);
-                $token = $userData[0]['token'];
-                $profile_img = $userData[0]['profile_img'];
+            if (empty($user_id)) {
+                $user_id = $_GET['user_id'];
+                error_log('getで取得したuser_id');
+                error_log($user_id);
             }
-
-            if ($profile_img !== 'none') {
-                $profile_img = Model_S3::input($user_id, $profile_img);
-            } else {
-                error_log('profile_img none');
-            }
-
-
             $identity_id = Model_User::get_identity_id($user_id);
             Model_User::update_sns_flag($user_id, $provider);
-
             Model_Cognito::post_sns($user_id, $identity_id, $provider, $token);
 
             $data = [
                 "profile_img" => $profile_img
             ];
+            if (empty($jwt)) {
+                $jwt = "";
+            }
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
                 $login_flag  =  1, $data, $jwt
             );
+            if ($provider === "api.twitter.com") {
+                // twitter
+                $json = self::assignment_json($base_data);
+                header('Location: http://127.0.0.1:3000/#/setting/cooperation/?json='. $json); // test
+                exit;
+            }
 
+            error_log('facebook jsonを返します');
             self::output_json($base_data);
         } catch (\Database_Exception $e) {
             self::failed($keyword);
@@ -141,23 +147,23 @@ class Controller_V1_Post extends Controller_V1_Base
      */
     public function action_unlink()
     {
-        self::create_token($uri=Uri::string(), $login_flag=1);
+        error_log('unlink');
         $keyword  = 'SNS連携解除';
-        $user_id  = session::get('user_id');
-        $provider = Input::post('provider');
-        $token    = Input::post('token');
+        $user_id     = Input::get('user_id');
+        $provider    = Input::get('provider');
+        $token       = Input::get('token');
+        $profile_img = Input::get('profile_img');
 
         try {
-            if ($provider === "api.twitter.com") {
-                // user_idからtokenとprofile_imgを取得する
-                $userData = Model_Token::get_token_data($user_id);
-                $token = $userData[0]['token'];
-                $profile_img = $userData[0]['profile_img'];
-            }
-
             if (empty($provider) && empty($token) || empty($provider) || empty($token)) {
+                error_log($user_id);
+                error_log($provider);
+                error_log($token);
+                error_log($profile_img);
+
                 error_log("POSTされていない値があります");
-                self::failed($message = "POSTされていない値があります");
+                self::error_json('UnAuthorized');
+                // self::failed($message = "POSTされていない値があります");
                 exit;
             }
             // 他にSNS連携しているか確認
@@ -185,8 +191,11 @@ class Controller_V1_Post extends Controller_V1_Base
      */
     public static function action_check_sns_coordination()
     {
+        error_log('action_check_sns_coordination');
         self::create_token($uri=Uri::string(), $login_flag=1);
         $user_id  = session::get('user_id');
+        error_log('user_id');
+        error_log($user_id);
         $sns_flag = Model_User::check_sns_flag($user_id);
         $facebook_flag = $sns_flag[0]['facebook_flag'];
         $twitter_flag  = $sns_flag[0]['twitter_flag'];
@@ -202,9 +211,12 @@ class Controller_V1_Post extends Controller_V1_Base
             "message"       => $message
         ];
         $base_data = self::base_template($api_code = 0, 
-            $api_message = "SUCCESS", 
-            $login_flag =  1,$data, $jwt = ""
+            $api_message = "SUCCESS",
+            $login_flag  =  1, $data, $jwt = ""
         );
+        $json = self::assignment_json($base_data);
+        error_log('check_sns_coordinationのjson');
+        error_log(print_r($json, true));
         $status = self::output_json($base_data);
     }
 
@@ -222,7 +234,8 @@ class Controller_V1_Post extends Controller_V1_Base
                 "message" => "UNREGISTER"
             ];
             $base_data = self::base_template($api_code = "SUCCESS",
-                $api_message = "UnAuthorized", $login_flag =  1, $data, $jwt=""
+                $api_message = "UnAuthorized",
+                $login_flag =  1, $data, $jwt=""
             );
             self::output_json($base_data);
         } else {
@@ -231,7 +244,7 @@ class Controller_V1_Post extends Controller_V1_Base
             ];
             $base_data = self::base_template($api_code = "SUCCESS",
                 $api_message = "UnAuthorized", 
-                $login_flag =  1,$data, $jwt=""
+                $login_flag  =  1, $data, $jwt=""
             );
             self::output_json($base_data);
         }
@@ -250,8 +263,7 @@ class Controller_V1_Post extends Controller_V1_Base
             self::failed($message = "passwordが空です。パスワードが生成");
         }
 
-        $password = Model_User::format_password_check($password);
-
+        $password  = Model_User::format_password_check($password);
         $hash_pass = password_hash($password, PASSWORD_BCRYPT);
 
         try {
@@ -280,18 +292,34 @@ class Controller_V1_Post extends Controller_V1_Base
     public static function start_unlink($user_id, $provider, $token, $keyword)
     {
         try {
+            error_log('user_id');
+            error_log($user_id);
             $identity_id = Model_User::get_identity_id($user_id);
+            error_log('unlink_1');
             Model_User::delete_sns_flag($user_id, $provider);
+            error_log('unlink_2');
             Model_Cognito::delete_sns($user_id, $identity_id, $provider, $token);
+            error_log('unlink_3');
             $data = [
-                "message" => "連携しました"
+                "message" => "連携解除しました"
             ];
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
-                $login_flag =  1, $data, $jwt="");
-
+                $login_flag  =  1, $data, $jwt=""
+            );
+            if ($provider === "api.twitter.com") {
+                // twitter
+                $json = self::assignment_json($base_data);
+                // header('Location: http://127.0.0.1:3000/#/setting/cooperation/?json='. $json); // test
+                header('Location: http://gocci.me/#/setting/cooperation/?json='.$json); // production
+                exit;
+            }
+            // error_log('Facebook jsonを返します unlink');
+            $json = self::assignment_json($base_data);
+            error_log($json);
             $status = self::output_json($base_data);
         } catch (\Dataase_Exception $e) {
+            error_log('Error');
              self::failed($keyword);
              error_log($e);
         }
@@ -382,19 +410,13 @@ class Controller_V1_Post extends Controller_V1_Base
             Model_Follow::check_follow($user_id, $follow_user_id);
             $result = Model_Follow::post_follow($user_id, $follow_user_id);
 
-            error_log('root a');
-
             $record = Model_Notice::notice_insert(
                 $keyword, $user_id, $follow_user_id
             );
 
-            error_log('root b');
-
             $data = [
                 "message" => "フォローしました"
             ];
-
-            error_log('root c');
 
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
@@ -464,7 +486,7 @@ class Controller_V1_Post extends Controller_V1_Base
         }
     }
 
-    /**
+   /**
     * UnWant
     */
     public function action_unwant()
@@ -587,7 +609,6 @@ class Controller_V1_Post extends Controller_V1_Base
             $status = $this->output_json($base_data); 
 
         } catch (\Database_Exception $e) {
-            // self::failed($keyword);
             error_log($e);
         }
     }
@@ -630,7 +651,7 @@ class Controller_V1_Post extends Controller_V1_Base
             "api_version" => 3.0,
             "api_uri"     => Uri::string(),
             "api_code"    => " VALIDATION ERROR",
-            "api_message" => $message . "できませんでした",
+            "api_message" => $message,# . "できませんでした",
             "login_flag"  => 1,
             "api_data"    => $obj = new stdClass()
         ];

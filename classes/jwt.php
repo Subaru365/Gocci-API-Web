@@ -57,10 +57,9 @@ class Jwt
      */
     public static function decode($jwt, $key = null, $allowed_algs = array())
     {
-	error_log('JWT::decode内です');
-	// error_log('処理を中断します');exit;
+        error_log('JWT::decode内です');
+        error_log($jwt);
         $tks = explode('.', $jwt);
-	
         if (count($tks) != 3) {
             throw new UnexpectedValueException('Wrong number of segments');
         }

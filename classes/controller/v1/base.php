@@ -57,11 +57,11 @@ class Controller_V1_Base extends Controller
     const API_CODE_ERROR_ALREADY_REGISTER = "ERROR_ALREADY_REGISTER";
     const REQUEST_URL                     = 'https://api.twitter.com/oauth/access_token';
     const PROVIDER_TWITTER                = 'api.twitter.com';
-    const API_KEY_TEST                    = 'kurJalaArRFtwhnZCoMxB2kKU'; // コグニートに既に設定されていたKEY
-    const API_SECRET_TEST                 = 'oOCDmf29DyJyfxOPAaj8tSASzSPAHNepvbxcfVLkA9dJw7inYa';
+    const API_KEY                         = 'kurJalaArRFtwhnZCoMxB2kKU'; // コグニートに既に設定されていたKEY
+    const API_SECRET                      = 'oOCDmf29DyJyfxOPAaj8tSASzSPAHNepvbxcfVLkA9dJw7inYa';
     const CALLBACK_URL_TEST               = 'http://127.0.0.1:3000/#/reg/name';
-    const CALLBACK_URL_PRODUCTION         = 'gocci.me/#/reg/name';
-    const CALLBACK_HOME_URL_TEST          = 'http://192.168.1.93:3000/#/';
+    // const CALLBACK_HOME_URL_TEST          = 'http://192.168.1.93:3000/#/';
+    const CALLBACK_HOME_URL               = 'gocci.me/#/reg/name';
     const CALLBACK_HOME_URL_PRODUCTION    = 'gocci.me/#/reg/name';
 
     public static function setToken($token)
@@ -254,7 +254,10 @@ class Controller_V1_Base extends Controller
      */
     public static function get_jwt_token($uri="", $login_flag)
     {
+        error_log('get_jwt_token method');
         $jwt = self::get_jwt();
+        error_log('jwt: ');
+        error_log($jwt);
         if(isset($jwt)) {
             self::setJwt($jwt);
         } else {
@@ -364,6 +367,7 @@ class Controller_V1_Base extends Controller
      */
     public static function _refresh_token()
     {
+        error_log('base_refresh_token');
         $user_id  = session::get('user_id');
         $username = session::get('username');
 
@@ -759,8 +763,8 @@ class Controller_V1_Base extends Controller
     // Request Token
     public static function getRequestToken()
     {
-        $API_KEY_TEST    = self::API_KEY_TEST;
-        $API_SECRET_TEST = self::API_SECRET_TEST;
+        $API_KEY    = self::API_KEY;
+        $API_SECRET = self::API_SECRET;
         $callback_url = ( !isset($_SERVER['HTTPS']) || empty($_SERVER['HTTPS']) ? 'http://' : 'https://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ;
         // リクエストトークンの取得
         $access_token_secret = '' ;
@@ -769,11 +773,11 @@ class Controller_V1_Base extends Controller
         // リクエストメソッド
         $request_method = 'POST' ;
         // キーを作成する (URLエンコードする)
-        $signature_key = rawurlencode( $API_SECRET_TEST ) . '&' . rawurlencode( $access_token_secret ) ;
+        $signature_key = rawurlencode( $API_SECRET ) . '&' . rawurlencode( $access_token_secret ) ;
         // パラメータ([oauth_signature]を除く)を連想配列で指定
         $params = [
             'oauth_callback'         => $callback_url,
-            'oauth_consumer_key'     => $API_KEY_TEST,
+            'oauth_consumer_key'     => $API_KEY,
             'oauth_signature_method' => 'HMAC-SHA1',
             'oauth_timestamp'        => time(),
             'oauth_nonce'            => microtime(),
@@ -868,7 +872,7 @@ class Controller_V1_Base extends Controller
             // エラーの場合
             if( isset( $error_msg ) && !empty( $error_msg ) ) {
                 $error = '' ;
-                $error .= 'リクエストトークンを取得できませんでした。[$API_KEY_TEST]と[$callback_url]、そしてTwitterのアプリケーションに設定している[Callback URL]を確認して下さい。' ;
+                $error .= 'リクエストトークンを取得できませんでした。[$API_KEY]と[$callback_url]、そしてTwitterのアプリケーションに設定している[Callback URL]を確認して下さい。' ;
                 $error .= '([Callback URLに設定されているURL]→<mark>' . $callback_url . '</mark>)' ;
                 error_log($error);
             }
@@ -883,8 +887,8 @@ class Controller_V1_Base extends Controller
 
     public static function get_twitter_data()
     {
-        $API_KEY_TEST    = self::API_KEY_TEST;
-        $API_SECRET_TEST = self::API_SECRET_TEST;
+        $API_KEY    = self::API_KEY;
+        $API_SECRET = self::API_SECRET;
         $tof = "";
 
         // Callback URL
@@ -897,10 +901,10 @@ class Controller_V1_Base extends Controller
             @$request_token_secret = $_SESSION['oauth_token_secret'];
             $request_url = self::REQUEST_URL;
             $request_method = 'POST';
-            $signature_key = rawurlencode($API_SECRET_TEST) . '&' . rawurlencode($request_token_secret);
+            $signature_key = rawurlencode($API_SECRET) . '&' . rawurlencode($request_token_secret);
 
             $params = [
-                'oauth_consumer_key'    => $API_KEY_TEST,
+                'oauth_consumer_key'    => $API_KEY,
                 'oauth_token'           => $_GET['oauth_token'],
                 'oauth_signature_method'=> 'HMAC-SHA1',
                 'oauth_timestamp'       => time(),
@@ -986,7 +990,6 @@ class Controller_V1_Base extends Controller
                             $query[$pair[0]] = $pair[1];
                         }
                     }
-                    // if ( isset($query['oauth_token']) || !isset($query['oauth_token_secret'])) {
                     if (!isset($query['oauth_token']) ) {
                         error_log('error2');
                         $error_msg = true;
@@ -996,7 +999,6 @@ class Controller_V1_Base extends Controller
                         $oauth_token = $query['oauth_token'];
                         $oauth_token_secret = $query['oauth_token_secret'];
                         $token = $oauth_token . ";" . $oauth_token_secret;
-                        // $user_id = $query['user_id'];
                         $screen_name = $query['screen_name'];
                         $image = "http://www.paper-glasses.com/api/twipi/" . $screen_name;
                         $tof = true;
@@ -1009,26 +1011,27 @@ class Controller_V1_Base extends Controller
                         $judge = Model_Token::check_tokne($token); // $そいつのuser_idを引数に渡す
                         error_log($judge);
                         if ($judge === true) {
-                          // insert
-                          Model_Token::insert_token($user_id, $token, $image);
-                          error_log('insert done');
+                            // insert
+                            Model_Token::insert_token($user_id, $token, $image);
+                            error_log('insert done');
                         } else {
-                          // すでに登録してある。
-                          error_log('既にそのtwitterアカウントは登録されていましたので、処理を終了します');
-                          $token = $judge;
-                          error_log($token);
-                          error_log('reg/nameへリダイレクトします!!');
-                          header('Location: http://test.web.api.gocci.me/v1/auth/twitter_sign_in/?token=' .$token);
-                          // header('Location: https://web.api.gocci.me/v1/auth/twitter_sign_in/?token=' .$token);
-                          exit;
+                            // すでに登録してある。
+                            error_log('既にそのtwitterアカウントは登録されていましたので、処理を終了します');
+                            $token = $judge;
+                            error_log($token);
+                            error_log('reg/nameへリダイレクトします!!');
+                            header('Location: http://test.web.api.gocci.me/v1/auth/twitter_sign_in/?token=' .$token);
+                            // header('Location: https://web.api.gocci.me/v1/auth/twitter_sign_in/?token=' .$token);
+                            exit;
                         }
                     }
                 }
             }
         } else if( isset($_GET['denied']) && !empty( $_GET['denied'])) {
             // キャンセルクリックして返ってきた時、エラーメッセージを出力して終了
-          error_log('キャンセルクリックが押されました');
-            header('Location: ' . self::CALLBACK_HOME_URL_TEST);
+            error_log('キャンセルクリックが押されました');
+            // header('Location: ' . self::CALLBACK_HOME_URL_TEST);
+            header('Location: ' . self::CALLBACK_HOME_URL);// production
             exit;
         } else {
             // 認証クリックしていない時
@@ -1043,9 +1046,8 @@ class Controller_V1_Base extends Controller
         if ($tof) {
           // twitter認証ボタンクリック完了後
           error_log('reg/nameへリダイレクトします');
-          error_log('register 1回目のリダイレクト');
-          header('Location: ' . self::CALLBACK_URL_TEST); // test /reg/nameへ。(register)
-          // header('Location: ' . self::CALLBACK_URL_PRODUCTION); // production
+          // header('Location: ' . self::CALLBACK_URL_TEST); // test /reg/nameへ。(register)
+          header('Location: ' . self::CALLBACK_URL); // production
           exit;
         } else {
           error_log('tofがtrueではないのでリダイレクトしない');
@@ -1054,9 +1056,14 @@ class Controller_V1_Base extends Controller
 
     public static function get_twitter_access_token()
     {
-        $API_KEY_TEST    = self::API_KEY_TEST;
-        $API_SECRET_TEST = self::API_SECRET_TEST;
+        // http://test.web.api.gocci.me/v1/get/twitter_access_token
+        error_log('get/twitter_access_token BASEが呼ばれました');
+        $API_KEY    = self::API_KEY;
+        $API_SECRET = self::API_SECRET;
         $tof = "";
+        $user_id = Input::get('user_id');
+        $user_id = session::set('user_id', $user_id);
+        error_log('取得したuser_id by get_twitter_access_token');
 
         // Callback URL
         $Callback_url = ( !isset($_SERVER['HTTPS']) ||
@@ -1068,10 +1075,10 @@ class Controller_V1_Base extends Controller
             @$request_token_secret = $_SESSION['oauth_token_secret'];
             $request_url = self::REQUEST_URL;
             $request_method = 'POST';
-            $signature_key = rawurlencode($API_SECRET_TEST) . '&' . rawurlencode($request_token_secret);
+            $signature_key = rawurlencode($API_SECRET) . '&' . rawurlencode($request_token_secret);
 
             $params = [
-                'oauth_consumer_key'    => $API_KEY_TEST,
+                'oauth_consumer_key'    => $API_KEY,
                 'oauth_token'           => $_GET['oauth_token'],
                 'oauth_signature_method'=> 'HMAC-SHA1',
                 'oauth_timestamp'       => time(),
@@ -1172,7 +1179,7 @@ class Controller_V1_Base extends Controller
         } else if( isset($_GET['denied']) && !empty( $_GET['denied'])) {
             // キャンセルクリックして返ってきた時、エラーメッセージを出力して終了
             error_log('キャンセルクリックが押されました');
-            header('Location: ' . self::CALLBACK_HOME_URL_TEST);
+            header('Location: ' . self::CALLBACK_HOME_URL);
             exit;
         } else {
             // 認証クリックしていない時
@@ -1185,10 +1192,23 @@ class Controller_V1_Base extends Controller
             $access_token = $data['oauth_token'];
         }
         if ($tof) {
-          // twitter認証ボタンクリック完了後
+          $user_id     = session::get('user_id');
+          $provider = "api.twitter.com";
+          $flag = Model_User::get_twitter_flag($user_id);
+          $twitter_flag = $flag[0]['twitter_flag'];
 
-          header('Location: http://127.0.0.1:3000/#/setting/cooperation/?token='.$token .'&image=' . $image); // test
-          // header('Location: http://gocci.me/#/setting/cooperation/?token='.$token .'&image' . $image); // production
+          if ((int)$twitter_flag === (int)0){ // 連携
+              error_log('連携します');
+              error_log('twitter連携');
+              header('Location: https://web.api.gocci.me/v1/post/sns_link/?provider='.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id);
+              // header('Location: http://test.web.api.gocci.me/v1/post/sns_link/?provider='.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id); // test
+          } else {
+              // 連携解除
+              error_log('連携解除します');
+              error_log('twitter連携解除');
+              header('Location: https://web.api.gocci.me/v1/post/unlink/?provider='.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id);
+              // header('Location: http://test.web.api.gocci.me/v1/post/unlink/?provider='.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id); // test
+          }
           exit;
         } else {
           error_log('tofがtrueではないのでリダイレクトしない');

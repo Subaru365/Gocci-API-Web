@@ -50,23 +50,26 @@ class Model_Cognito extends Model
     {
         $cognito_data = Config::get('_cognito');
 
-        $client = new CognitoIdentityClient([
-            'region'  => 'us-east-1',
-            'version' => 'latest'
-        ]);
-        error_log('identity_id');
-        error_log($identity_id);
-
-        error_log('post_sns内');
-        $result = $client->getOpenIdTokenForDeveloperIdentity([
-            'IdentityId'     => "$identity_id",
-            'IdentityPoolId' => "$cognito_data[IdentityPoolId]",
-            'Logins'         => [
-                "$cognito_data[developer_provider]" => "$user_id",
-                "$provider" => "$token",
-            ],
-        ]);
-        error_log('returnします');
+        try {
+                $client = new CognitoIdentityClient([
+                'region'  => 'us-east-1',
+                'version' => 'latest'
+            ]);
+            error_log('identity_id');
+            error_log($identity_id);
+            error_log('post_sns内');
+            $result = $client->getOpenIdTokenForDeveloperIdentity([
+                'IdentityId'     => "$identity_id",
+                'IdentityPoolId' => "$cognito_data[IdentityPoolId]",
+                'Logins'         => [
+                    "$cognito_data[developer_provider]" => "$user_id",
+                    "$provider" => "$token",
+                ],
+            ]);
+            error_log('returnします');
+        } catch (Exception $e) {
+            error_log($e);
+        }
         return $result;
     }
 
@@ -158,19 +161,21 @@ class Model_Cognito extends Model
      */
     public static function delete_sns($user_id, $identity_id, $provider, $token)
     {
-        error_log('delete_sns');
-        $developer_provider = Config::get('_cognito.developer_provider');
-
-        $client = new CognitoIdentityClient([
-            'region'  => 'us-east-1',
-            'version' => 'latest'
-        ]);
-
-        $result = $client->unlinkIdentity([
-            'IdentityId' => "$identity_id",
-            'Logins' => ["$provider" => "$token"],
-            'LoginsToRemove' => ["$provider"],
-        ]);
+        try {
+            $developer_provider = Config::get('_cognito.developer_provider');
+            $client = new CognitoIdentityClient([
+                'region'  => 'us-east-1',
+                'version' => 'latest'
+            ]);
+            $result = $client->unlinkIdentity([
+                'IdentityId' => "$identity_id",
+                'Logins' => ["$provider" => "$token"],
+                'LoginsToRemove' => ["$provider"],
+            ]);
+        } catch (Exception $e) {
+            error_log('Errorが発生');
+            error_log($e);
+        }
     }
 
     /**
@@ -208,7 +213,6 @@ class Model_Cognito extends Model
         } catch (Exception $e) {
             error_log('例外が発生しました...');
             error_log($e);
-            // exit;
         }
     }
 

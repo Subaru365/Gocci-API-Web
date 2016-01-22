@@ -17,6 +17,7 @@ class Controller_V1_Put extends Controller_V1_Base
      */
     public static function action_refresh_token()
     {
+        error_log('refresh_token method');
         self::get_jwt_token($uri=Uri::string(), $login_flag =0);
         $user_id  = session::get('user_id');
         $username = session::get('usernaem');

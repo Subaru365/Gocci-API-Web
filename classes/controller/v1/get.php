@@ -48,10 +48,7 @@ class Controller_V1_Get extends Controller_V1_Base
     public function action_access_token()
     {
         try {
-            $token = self::getRequestToken();
-            error_log('Access_token: ');
-            error_log($token);
-
+            $token= self::getRequestToken();
             $data = self::get_twitter_data();
             $data = [
                 "token" => $token
@@ -97,7 +94,7 @@ class Controller_V1_Get extends Controller_V1_Base
             $data = self::timeline_template();
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "UnAuthorized", 
-                $login_flag = 0,$data, $jwt);
+                $login_flag  = 0,$data, $jwt);
             $this->debug_output_json($base_data);
             exit;
         } else {
@@ -172,6 +169,7 @@ class Controller_V1_Get extends Controller_V1_Base
         $user_id      = session::get('user_id');
         $post_id      = Input::get('post_id');
         if (empty($post_id)) {
+            self::error_json('post_idがありません');
             exit;
         }
         $exp          = session::get('exp');
@@ -185,13 +183,13 @@ class Controller_V1_Get extends Controller_V1_Base
         ];
         $base_data = self::base_template($api_code = "SUCCESS", 
             $api_message = "Successful API request", 
-            $login_flag = 1, $data, $jwt
+            $login_flag  = 1, $data, $jwt
         );
         $status = $this->output_json($data);
     }
 
     /**
-     * Restarants Page ver3
+     * Restarants Page
      */
     public function action_rest()
     {
@@ -201,6 +199,15 @@ class Controller_V1_Get extends Controller_V1_Base
         $sort_key   = 'rest';
 
         $jwt = self::get_jwt();
+
+        $rest_id = Model_Restaurant::check_rest_id($rest_id);
+        if (empty($rest_id[0]['rest_id'])) {
+            Controller_V1_Base::error_json('NOTFOUND');
+            error_log('処理を中断します');
+            exit;
+        } else {
+            $rest_id = $rest_id[0]['rest_id'];
+        }
         if (isset($jwt)) {
             $data      = self::decode($jwt);
             $user_data = session::get('data');
@@ -208,8 +215,8 @@ class Controller_V1_Get extends Controller_V1_Base
             if (empty($obj)) {
                 $jwt= "";
                 $user_id= 0;
-
                 $data = self::rest_template($user_id, $rest_id, $sort_key);
+                error_log(print_r($data, true));
                 $base_data = self::base_template($api_code = "SUCCESS", 
                     $api_message = "UnAuthorized", $login_flag, $data, $jwt
                 );
@@ -320,7 +327,7 @@ class Controller_V1_Get extends Controller_V1_Base
             $api_message = "Successful API request", 
             $login_flag =  1,$data, $jwt
         );
-        $status = $this->output_json($base_data);	
+        $status = $this->output_json($base_data);
     }
 
     /**
@@ -330,7 +337,6 @@ class Controller_V1_Get extends Controller_V1_Base
     {
         self::create_token($uri=Uri::string(), $login_flag=2);
         $user_id  = session::get('user_id');
-
         $exp      = session::get('exp');
         $jwt      = self::check_jwtExp($exp);
         $sort_key = 'users';

@@ -165,8 +165,9 @@ class Model_Follow extends Model
             // まだユーザーをフォローしていないため処理を続行
           } else {
             // 既にユーザーをフォローしている
-            error_log('既にユーザーをフォローしているため処理を中断します');
-            die('既にユーザーをフォローしています');
+            error_log('既にユーザーをフォローしています');
+            Controller_V1_Base::error_json('既にユーザーをフォローしています');
+            // die('既にユーザーをフォローしています');
           }
         } catch (ErrorException $e) {
           error_log($e);

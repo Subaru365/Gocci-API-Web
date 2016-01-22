@@ -239,6 +239,20 @@ class Model_User extends Model
 
         return $user_id;
     }
+    /**
+     * twitter_flagを取得(1 or 0)
+     * @param Int $user_id
+     *
+     * @return Int $result
+     */
+    public static function get_twitter_flag($user_id)
+    {
+        $query = DB::select('twitter_flag')
+                ->from('users')
+                ->where('user_id', $user_id);
+
+        return $twitter_flag = $query->execute()->as_array();
+    }
 
     /**
      * identity_id取得
@@ -367,8 +381,8 @@ class Model_User extends Model
             error_log('CognitoからidentityIdを消去しました');
 
             // 登録されていないアカウントだからregister処理をする。
-            header('Location: ' . Controller_V1_Base::CALLBACK_URL_TEST);
-            // header('Location: ' . Controller_V1_Base::CALLBACK_URL_PRODUCTION);// production
+            // header('Location: ' . Controller_V1_Base::CALLBACK_URL_TEST);
+            header('Location: ' . Controller_V1_Base::CALLBACK_URL);// production
             exit;
         } else {
             $user_data[0]['profile_img'] = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);

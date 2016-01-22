@@ -13,6 +13,19 @@ class Model_Restaurant extends Model
 {
     /**
      * 近くのお店30件取得
+     * @param  Int $rest_id
+     *
+     * @return Array $query
+     */
+    public static function check_rest_id($rest_id)
+    {
+        $query = DB::select('rest_id')->from('restaurants')
+        ->where('rest_id', '=', $rest_id)->execute()->as_array();
+        return $query;
+    }
+
+    /**
+     * 近くのお店30件取得
      * @param  Int $lon
      * @param  Int $lat
      *
@@ -80,4 +93,5 @@ class Model_Restaurant extends Model
 
         return $rest_id;
     }
+
 }
