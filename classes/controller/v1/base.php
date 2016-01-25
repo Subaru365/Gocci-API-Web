@@ -60,21 +60,19 @@ class Controller_V1_Base extends Controller
     const API_KEY                         = 'kurJalaArRFtwhnZCoMxB2kKU'; // コグニートに既に設定されていたKEY
     const API_SECRET                      = 'oOCDmf29DyJyfxOPAaj8tSASzSPAHNepvbxcfVLkA9dJw7inYa';
     const CALLBACK_URL_TEST               = 'http://127.0.0.1:3000/#/reg/name';
-    // const CALLBACK_HOME_URL_TEST          = 'http://192.168.1.93:3000/#/';
     const CALLBACK_HOME_URL               = 'gocci.me/#/reg/name';
-    const CALLBACK_HOME_URL_PRODUCTION    = 'gocci.me/#/reg/name';
+    const CALLBACK_REG_NAME_URL           = 'gocci.me/#/reg/name'; // 'http://127.0.0.1:3000/#/reg/name';
+    const TWITTER_SIGN_IN_URL             = 'https://web.api.gocci.me/v1/auth/twitter_sign_in/?token=';//'http://test.web.api.gocci.me/v1/auth/twitter_sign_in/?token=';
+    const SNS_LINK                        = 'https://web.api.gocci.me/v1/post/sns_link/?provider='; // 'http://test.web.api.gocci.me/v1/post/sns_link/?provider=';
+    const SNS_UNLINK                      = 'https://web.api.gocci.me/v1/post/unlink/?provider='; // 'http://test.web.api.gocci.me/v1/post/unlink/?provider=';
 
     public static function setToken($token)
     {
-      error_log('tokenがsetされました');
-      // $this->token = $token;
       self::$token = $token;
     }
 
     public static function setImage($image)
     {
-      error_log('imageがsetされました');
-      // $this->image = $image;
       self::$image = $image;
     }
 
@@ -93,8 +91,6 @@ class Controller_V1_Base extends Controller
     public function before()
     {
         self::session_check();
-        // $this->session_check();
-        // $this->http_x_request_check();
         self::http_x_request_check();
         self::accessLog();
     }
@@ -139,10 +135,8 @@ class Controller_V1_Base extends Controller
         }
     }
 
-    // public static function get_user_id()
     public static function get_user_id()
     {
-        // return $this->user_id;
         return self::$user_id;
     }
 
@@ -151,7 +145,6 @@ class Controller_V1_Base extends Controller
         return $this->jwt_obj;
     }
 
-    // public static function set_user_id()
     public static function set_user_id()
     {
         self::$user_id = session::get('user_id');
@@ -622,7 +615,6 @@ class Controller_V1_Base extends Controller
      * @param  String $sort_key
      * @return Array  $data
      */
-    // public static function user_template($target_username, $limit, $sort_key) {
     public static function user_template($target_userhash, $limit, $sort_key) {
       if (ctype_digit($target_userhash)) { self::notid(); }
 
@@ -995,7 +987,6 @@ class Controller_V1_Base extends Controller
                         $error_msg = true;
                     } else {
                         // register
-                        error_log('errorなし！それぞれの値を変数に代入します');
                         $oauth_token = $query['oauth_token'];
                         $oauth_token_secret = $query['oauth_token_secret'];
                         $token = $oauth_token . ";" . $oauth_token_secret;
@@ -1005,10 +996,7 @@ class Controller_V1_Base extends Controller
 
                         $user_id = Model_User::get_next_id();
                         session::set('user_id', $user_id);
-
-                        error_log('checkするtoken');
-                        error_log($token);
-                        $judge = Model_Token::check_tokne($token); // $そいつのuser_idを引数に渡す
+                        $judge = Model_Token::check_tokne($token);
                         error_log($judge);
                         if ($judge === true) {
                             // insert
@@ -1018,10 +1006,8 @@ class Controller_V1_Base extends Controller
                             // すでに登録してある。
                             error_log('既にそのtwitterアカウントは登録されていましたので、処理を終了します');
                             $token = $judge;
-                            error_log($token);
-                            error_log('reg/nameへリダイレクトします!!');
-                            header('Location: http://test.web.api.gocci.me/v1/auth/twitter_sign_in/?token=' .$token);
-                            // header('Location: https://web.api.gocci.me/v1/auth/twitter_sign_in/?token=' .$token);
+                            // header('Location: http://test.web.api.gocci.me/v1/auth/twitter_sign_in/?token=' .$token);
+                            header("Location: " .self::TWITTER_SIGN_IN_URL.$token);
                             exit;
                         }
                     }
@@ -1030,8 +1016,7 @@ class Controller_V1_Base extends Controller
         } else if( isset($_GET['denied']) && !empty( $_GET['denied'])) {
             // キャンセルクリックして返ってきた時、エラーメッセージを出力して終了
             error_log('キャンセルクリックが押されました');
-            // header('Location: ' . self::CALLBACK_HOME_URL_TEST);
-            header('Location: ' . self::CALLBACK_HOME_URL);// production
+            header('Location: ' . self::CALLBACK_HOME_URL);
             exit;
         } else {
             // 認証クリックしていない時
@@ -1046,8 +1031,8 @@ class Controller_V1_Base extends Controller
         if ($tof) {
           // twitter認証ボタンクリック完了後
           error_log('reg/nameへリダイレクトします');
-          // header('Location: ' . self::CALLBACK_URL_TEST); // test /reg/nameへ。(register)
-          header('Location: ' . self::CALLBACK_URL); // production
+          // header('Location: ' . self::CALLBACK_URL);
+          header('Location: ' . self::CALLBACK_REG_NAME_URL);
           exit;
         } else {
           error_log('tofがtrueではないのでリダイレクトしない');
@@ -1063,7 +1048,6 @@ class Controller_V1_Base extends Controller
         $tof = "";
         $user_id = Input::get('user_id');
         $user_id = session::set('user_id', $user_id);
-        error_log('取得したuser_id by get_twitter_access_token');
 
         // Callback URL
         $Callback_url = ( !isset($_SERVER['HTTPS']) ||
@@ -1200,14 +1184,14 @@ class Controller_V1_Base extends Controller
           if ((int)$twitter_flag === (int)0){ // 連携
               error_log('連携します');
               error_log('twitter連携');
-              header('Location: https://web.api.gocci.me/v1/post/sns_link/?provider='.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id);
-              // header('Location: http://test.web.api.gocci.me/v1/post/sns_link/?provider='.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id); // test
+              // header('Location: https://web.api.gocci.me/v1/post/sns_link/?provider='.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id);
+              header("Location: " .self::SNS_LINK.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id);
           } else {
               // 連携解除
               error_log('連携解除します');
               error_log('twitter連携解除');
-              header('Location: https://web.api.gocci.me/v1/post/unlink/?provider='.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id);
-              // header('Location: http://test.web.api.gocci.me/v1/post/unlink/?provider='.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id); // test
+              // header('Location: https://web.api.gocci.me/v1/post/unlink/?provider='.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id);
+              header("Location: " .self::SNS_UNLINK.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id);
           }
           exit;
         } else {

@@ -381,7 +381,7 @@ class Controller_V1_Get extends Controller_V1_Base
         $data           = Model_Follow::get_follow($user_id, $target_user_id);
         $base_data      = self::base_template($api_code = "SUCCESS", 
             $api_message= "Successful API request", 
-            $login_flag =  1,$data, $jwt
+            $login_flag =  1, $data, $jwt
         );
         $stats          = $this->output_json($base_data);
     }

@@ -200,10 +200,7 @@ class Controller_V1_Register extends Controller_V1_Base
                 $api_message = "Successful API request", 
                 $login_flag  = 1, $data, $jwt
             );
-            // $json =  Controller_V1_Base::assignment_json($base_data);
-            // header('Location: http://127.0.0.1:3000/#/reg/name/?json=' .$json); 
             $status = self::output_json($base_data);
-            // $status = $this->output_json($base_data);
             error_log('json出力しました');
         } catch (\Database_Exception $e) {
             error_log('sns sign_up Error: ');
