@@ -13,27 +13,57 @@
  * 協調フィルタリングインターフェース
  */
 interface CollaborativeFiltering {
-    public function action_cfr();
+    public function cfr();
 }
 
 /**
  * コンテンツベースインターフェース
  */
 interface ContentBasedFiltering {
-    public function action_cbfr();
+    public function cbfr();
 }
 
 class Controller_V1_Recommend extends Controller_V1_Base implements CollaborativeFiltering, ContentBasedFiltering {
 
-  const DEFAULT_TARGET_POINT = "東京都渋谷区道玄坂２丁目１８";
-  const LAT = "35.658844";
-  const LON = "139.696193";
+  /**
+   * @var DOUBLE $lat
+   */
+  private $lat;
 
+  /**
+   * @var DOUBLE $lon
+   */
+  private $lon;
+
+  /**
+   * @var DOUBLE $currentPosition
+   */
   private $currentPosition;
+
+  /**
+   * @var Int count
+   */
   private $count;
+
+  /**
+   * @var Int $loginUserId
+   */
   private $loginUserId;
+
+  /**
+   * @var Array $categoryIdList
+   */
   private $categoryIdList = [];
-  private $array = [];
+
+  /**
+   * @var Array $array
+   */
+  private $array  = [];
+
+  /**
+   * @var Array $option
+   */
+  private $option = [];
 
   // 各IDの値を0で初期化
   private $categoryNumId_1  = 0;
@@ -47,40 +77,57 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
   private $categoryNumId_9  = 0;
   private $categoryNumId_10 = 0;
 
-  private $option = [];
+  const DEFAULT_TARGET_POINT = "東京都渋谷区道玄坂２丁目１８";
+  const LAT = "35.658844";
+  const LON = "139.696193";
+  const DEFAULT_LIMIT_NUM = 18;
 
+  /**
+   * @param DOUBLE $currentPosition
+   */
   public function SetCurrentPosition($currentPosition)
   {
-    $this->$currentPosition = $currentPosition;
+      $this->$currentPosition = $currentPosition;
   }
 
+  /**
+   * @return DOUBLE $currentPosition
+   */
   public function getCurrentPosition()
   {
-    return $this->currentPosition;
+      return $this->currentPosition;
   }
 
+  /**
+   * @return Array $array
+   */
   public function getArray()
   {
-    return $this->array;
+      return $this->array;
   }
 
+  /**
+   * @return Array $option
+   */
   public function getOption()
   {
-    $this->option = [
-            'call'        => Input::get('call', 0),
-            'order_id'    => Input::get('order_id', 0),
-            'category_id' => Input::get('category_id', 0),
-            'value_id'    => Input::get('value_id', 0),
-            'lon'         => Input::get('lon', 0),
-            'lat'         => Input::get('lat', 0)
-    ];
-
-    return $this->option;
+      $this->option = [
+          'call'        => Input::get('call', 0),
+          'order_id'    => Input::get('order_id', 0),
+          'category_id' => Input::get('category_id', 0),
+          'value_id'    => Input::get('value_id', 0),
+          'lon'         => Input::get('lon', 0),
+          'lat'         => Input::get('lat', 0)
+      ];
+      return $this->option;
   }
 
+  /**
+   * @return Array $array
+   */
   public function setArray($array)
   {
-    $this->array = $array;
+      $this->array = $array;
   }
 
   /**
@@ -88,11 +135,12 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
    * @param  Int   $user_id
    * @return Array $data
    */
-  private function getRecommendRest($categoryIdList, $user_id)
+  private function getRecommendRest($categoryIdList, $user_id, $lat, $lon)
   {
-    $limit  = 18; // default
+    $limit  = self::DEFAULT_LIMIT_NUM;
+
     $option = $this->getOption();
-    $data  = Model_Post::get_recommend_posts($categoryIdList, $user_id, $sort_key = 'all', 0, $option, $limit);
+    $data   = Model_Post::get_recommend_posts($categoryIdList, $user_id, $sort_key = 'all', 0, $option, $limit, $lat, $lon);
 
     for ($i = 0; $i<$limit; $i++) {
         $post_id      = $data[$i]['post_id'];
@@ -146,8 +194,8 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
           $array[$n] = $array[$n-1];
           $array[$n-1] = $temp;
         }
-      }
-    }
+      } # for end
+    } # for end
     return $array;
   }
 
@@ -226,7 +274,7 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
         $value =  max($aryCountData);
         $key = array_search($value, $aryCountData);
         $selectId[] = $key;
-        array_splice($aryCountData,$key,1,0);
+        array_splice($aryCountData, $key, 1, 0);
     }
     return $selectId;
   }
@@ -249,7 +297,10 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
   }
 
   /**
-   * @param Array $categoryIdList
+   * @param  Array  $categoryIdList
+   * @param  Int    $user_id
+   * @param  String $jwt
+   * @return Array  $categoryIdList
    */
   private function checkRecommendExists($categoryIdList, $user_id, $jwt)
   {
@@ -261,32 +312,59 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
             $login_flag  = 1,
             $data, $jwt);
           self::debug_output_json($base_data);
-          // error_log('オススメは見つかりませんでした。');
-          // Controller_V1_Base::error_json('オススメは見つかりませんでした。');
           exit;
     }
-
     return $categoryIdList;
   }
 
-  private function similarity($tfid1, $tfid2)
+  /**
+   * jaccard指数で類似度を比較します
+   * @param  String $category
+   * @return Array $lists
+   */
+  private function similarity($category)
   {
+    // $lists = $this->array;
     // call python script
-    // echo `/usr/local/bin/python-recom/cosinesimilarity`;
+    // $lists = `python /usr/local/bin/recommend-api/jaccard {$category}`;
+    // return $lists;
   }
 
-  // ユーザーの現在値から周辺のお店をレコメンドする
-  private function sim_distance()
+  /**
+   * 特徴の類似度を計算します
+   * @param  Array $tfid1
+   * @param  Array $tfid2
+   * @return FLOAT $resultNum
+   */
+  private function cosinesimilarity($tfid1, $tfid2)
   {
     // call python script
-    // echo `/usr/local/bin/python-recom/sim_distance`;
+    // echo `python /usr/local/bin/recommend-api/cosinesimilarity`;
   }
 
-  //
-  public function action_cfr()
+  /**
+   * ユーザーの現在値から周辺のお店をレコメンドします
+   * @param DOUBLE $lat
+   * @param DOUBLE $lon
+   */
+  private function sim_distance($lat, $lon)
+  {
+    
+    // call python script
+    // echo `python /usr/local/bin/recommend-api/sim_distance`;
+    $nearRestId = Model_Get::getNearRestId($lat, $lon);
+    print_r($nearRestId);
+
+  }
+
+  /**
+   * 協調フィルタリング
+   * @return 
+   */
+  public function cfr()
   {
     // call python script
-    // echo `/usr/local/bin/python-recom/cfr`;
+    // echo `python /usr/local/bin/recommend-api/cfr`;
 
     /**
      * 特徴の種類:    アイテムの特徴、個人属性特徴、コンテキスト特徴
@@ -299,12 +377,19 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
 
     // 店舗のデータ間の類似性を計算
 
+    echo 'cfr';
+
   }
 
-  public function action_cbfr()
+  /**
+   * コンテンツベース
+   * @return 
+   */
+  public function cbfr()
   {
     // call python script
-    // echo `/usr/local/bin/python-recom/cbfr`;
+    // echo `python /usr/local/bin/recommend-api/cbfr;
+    echo 'cbfr';
   }
 
   /**
@@ -315,12 +400,13 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
     Controller_V1_Post::create_token($uri=Uri::string(), $login_flag=1);
     $jwt = self::get_jwt();
     @$user_id = session::get('user_id');
-
+    $lat = Input::get('lat');
+    $lon = Input::get('lon');
     try {
         $categoryIdList = Model_Post::get_category_id($user_id);
         $categoryIdList = $this->checkRecommendExists($categoryIdList, $user_id, $jwt);
         $categoryIdList = $this->begineRecommendEngine($categoryIdList);
-        $data = $this->getRecommendRest($categoryIdList, $user_id);
+        $data = $this->getRecommendRest($categoryIdList, $user_id, $lat, $lon);
         $base_data = self::base_template($api_code = "SUCCESS",
           $api_message = "Successful API request",
           $login_flag  = 1,

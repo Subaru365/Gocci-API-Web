@@ -130,7 +130,8 @@ class Controller_V1_Post extends Controller_V1_Base
             if ($provider === "api.twitter.com") {
                 // twitter
                 $json = self::assignment_json($base_data);
-                header('Location: http://127.0.0.1:3000/#/setting/cooperation/?json='. $json); // test
+                // header('Location: http://127.0.0.1:3000/#/setting/cooperation/?json='. $json); // test
+                header("Location: " .self::CALLBACK_SETTING_URL.$json);
                 exit;
             }
 
