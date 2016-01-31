@@ -57,8 +57,8 @@ class Jwt
      */
     public static function decode($jwt, $key = null, $allowed_algs = array())
     {
-        error_log('JWT::decode内です');
-        error_log($jwt);
+        // error_log('JWT::decode内です');
+        // error_log($jwt);
         $tks = explode('.', $jwt);
         if (count($tks) != 3) {
             throw new UnexpectedValueException('Wrong number of segments');
@@ -110,29 +110,6 @@ class Jwt
                     'Cannot handle token prior to ' . date(DateTime::ISO8601, $payload->iat)
                 );
             }
-	    // error_log('例外処理突破');
-	    // この2行がバグの原因を引き起こしてる可能性が=>そうだった。
-	/*
-	    $obj = json_decode($payload); // $payloadをdecode(json化)すると$objの中身だけ変わるのではなくて、$payloadも再度decodeされているせいで、これ以降の処理でエラーになっているのでは
-	    $pay = $obj->exp;
-	*/
-	    // $pay = $payload->exp;
-            // Check if this token has expired.
-	   // error_log(gettype($payload)); // payloadがそもそもstring型
-
-	    // $pay = $payload->{'exp'}; // これだとexpを取得できない
-	    // $pay = '';
-	    // (object)$pay = $payload;
-
-	    // error_log('payの中身'); 
-	    // error_log($pay);
-
-	    //error_log(gettype($pay)); // string型
-/*	
-	    $payload = json_decode($payload); // payloadをdecodeしたらエラーでる(UnAuthorized)可能性
-	    $exp = $payload->exp;
-	    error_log($exp); //とれてる。
-*/
             if (isset($payload->exp) && (time() - self::$leeway) >= $payload->exp) { // 元の処理
            // if (isset($exp) && (time() - self::$leeway) >= $exp) {
 	    //if (isset($pay) && (time() - self::$leeway) >= $pay) {

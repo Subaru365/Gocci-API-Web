@@ -2,7 +2,7 @@
 /**
  * Post Model Class
  * @package    Gocci-Web
- * @version    3.0 <2015/10/20>
+ * @version    3.0 <2016/1/25>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2014-2015 Inase,inc.
@@ -42,15 +42,15 @@ class Model_Post extends Model
         ->where('post_id', '=', $post_id);
 
         $post_id = $query->execute()->as_array();
-        error_log('post_id');
-        error_log(print_r($post_id, true));
+        // error_log('post_id');
+        // error_log(print_r($post_id, true));
 
         if (isset($post_id[0]['post_id'])) {
             // exists!
             error_log('post_idは存在する');
         } else {
-             GocciAPI::error_json("Not Found");
-             exit;
+            GocciAPI::error_json("Not Found");
+            exit;
         }
     }
 
@@ -62,7 +62,6 @@ class Model_Post extends Model
     public static function get_user_id($post_id)
     {
         $query = DB::select('user_id')->from('posts')
-        // ->where('post_id', '=', 'post_id');
         ->where('post_id', '=', $post_id);
         $user_id = $query->execute()->as_array();
         return $user_id = $user_id[0]['user_id'];
@@ -107,8 +106,10 @@ class Model_Post extends Model
      */
     public static function get_data(
             $user_id, $sort_key,
-            $sort_id, $option = 0, $limit = 15)
+            $sort_id, $option = 0, $limit = 18)
     {
+        error_log('limit: ');
+        error_log($limit);
         $query = DB::select(
             'post_id', 'movie', 'thumbnail', 'category', 'tag', 'value',
             'memo', 'post_date', 'cheer_flag',
@@ -188,7 +189,6 @@ class Model_Post extends Model
         // 追加読み込み
         if ($option['call'] != 0) {
             $call_num = $option['call'] * $limit;
-            // echo $call_num;exit;
             $query->offset($call_num);
         }
 
@@ -234,8 +234,12 @@ class Model_Post extends Model
      */
     public static function get_recommend_posts($category_id,
             $user_id, $sort_key,
-            $sort_id, $option = 0, $limit = 15)
+            $sort_id, $option = 0, $limit = 18, $lat, $lon)
     {
+        if (empty($lat) && empty($lon)) {
+            $lat = "35.6820278"; // test
+            $lon = "139.67018059999998"; //test
+        }
         $query = DB::select(
             'post_id', 'movie', 'thumbnail', 'category', 'tag', 'value',
             'memo', 'post_date', 'cheer_flag',
@@ -251,7 +255,11 @@ class Model_Post extends Model
         ->on('post_category_id', '=', 'category_id')
         ->join('tags', 'LEFT OUTER')
         ->on('post_tag_id', '=', 'tag_id')
+        ->order_by(DB::expr("Glength(GeomFromText(
+          CONCAT('LineString(
+          {$lon} {$lat},', X(lon_lat),' ', Y(lon_lat),')')))"))
         ->where('post_status_flag', '1')
+        ->distinct(true)
         ->and_where('post_category_id', 'IN', $category_id)
         ->limit(18);
 
@@ -363,9 +371,6 @@ class Model_Post extends Model
      */
     public static function get_one_data($user_id, $limit = 1, $post_id)
     {
-        error_log('user_id');
-        error_log($user_id);
-
         $query = DB::select(
                 'post_id', 'movie', 'thumbnail', 'category', 'tag', 'value',
                 'memo', 'post_date', 'cheer_flag',
@@ -457,7 +462,8 @@ class Model_Post extends Model
             if (empty($value))
                 $value[0] = [];
         } catch (Exception $e) {
-            var_dump($e);exit;
+            var_dump($e);
+            exit;
         }
         $re_user = array();
         array_push ($value[0], $re_user);

@@ -56,7 +56,7 @@ class Controller_V1_Auth extends Controller_V1_Base
                 self::error_json("UnAuthorized");
             }
             $identity_id = Model_Cognito::get_identity_id($provider, $token);
-            $user_data   = Model_User::web_get_auth($identity_id);
+            $user_data   = Model_User::web_get_auth($identity_id, $token);
             $user_id     = $user_data['user_id'];
             $username    = $user_data['username'];
             $profile_img = $user_data['profile_img'];
@@ -147,8 +147,8 @@ class Controller_V1_Auth extends Controller_V1_Base
         );
 
         $json = self::assignment_json($base_data);
-        header('Location: http://127.0.0.1:3000/#/reg/name/?json=' .$json); // test
-        // header('Location: http://gocci.me/#/reg/name/?json=' .$json); // production
+        // header('Location: http://127.0.0.1:3000/#/reg/name/?json=' .$json); // test
+        header('Location: http://gocci.me/#/reg/name/?json=' .$json); // production
     }
 
    /**
