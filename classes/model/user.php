@@ -372,9 +372,8 @@ class Model_User extends Model
         ->where('identity_id', $identity_id);
         $user_data = $query->execute()->as_array();
 
-        error_log('queryを実行しました');
         if (empty($user_data)) {
-            error_log('登録されていないユーザです');
+            error_log('SNS連携していないアカウントもしくはアカウント登録されてません');
             error_log('登録されていないユーザー' . $identity_id);
             // Cognitoから消去
             Model_Cognito::delete_identity_id($identity_id);
@@ -382,7 +381,8 @@ class Model_User extends Model
 
             // 登録されていないアカウントだからregister処理をする。
             // header('Location: ' . Controller_V1_Base::CALLBACK_URL_TEST);
-            header('Location: ' . Controller_V1_Base::CALLBACK_URL);// production
+            Controller_V1_Base::error_json("SNS連携していないアカウントもしくはアカウント登録されてません");
+            // header('Location: ' . Controller_V1_Base::CALLBACK_URL_TEST);// production
             exit;
         } else {
             $user_data[0]['profile_img'] = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
