@@ -2,7 +2,7 @@
 /**
  * GET  API    リソースの取得
  * @package    Gocci-Web
- * @version    3.0 <2015/12/22>
+ * @version    3.0 <2016/1/25>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2014-2015 Inase,inc.
@@ -24,11 +24,9 @@ class Controller_V1_Get extends Controller_V1_Base
             $data      = self::decode($jwt);
             $user_data = session::get('data');
             $obj       = json_decode($user_data);
-
             if (empty($obj)) {
                 self::unauth($uri, $login_flag);
             }
-
             $user_id   = $obj->{'user_id'};
             session::set('user_id', $user_id);
             $username  = $obj->{'username'};
@@ -65,6 +63,9 @@ class Controller_V1_Get extends Controller_V1_Base
         }
     }
 
+    /**
+     * Twitter SNS連携/連携解除専用 Twitter Access_Token取得API
+     */
     public function action_twitter_token()
     {
 
@@ -78,7 +79,6 @@ class Controller_V1_Get extends Controller_V1_Base
             $login_flag  =  1, $data, $jwt = ""
         );
         $status = $this->output_json($base_data);
-        // self::get_twitter_access_token();
     }
 
     /**
@@ -244,13 +244,8 @@ class Controller_V1_Get extends Controller_V1_Base
     /**
      * User Page
      */
-    //public function action_user($target_username)
     public function action_user($target_userhash)
     {
-
-        error_log('target_userhash');
-        error_log($target_userhash);
-
         // GETのパラメータを$targeet_usernameから$user_hash_idに変える
         $uri = Uri::string();
         $jwt = @$_SERVER["HTTP_AUTHORIZATION"] ? @$_SERVER["HTTP_AUTHORIZATION"] : "";
@@ -263,13 +258,13 @@ class Controller_V1_Get extends Controller_V1_Base
             if (empty($obj)) {
                 $sort_key = 'user';
                 $limit    = 20;
-                // $data = self::user_template($target_username, $limit, $sort_key);
                 $data = self::user_template($target_userhash, $limit, $sort_key);
 
                 $base_data = self::base_template($api_code = "SUCESS", 
                     $api_message = "UnAuthorized", 
                     $login_flag  =  0, $data, $jwt
                 );
+                error_log('ここ1');
                 $status = $this->output_json($base_data);
                 exit;
             }
@@ -284,8 +279,8 @@ class Controller_V1_Get extends Controller_V1_Base
 
         $sort_key = 'user';
         $limit    = 20;
+        error_log('ここ2');
 
-        // $data = self::user_template($target_username, $limit, $sort_key);
         $data = self::user_template($target_userhash, $limit, $sort_key);
         $base_data = self::base_template($api_code = "SUCCESS", 
             $api_message = "Successful API request", 
@@ -363,7 +358,7 @@ class Controller_V1_Get extends Controller_V1_Base
         }
         $base_data = self::base_template($api_code = 0,
             $api_message = "SUCCESS",
-            $login_flag =  1,$data, $jwt
+            $login_flag =  1, $data, $jwt
         );
         $status    = $this->output_json($base_data);
     }
@@ -399,7 +394,7 @@ class Controller_V1_Get extends Controller_V1_Base
         $data           = Model_Follow::get_follower($user_id, $target_user_id);
         $base_data      = self::base_template($api_code = "SUCCESS",
             $api_message= "Successful API request",
-            $login_flag =  1,$data, $jwt
+            $login_flag =  1, $data, $jwt
         );
         $status         = $this->output_json($base_data);
     }
@@ -416,7 +411,7 @@ class Controller_V1_Get extends Controller_V1_Base
         $data= Model_Want::get_want($target_user_id);
         $base_data = self::base_template($api_code = "SUCCESS",
             $api_message = "Successful API request",
-            $login_flag  =  1,$data, $jwt
+            $login_flag  =  1, $data, $jwt
         );
         $status = $this->output_json($data);
     }
@@ -433,7 +428,7 @@ class Controller_V1_Get extends Controller_V1_Base
         $data = Model_Post::get_user_cheer($target_user_id);
         $base_data = self::base_template($api_code = "SUCCESS",
                     $api_message = "Successful API request",
-                    $login_flag =  1, $data, $jwt
+                    $login_flag  =  1, $data, $jwt
         );
         $status = $this->output_json($base_data);
     }
@@ -498,11 +493,9 @@ class Controller_V1_Get extends Controller_V1_Base
             } elseif (strpos($target, ' ') !== false) {
                 // 半角スペースを+に変換
                 $target = str_replace(' ', "+", $target);
-            //} else if (){
                 // 文字の最初と最後が+の場合、%2Bにエンコードする
             } else {
                 // 何もしない
-                // echo $target;
             }
             // 再度、$targetの先頭と末尾に「+」があれば、
 
@@ -514,9 +507,6 @@ class Controller_V1_Get extends Controller_V1_Base
                 $word[$i] = $word[$i];
                 echo $word[$i] . "\n";
             }
-
-
-
         } else {
             // Oops! Couldn't find it.
         }
@@ -524,11 +514,10 @@ class Controller_V1_Get extends Controller_V1_Base
 
     /**
      * Video api
+     * @param String $hash_id
      */
     public function action_video($hash_id)
     {
-        error_log('hash_id');
-        error_log($hash_id);
         $jwt = self::get_jwt();
         if (isset($jwt)) {
             $data      = self::decode($jwt);
@@ -536,11 +525,9 @@ class Controller_V1_Get extends Controller_V1_Base
             $obj       = json_decode($user_data);
 
             if (empty($obj)) {
-                error_log('now1');
                 // 未ログインユーザー
                 $jwt= "";
                 $user_id= 0;
-                error_log('video template呼び出し');
                 $data = self::video_template($user_id, $hash_id);
                 $base_data = self::base_template($api_code = "SUCESS",
                     $api_message = "UnAuthorized",
@@ -550,9 +537,7 @@ class Controller_V1_Get extends Controller_V1_Base
                 exit;
             }
         }
-        error_log('now2');
         $user_id   = $obj->{'user_id'};
-        error_log('video template呼び出し');
         $data = self::video_template($user_id, $hash_id);
 
         $base_data = self::base_template($api_code = "SUCCESS",
