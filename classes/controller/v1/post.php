@@ -68,7 +68,6 @@ class Controller_V1_Post extends Controller_V1_Base
         } else {
             error_log('jwt is not set.');
             self::unauth();
-            error_log('UnAuthorized Accsess..');
             exit;
         }
     }
@@ -312,7 +311,8 @@ class Controller_V1_Post extends Controller_V1_Base
                 // twitter
                 $json = self::assignment_json($base_data);
                 // header('Location: http://127.0.0.1:3000/#/setting/cooperation/?json='. $json); // test
-                header('Location: http://gocci.me/#/setting/cooperation/?json='.$json); // production
+                // header('Location: http://gocci.me/#/setting/cooperation/?json='.$json); // production
+                header("Location: " .self::CALLBACK_SETTING_URL.$json);
                 exit;
             }
             // error_log('Facebook jsonを返します unlink');

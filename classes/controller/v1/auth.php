@@ -147,8 +147,8 @@ class Controller_V1_Auth extends Controller_V1_Base
         );
 
         $json = self::assignment_json($base_data);
-        // header('Location: http://127.0.0.1:3000/#/reg/name/?json=' .$json); // test
-        header('Location: http://gocci.me/#/reg/name/?json=' .$json); // production
+        header('Location: http://127.0.0.1:3000/#/reg/name/?json=' .$json); // test
+        # header('Location: http://gocci.me/#/reg/name/?json=' .$json); // production
     }
 
    /**

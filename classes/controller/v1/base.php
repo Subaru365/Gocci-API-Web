@@ -63,16 +63,16 @@ class Controller_V1_Base extends Controller
     const API_SECRET                      = 'oOCDmf29DyJyfxOPAaj8tSASzSPAHNepvbxcfVLkA9dJw7inYa';
 
     # API URL
-    const CALLBACK_URL_TEST               = 'gocci.me/#/reg/name'; # 'http://127.0.0.1:3000/#/reg/name';
-    const CALLBACK_HOME_URL               = 'gocci.me/#/reg/name'; # 'http://127.0.0.1:3000/#/'; // 'gocci.me/#/reg/name';
-    const CALLBACK_REG_NAME_URL           = 'gocci.me/#/reg/name'  # 'http://127.0.0.1:3000/#/reg/name';// 'gocci.me/#/reg/name'
-    const CALLBACK_SETTING_URL            = 'http://gocci.me/#/setting/cooperation/?json='; // 'http://127.0.0.1:3000/#/setting/cooperation/?json=';
-    const TWITTER_SIGN_IN_URL             = 'https://web.api.gocci.me/v1/auth/twitter_sign_in/?token='; // 'http://test.web.api.gocci.me/v1/auth/twitter_sign_in/?token='; // 'https://web.api.gocci.me/v1/auth/twitter_sign_in/?token=';
+    const CALLBACK_URL_TEST               = 'http://127.0.0.1:3000/#/reg/name'; # 'gocci.me/#/reg/name'; 
+    const CALLBACK_HOME_URL               = 'http://127.0.0.1:3000/#/'; # 'gocci.me/#/reg/name'; # 'http://127.0.0.1:3000/#/';
+    const CALLBACK_REG_NAME_URL           = 'http://127.0.0.1:3000/#/reg/name'; # 'gocci.me/#/reg/name';  # // 'gocci.me/#/reg/name'
+    const CALLBACK_SETTING_URL            = 'http://127.0.0.1:3000/#/setting/cooperation/?json=';# 'http://gocci.me/#/setting/cooperation/?json=';
+    const TWITTER_SIGN_IN_URL             = 'http://test.web.api.gocci.me/v1/auth/twitter_sign_in/?token='; # 'https://web.api.gocci.me/v1/auth/twitter_sign_in/?token='; // 'https://web.api.gocci.me/v1/auth/twitter_sign_in/?token=';
 
-    const SNS_LINK                        = 'https://web.api.gocci.me/v1/post/sns_link/?provider='; // 'http://test.web.api.gocci.me/v1/post/sns_link/?provider=';
+    const SNS_LINK                        = 'http://test.web.api.gocci.me/v1/post/sns_link/?provider='; # 'https://web.api.gocci.me/v1/post/sns_link/?provider='; 
     // 'https://web.api.gocci.me/v1/post/sns_link/?provider=';
 
-    const SNS_UNLINK                      = 'https://web.api.gocci.me/v1/post/unlink/?provider='; // 'http://test.web.api.gocci.me/v1/post/unlink/?provider=';
+    const SNS_UNLINK                      = 'http://test.web.api.gocci.me/v1/post/unlink/?provider='; # 'https://web.api.gocci.me/v1/post/unlink/?provider=';
     // 'https://web.api.gocci.me/v1/post/unlink/?provider=';
 
     /**
@@ -1206,13 +1206,11 @@ class Controller_V1_Base extends Controller
           if ((int)$twitter_flag === (int)0){ // 連携
               error_log('連携します');
               error_log('twitter連携');
-              // header('Location: https://web.api.gocci.me/v1/post/sns_link/?provider='.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id);
               header("Location: " .self::SNS_LINK.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id);
           } else {
               // 連携解除
               error_log('連携解除します');
               error_log('twitter連携解除');
-              // header('Location: https://web.api.gocci.me/v1/post/unlink/?provider='.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id);
               header("Location: " .self::SNS_UNLINK.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id);
           }
           exit;
