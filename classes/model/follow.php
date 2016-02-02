@@ -53,10 +53,6 @@ class Model_Follow extends Model
         $follow_list = $query->execute()->as_array();
         $follow_num = count($follow_list);
 
-        error_log('follow_num: ');
-        error_log($follow_num);
-
-
         for ($i=0; $i < $follow_num; $i++) {
           $follow_list[$i]['profile_img'] = Model_Transcode::decode_profile_img($follow_list[$i]['profile_img']);
           $follow_list[$i]['follow_flag'] = self::get_flag($user_id, $follow_list[$i]['user_id']);
@@ -117,12 +113,8 @@ class Model_Follow extends Model
         */
         if ($result == true) {
             $follow_flag = 1;
-            error_log('get_flag: ');
-            error_log($follow_flag);
         } else {
             $follow_flag = 0;
-            error_log('get_flag: ');
-            error_log($follow_flag);
         }
         return $follow_flag;
     }
