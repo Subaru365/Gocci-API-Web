@@ -452,6 +452,9 @@ class Model_User extends Model
         $user_data[0]['want_num']     = Model_Want::want_num($target_user_id);
         $user_data[0]['follow_flag']  = Model_Follow::get_flag($user_id, $target_user_id);
 
+        error_log('flag: ');
+        error_log(print_r($user_data[0]['follow_flag'], true));
+
         return $user_data[0];
     }
 
