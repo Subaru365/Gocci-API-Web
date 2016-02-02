@@ -629,13 +629,26 @@ class Controller_V1_Base extends Controller
      * @param  String $sort_key
      * @return Array  $data
      */
-    public static function user_template($target_userhash, $limit, $sort_key) {
+    public static function user_template($target_userhash, $limit, $sort_key, $loginUserId) {
 
       if (ctype_digit($target_userhash)) { self::notid(); }
 
         $target_user_id = Hash_Id::get_user_hash($target_userhash);
 
-        $user_id        = Controller_V1_Check::check_user_id_exists($target_user_id);
+        Controller_V1_Check::check_user_id_exists($target_user_id);
+        $user_id = session::get('user_id');
+        /*
+        if (empty($loginUserId)) {
+            error_log('user_idにsessionを保持します');
+            $user_id = session::get('user_id');
+        } else {
+            error_log('user_idにloginUserIdを入れます');
+            $user_id = $loginUserId;
+            error_log($user_id);
+        }
+        */
+        // error_log('user_id in user_template:');
+        // error_log($user_id);
         $user_data      = Model_User::get_data($user_id, $target_user_id);
 
         $option   = [
