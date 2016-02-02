@@ -27,6 +27,26 @@ class Model_User extends Model
     }
 
     /**
+     * DBにuser_idが存在するかチェックします
+     * @param $user_id
+     */
+    public static function checkUserId($user_id)
+    {
+        $result = DB::select('user_id')->from('users')
+        ->where('user_id', '=', $user_id)
+        ->execute();
+
+        $num = count($result);
+        if ((int)$num === (int)0) {
+            // そのuser_idは存在しない
+            Controller_V1_Base::error_json('NotFoundUserID');
+            error_log('user_idが存在しません');
+            exit;
+        }
+        error_log('存在するuser_id');
+    }
+
+    /**
      * ユーザーIDとユーザー名チェック
      * @param String $username
      * @param String $password
