@@ -2,7 +2,7 @@
 /**
  * Auth Class
  * @package    Gocci-Web
- * @version    3.0 <2015/10/20>
+ * @version    3.0 <2016/2/02>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2014-2015 Inase,inc.
@@ -102,19 +102,13 @@ class Controller_V1_Auth extends Controller_V1_Base
     {
         error_log('twitter_sign_inが叩かれました');
         $provider = "api.twitter.com";
-        $token = input::get('token'); // test
-        // $token = input::post('token');
+        $token = input::get('token');
 
         // jwt
         if (empty($provider) && empty($token) || empty($provider) or empty($token) ) {
             error_log('paramがありません');
             self::error_json("UnAuthorized");
         }
-        error_log('provider:');
-        error_log($provider);
-        error_log('token');
-        error_log($token);
-
         $identity_id = Model_Cognito::get_identity_id($provider, $token);
         error_log('取得したidentity_id: ');
         error_log($identity_id);
@@ -147,8 +141,7 @@ class Controller_V1_Auth extends Controller_V1_Base
         );
 
         $json = self::assignment_json($base_data);
-        // header('Location: http://127.0.0.1:3000/#/reg/name/?json=' .$json); // test
-        header('Location: http://gocci.me/#/reg/name/?json=' .$json); // production
+        header('Location: ' . self::CALLBACK_REG_NAME_URL . '/?json=' . $json);
     }
 
    /**

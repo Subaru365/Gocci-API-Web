@@ -27,6 +27,26 @@ class Model_User extends Model
     }
 
     /**
+     * DBにuser_idが存在するかチェックします
+     * @param $user_id
+     */
+    public static function checkUserId($user_id)
+    {
+        $result = DB::select('user_id')->from('users')
+        ->where('user_id', '=', $user_id)
+        ->execute();
+
+        $num = count($result);
+        if ((int)$num === (int)0) {
+            // そのuser_idは存在しない
+            Controller_V1_Base::error_json('NotFoundUserID');
+            error_log('user_idが存在しません');
+            exit;
+        }
+        error_log('存在するuser_id');
+    }
+
+    /**
      * ユーザーIDとユーザー名チェック
      * @param String $username
      * @param String $password
@@ -121,8 +141,7 @@ class Model_User extends Model
     public static function format_name_check($username)
     {
         // 文字数チェック
-		if (preg_match('/^[^\p{Cc}]{1,20}$/u', $username)) {
-             // 4 - 20文字以内
+        if (preg_match('/^[^\p{Cc}]{1,20}$/u', $username)) {
              return $username;
         } else {
              return Controller_V1_Web_Base::error_json("ユーザーネームは4文字から20文字以内です");
@@ -178,7 +197,7 @@ class Model_User extends Model
         $result = $query->execute()->as_array();
 
         if (empty($result)) {
-            //profile_img該当なし
+            // profile_img該当なし
             Controller_V1_Mobile_Base::output_none();
             error_log("$profile_img" . 'は該当するものがありませんでした。');
             exit;
@@ -241,7 +260,7 @@ class Model_User extends Model
     }
     /**
      * twitter_flagを取得(1 or 0)
-     * @param Int $user_id
+     * @param  Int $user_id
      *
      * @return Int $result
      */
@@ -271,7 +290,7 @@ class Model_User extends Model
 
     /**
      * ユーザー名取得
-     * @param Int $user_id
+     * @param  Int $user_id
      *
      * @return Int $user_name
      */
@@ -286,7 +305,7 @@ class Model_User extends Model
 
      /**
      * ユーザー名、プロフィール画像取得
-     * @param Int $user_id
+     * @param  Int $user_id
      *
      * @return Array $user_data
      */
@@ -305,7 +324,7 @@ class Model_User extends Model
 
     /**
      * パスワード取得
-     * @param Int $user_id
+     * @param  Int $user_id
      *
      * @return String $password
      */
@@ -321,7 +340,7 @@ class Model_User extends Model
 
      /**
       * 通知数取得
-      * @param Int $user_id
+      * @param  Int $user_id
       *
       * @return String $password
       */
@@ -361,7 +380,7 @@ class Model_User extends Model
 
     /**
       * Web用 ログインユーザ情報取得
-      * @param Int $identity_id
+      * @param  Int $identity_id
       *
       * @return Array $user_data
       */
@@ -380,9 +399,7 @@ class Model_User extends Model
             error_log('CognitoからidentityIdを消去しました');
 
             // 登録されていないアカウントだからregister処理をする。
-            // header('Location: ' . Controller_V1_Base::CALLBACK_URL_TEST);
             Controller_V1_Base::error_json("SNS連携していないアカウントもしくはアカウント登録されてません");
-            // header('Location: ' . Controller_V1_Base::CALLBACK_URL_TEST);// production
             exit;
         } else {
             $user_data[0]['profile_img'] = Model_Transcode::decode_profile_img($user_data[0]['profile_img']);
@@ -408,8 +425,8 @@ class Model_User extends Model
 
     /**
      * ユーザーページ情報取得
-     * @param Int $user_id
-     * @param Int $target_user_id
+     * @param  Int $user_id
+     * @param  Int $target_user_id
      *
      * @return Array $user_data
      */
@@ -434,6 +451,9 @@ class Model_User extends Model
         $user_data[0]['cheer_num']    = Model_Post::get_user_cheer_num($target_user_id);
         $user_data[0]['want_num']     = Model_Want::want_num($target_user_id);
         $user_data[0]['follow_flag']  = Model_Follow::get_flag($user_id, $target_user_id);
+
+        error_log('flag: ');
+        error_log(print_r($user_data[0]['follow_flag'], true));
 
         return $user_data[0];
     }
@@ -488,9 +508,9 @@ class Model_User extends Model
 
     /**
      * sns inset
-     * @param String $username
-     * @param Int $identity_id
-     * @param String $profile_img
+     * @param  String $username
+     * @param  Int $identity_id
+     * @param  String $profile_img
      *
      * @return String $profile_img
      */
@@ -509,8 +529,8 @@ class Model_User extends Model
     }
 
     /**
-     * @param Int $user_id
-     * @param String $password
+     * @param  Int $user_id
+     * @param  String $password
      *
      * @return Array $query
      */
@@ -792,7 +812,7 @@ class Model_User extends Model
      * @param String $profile_img
      * @param Int $identity_id
      *
-     * @return $profile_img
+     * @return String $profile_img
      */
     public static function post_conversion(
         $user_id, $username, $profile_img, $identity_id)
@@ -813,12 +833,12 @@ class Model_User extends Model
     /**
      * ユーザーデータ更新
      *
-     * @param Int $user_id
-     * @param String $username
-     * @param String $profile_img
-     * @param Int $identity_id
+     * @param  Int $user_id
+     * @param  String $username
+     * @param  String $profile_img
+     * @param  Int $identity_id
      *
-     * @return $profile_img
+     * @return String $profile_img
      */
     public static function update_data(
         $user_id, $username, $profile_img, $identity_id)

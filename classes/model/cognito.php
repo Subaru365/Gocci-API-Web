@@ -2,7 +2,7 @@
 /**
  * Cognito Class
  * @package    Gocci-Web
- * @version    3.0 <2015/10/20>
+ * @version    3.0 <2016/2/01>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2014-2015 Inase,inc.
@@ -68,6 +68,7 @@ class Model_Cognito extends Model
             ]);
             error_log('returnします');
         } catch (Exception $e) {
+            $result = "";
             error_log($e);
         }
         return $result;
@@ -92,7 +93,6 @@ class Model_Cognito extends Model
             'region'  => 'us-east-1',
             'version' => 'latest'
         ]);
-        error_log('getOpenIdTokenForDeveloperIdentity呼びます');
 
         try {
             // IdentityPoolId
@@ -103,10 +103,8 @@ class Model_Cognito extends Model
                     "$provider" => "$token",
                 ],
             ]);
-            // error_log(print_r($result, true));
-            error_log('resutlに値を格納しました');
         } catch (Exception $e) {
-            // self::delete_sns($user_id, $identity_id, $provider, $token);
+            $result = "";
             error_log($e);
         }
         error_log('returnします');
@@ -173,7 +171,7 @@ class Model_Cognito extends Model
                 'LoginsToRemove' => ["$provider"],
             ]);
         } catch (Exception $e) {
-            error_log('Errorが発生');
+            error_log('Error: ');
             error_log($e);
         }
     }
@@ -187,17 +185,12 @@ class Model_Cognito extends Model
      */
     public static function get_identity_id($provider, $token)
     {
-        error_log('Cognito Model内1');
         $IdentityPoolId = Config::get('_cognito.IdentityPoolId');
-        error_log('IdentityPoolId: ');
-        error_log($IdentityPoolId);
-        error_log('Cognito Model内2');
+
         $client = new CognitoIdentityClient([
             'region'  => 'us-east-1',
             'version' => 'latest'
         ]);
-
-        error_log('Cognito Model内3');
 
         try {
 
@@ -207,8 +200,6 @@ class Model_Cognito extends Model
                     "$provider" => "$token",
                 ],
             ]);
-
-            error_log('identity_idを返します');
             return $result['IdentityId'];
         } catch (Exception $e) {
             error_log('例外が発生しました...');

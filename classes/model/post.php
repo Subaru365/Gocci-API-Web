@@ -237,8 +237,10 @@ class Model_Post extends Model
             $sort_id, $option = 0, $limit = 18, $lat, $lon)
     {
         if (empty($lat) && empty($lon)) {
-            $lat = "35.6820278"; // test
-            $lon = "139.67018059999998"; //test
+            $lat = "35.658844";
+            $lon = "139.696193";
+            // $lat = "35.6820278"; // test
+            // $lon = "139.67018059999998"; //test
         }
         $query = DB::select(
             'post_id', 'movie', 'thumbnail', 'category', 'tag', 'value',

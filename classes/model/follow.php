@@ -103,7 +103,14 @@ class Model_Follow extends Model
         ->and_where('follow_p_user_id', "$target_user_id");
 
         $result = $query->execute()->as_array();
+        /*
+        error_log('user_id');
+        error_log($user_id);
 
+        error_log('target_user_id');
+        error_log($target_user_id);
+        error_log(print_r($result, true));
+        */
         if ($result == true) {
             $follow_flag = 1;
         } else {

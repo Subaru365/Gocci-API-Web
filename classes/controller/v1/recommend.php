@@ -2,7 +2,7 @@
 /**
  * recommend
  * @package    Gocci-Web
- * @version    3.0 <2016/1/13>
+ * @version    3.0 <2016/2/01>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2014-2015 Inase,inc.
@@ -393,15 +393,14 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
   }
 
   /**
-   * ログインしているユーザーにお店をレコメンドします
+   * レストランページのレコメンドを開始するメソッドです
+   * @param Int    $user_id
+   * @param String $jwt
+   * @param DOUBLE $lat
+   * @param DOUBLE $lon
    */
-  public function action_rest()
+  private function startRecommend($user_id, $jwt, $lat, $lon)
   {
-    Controller_V1_Post::create_token($uri=Uri::string(), $login_flag=1);
-    $jwt = self::get_jwt();
-    @$user_id = session::get('user_id');
-    $lat = Input::get('lat');
-    $lon = Input::get('lon');
     try {
         $categoryIdList = Model_Post::get_category_id($user_id);
         $categoryIdList = $this->checkRecommendExists($categoryIdList, $user_id, $jwt);
@@ -416,6 +415,20 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
       error_log($e);
       exit;
     }
-  } # end action_rest
+  }
 
-} # class end
+  /**
+   * ユーザーにお店をレコメンドします
+   */
+  public function action_rest()
+  {
+    Controller_V1_Post::create_token($uri=Uri::string(), $login_flag=1);
+    $jwt = self::get_jwt();
+    @$user_id = session::get('user_id');
+    Model_User::checkUserId($user_id);
+    $lat = Input::get('lat');
+    $lon = Input::get('lon');
+    $this->startRecommend($user_id, $jwt, $lat, $lon);
+  }
+
+} # Recommend Class end

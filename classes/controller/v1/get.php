@@ -2,7 +2,7 @@
 /**
  * GET  API    リソースの取得
  * @package    Gocci-Web
- * @version    3.0 <2016/1/25>
+ * @version    3.0 <2016/2/01>
  * @author     bitbuket ta_kazu Kazunori Tani <k-tani@inase-inc.jp>
  * @license    MIT License
  * @copyright  2014-2015 Inase,inc.
@@ -87,8 +87,6 @@ class Controller_V1_Get extends Controller_V1_Base
     public function action_timeline()
     {
         $jwt = self::get_jwt();
-        error_log('timelineのjwt: ');
-        error_log($jwt);
         $obj = self::getJwtObject($jwt);
         if (empty($obj)) {
             $data = self::timeline_template();
@@ -216,7 +214,6 @@ class Controller_V1_Get extends Controller_V1_Base
                 $jwt= "";
                 $user_id= 0;
                 $data = self::rest_template($user_id, $rest_id, $sort_key);
-                error_log(print_r($data, true));
                 $base_data = self::base_template($api_code = "SUCCESS", 
                     $api_message = "UnAuthorized", $login_flag, $data, $jwt
                 );
@@ -233,7 +230,6 @@ class Controller_V1_Get extends Controller_V1_Base
         $rest_id= Input::get('rest_id');
         $jwt    = self::check_jwtExp($exp);
         $data   = self::rest_template($user_id, $rest_id, $sort_key);
-
         $base_data = self::base_template($api_code = "SUCCESS", 
             $api_message = "Successful API request", 
             $login_flag =  1, $data, $jwt
@@ -258,30 +254,31 @@ class Controller_V1_Get extends Controller_V1_Base
             if (empty($obj)) {
                 $sort_key = 'user';
                 $limit    = 20;
-                $data = self::user_template($target_userhash, $limit, $sort_key);
+                $data = self::user_template($target_userhash, $limit, $sort_key, $loginUserId = "");
 
                 $base_data = self::base_template($api_code = "SUCESS", 
                     $api_message = "UnAuthorized", 
                     $login_flag  =  0, $data, $jwt
                 );
-                error_log('ここ1');
                 $status = $this->output_json($base_data);
                 exit;
             }
         }
         $user_id  = $obj->{'user_id'};
         session::set('user_id', $user_id);
+
         $username = $obj->{'username'};
         session::set('username', $username);
+        $loginUserId = $user_id;
+
         $exp      = $obj->{'exp'};
         session::set('exp', $exp);
         $jwt = self::check_jwtExp($exp);
 
         $sort_key = 'user';
         $limit    = 20;
-        error_log('ここ2');
 
-        $data = self::user_template($target_userhash, $limit, $sort_key);
+        $data = self::user_template($target_userhash, $limit, $sort_key, $loginUserId = "");
         $base_data = self::base_template($api_code = "SUCCESS", 
             $api_message = "Successful API request", 
             $login_flag =  1, $data, $jwt
@@ -485,7 +482,6 @@ class Controller_V1_Get extends Controller_V1_Base
             // 「渋谷 ラーメン」と検索した場合、空白(スペース)を+に変換
             // -> 渋谷+ラーメン
             // URI: gocci.me/search/渋谷 ラーメン
-
             if (strpos($target, '　') !== false) {
                 // 全角スペースを+に変換
                 // ※vineは全角スペースの場合何もしない
@@ -498,7 +494,6 @@ class Controller_V1_Get extends Controller_V1_Base
                 // 何もしない
             }
             // 再度、$targetの先頭と末尾に「+」があれば、
-
             // $replace_targetの中に含まれる単語を分割
             $word = explode("+", $target);
             $count = count($word);

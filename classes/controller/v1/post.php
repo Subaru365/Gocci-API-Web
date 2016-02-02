@@ -68,7 +68,6 @@ class Controller_V1_Post extends Controller_V1_Base
         } else {
             error_log('jwt is not set.');
             self::unauth();
-            error_log('UnAuthorized Accsess..');
             exit;
         }
     }
@@ -312,7 +311,8 @@ class Controller_V1_Post extends Controller_V1_Base
                 // twitter
                 $json = self::assignment_json($base_data);
                 // header('Location: http://127.0.0.1:3000/#/setting/cooperation/?json='. $json); // test
-                header('Location: http://gocci.me/#/setting/cooperation/?json='.$json); // production
+                // header('Location: http://gocci.me/#/setting/cooperation/?json='.$json); // production
+                header("Location: " .self::CALLBACK_SETTING_URL.$json);
                 exit;
             }
             // error_log('Facebook jsonを返します unlink');
@@ -406,26 +406,34 @@ class Controller_V1_Post extends Controller_V1_Base
         $user_id        = session::get('user_id');
         $follow_user_id = Input::post('target_user_id');
 
+        error_log('user_id');
+        error_log($user_id);
+
+        error_log('follow_user_id');
+        error_log($follow_user_id);
+
         try {
             // 既にユーザーをフォローしていないかチェックする
             Model_Follow::check_follow($user_id, $follow_user_id);
-            $result = Model_Follow::post_follow($user_id, $follow_user_id);
-
+            $data = Model_Follow::post_follow($user_id, $follow_user_id);
+            // $data = Model_Follow::get_follower($user_id, $follow_user_id);
+            error_log(print_r($data, true));
             $record = Model_Notice::notice_insert(
                 $keyword, $user_id, $follow_user_id
             );
-
+            /*
             $data = [
                 "message" => "フォローしました"
             ];
+            */
 
             $base_data = self::base_template($api_code = "SUCCESS", 
                 $api_message = "Successful API request", 
                 $login_flag  = 1, $data, $jwt = ""
             );
             $status = $this->output_json($base_data);
-            error_log('json output!');
-            error_log(print_r($status, true));
+            $json = self::assignment_json();
+            error_log(print_r($json, true));
         } catch(\Database_Exception $e) {
             self::failed($keyword);
             error_log($e);

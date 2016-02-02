@@ -63,16 +63,24 @@ class Controller_V1_Base extends Controller
     const API_SECRET                      = 'oOCDmf29DyJyfxOPAaj8tSASzSPAHNepvbxcfVLkA9dJw7inYa';
 
     # API URL
+<<<<<<< HEAD
     const CALLBACK_URL_TEST               = 'gocci.me/#/reg/name'; # 'http://127.0.0.1:3000/#/reg/name';
     const CALLBACK_HOME_URL               = 'gocci.me/#/reg/name'; # 'http://127.0.0.1:3000/#/'; // 'gocci.me/#/reg/name';
     const CALLBACK_REG_NAME_URL           = 'gocci.me/#/reg/name';  # 'http://127.0.0.1:3000/#/reg/name';// 'gocci.me/#/reg/name'
     const CALLBACK_SETTING_URL            = 'http://gocci.me/#/setting/cooperation/?json='; // 'http://127.0.0.1:3000/#/setting/cooperation/?json=';
     const TWITTER_SIGN_IN_URL             = 'https://web.api.gocci.me/v1/auth/twitter_sign_in/?token='; // 'http://test.web.api.gocci.me/v1/auth/twitter_sign_in/?token='; // 'https://web.api.gocci.me/v1/auth/twitter_sign_in/?token=';
+=======
+    const CALLBACK_URL_TEST               = 'gocci.me/#/reg/name'; # 'http://127.0.0.1:3000/#/reg/name'; # 'gocci.me/#/reg/name'; 
+    const CALLBACK_HOME_URL               = 'gocci.me/#/reg/name'; # 'http://127.0.0.1:3000/#/'; # 'gocci.me/#/reg/name'; # 'http://127.0.0.1:3000/#/';
+    const CALLBACK_REG_NAME_URL           = 'gocci.me/#/reg/name'; # 'http://127.0.0.1:3000/#/reg/name'; # 'gocci.me/#/reg/name';  # // 'gocci.me/#/reg/name'
+    const CALLBACK_SETTING_URL            = 'http://gocci.me/#/setting/cooperation/?json='; # 'http://127.0.0.1:3000/#/setting/cooperation/?json=';# 'http://gocci.me/#/setting/cooperation/?json=';
+    const TWITTER_SIGN_IN_URL             = 'https://web.api.gocci.me/v1/auth/twitter_sign_in/?token=';# 'http://test.web.api.gocci.me/v1/auth/twitter_sign_in/?token='; # 'https://web.api.gocci.me/v1/auth/twitter_sign_in/?token='; // 'https://web.api.gocci.me/v1/auth/twitter_sign_in/?token=';
+>>>>>>> dev
 
-    const SNS_LINK                        = 'https://web.api.gocci.me/v1/post/sns_link/?provider='; // 'http://test.web.api.gocci.me/v1/post/sns_link/?provider=';
+    const SNS_LINK                        = 'https://web.api.gocci.me/v1/post/sns_link/?provider='; # 'http://test.web.api.gocci.me/v1/post/sns_link/?provider='; # 'https://web.api.gocci.me/v1/post/sns_link/?provider='; 
     // 'https://web.api.gocci.me/v1/post/sns_link/?provider=';
 
-    const SNS_UNLINK                      = 'https://web.api.gocci.me/v1/post/unlink/?provider='; // 'http://test.web.api.gocci.me/v1/post/unlink/?provider=';
+    const SNS_UNLINK                      = 'https://web.api.gocci.me/v1/post/unlink/?provider='; #'http://test.web.api.gocci.me/v1/post/unlink/?provider='; # 'https://web.api.gocci.me/v1/post/unlink/?provider=';
     // 'https://web.api.gocci.me/v1/post/unlink/?provider=';
 
     /**
@@ -319,11 +327,8 @@ class Controller_V1_Base extends Controller
     {
         $key = 'i_am_a_secret_key';
         try {
-          // error_log('decode Methodに渡された引数: ');
-          // error_log($jwt);
             $decoded = JWT::decode($jwt, $key, array('HS256'));
             $decoded = session::set('data', $decoded);
-            // error_log('decodedの中身を確認 by base decode');
         } catch (Exception $e){
             error_log($e);
             $decoded = "";
@@ -335,7 +340,7 @@ class Controller_V1_Base extends Controller
      * ENCODE (JWT CREATE)
      * @param  Int    $user_id
      * @param  String $username
-     * @return string $jwt
+     * @return String $jwt
      */
     public static function encode($user_id, $username)
     {
@@ -365,10 +370,8 @@ class Controller_V1_Base extends Controller
     {
         $jwt = "";
         if (isset($exp) && (time() >= $exp)) {
-            // error_log('=jwtの有効期限切れ=');
             self::expired_token("Expired Token");
         } else {
-            // error_log('有効期限内です. jwtを更新します');
             $jwt = self::_refresh_token();
         }
         return $jwt;
@@ -386,7 +389,6 @@ class Controller_V1_Base extends Controller
 
         Session::delete('exp');
         $jwt = self::encode($user_id, $username);
-        // error_log('-*-*-*-*JWT was update!-*-*-*');
         return $jwt;
     }
 
@@ -635,13 +637,26 @@ class Controller_V1_Base extends Controller
      * @param  String $sort_key
      * @return Array  $data
      */
-    public static function user_template($target_userhash, $limit, $sort_key) {
+    public static function user_template($target_userhash, $limit, $sort_key, $loginUserId) {
 
       if (ctype_digit($target_userhash)) { self::notid(); }
 
         $target_user_id = Hash_Id::get_user_hash($target_userhash);
 
-        $user_id        = Controller_V1_Check::check_user_id_exists($target_user_id);
+        Controller_V1_Check::check_user_id_exists($target_user_id);
+        $user_id = session::get('user_id');
+        /*
+        if (empty($loginUserId)) {
+            error_log('user_idにsessionを保持します');
+            $user_id = session::get('user_id');
+        } else {
+            error_log('user_idにloginUserIdを入れます');
+            $user_id = $loginUserId;
+            error_log($user_id);
+        }
+        */
+        // error_log('user_id in user_template:');
+        // error_log($user_id);
         $user_data      = Model_User::get_data($user_id, $target_user_id);
 
         $option   = [
@@ -688,7 +703,6 @@ class Controller_V1_Base extends Controller
         $post_data = Model_Post::get_data($user_id, $sort_key, $rest_id);
 
         $loop_num = count($post_data);
-
         for ($i = 0; $i<$loop_num; $i++) {
             $post_id = $post_data[$i]['post_id'];
             $Comment_data = Model_Comment::get_data($post_id);
@@ -1056,7 +1070,6 @@ class Controller_V1_Base extends Controller
         if ($tof) {
           // twitter認証ボタンクリック完了後
           error_log('reg/nameへリダイレクトします');
-          // header('Location: ' . self::CALLBACK_URL);
           header('Location: ' . self::CALLBACK_REG_NAME_URL);
           exit;
         }
@@ -1206,13 +1219,11 @@ class Controller_V1_Base extends Controller
           if ((int)$twitter_flag === (int)0){ // 連携
               error_log('連携します');
               error_log('twitter連携');
-              // header('Location: https://web.api.gocci.me/v1/post/sns_link/?provider='.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id);
               header("Location: " .self::SNS_LINK.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id);
           } else {
               // 連携解除
               error_log('連携解除します');
               error_log('twitter連携解除');
-              // header('Location: https://web.api.gocci.me/v1/post/unlink/?provider='.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id);
               header("Location: " .self::SNS_UNLINK.$provider.'&token='.$token.'&profile_img='.$image.'&user_id='.$user_id);
           }
           exit;
