@@ -319,11 +319,8 @@ class Controller_V1_Base extends Controller
     {
         $key = 'i_am_a_secret_key';
         try {
-          // error_log('decode Methodに渡された引数: ');
-          // error_log($jwt);
             $decoded = JWT::decode($jwt, $key, array('HS256'));
             $decoded = session::set('data', $decoded);
-            // error_log('decodedの中身を確認 by base decode');
         } catch (Exception $e){
             error_log($e);
             $decoded = "";
@@ -335,7 +332,7 @@ class Controller_V1_Base extends Controller
      * ENCODE (JWT CREATE)
      * @param  Int    $user_id
      * @param  String $username
-     * @return string $jwt
+     * @return String $jwt
      */
     public static function encode($user_id, $username)
     {
@@ -365,10 +362,8 @@ class Controller_V1_Base extends Controller
     {
         $jwt = "";
         if (isset($exp) && (time() >= $exp)) {
-            // error_log('=jwtの有効期限切れ=');
             self::expired_token("Expired Token");
         } else {
-            // error_log('有効期限内です. jwtを更新します');
             $jwt = self::_refresh_token();
         }
         return $jwt;
@@ -386,7 +381,6 @@ class Controller_V1_Base extends Controller
 
         Session::delete('exp');
         $jwt = self::encode($user_id, $username);
-        // error_log('-*-*-*-*JWT was update!-*-*-*');
         return $jwt;
     }
 
@@ -688,7 +682,6 @@ class Controller_V1_Base extends Controller
         $post_data = Model_Post::get_data($user_id, $sort_key, $rest_id);
 
         $loop_num = count($post_data);
-
         for ($i = 0; $i<$loop_num; $i++) {
             $post_id = $post_data[$i]['post_id'];
             $Comment_data = Model_Comment::get_data($post_id);
@@ -1056,7 +1049,6 @@ class Controller_V1_Base extends Controller
         if ($tof) {
           // twitter認証ボタンクリック完了後
           error_log('reg/nameへリダイレクトします');
-          // header('Location: ' . self::CALLBACK_URL);
           header('Location: ' . self::CALLBACK_REG_NAME_URL);
           exit;
         }
