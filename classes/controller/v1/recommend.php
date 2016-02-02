@@ -425,6 +425,7 @@ class Controller_V1_Recommend extends Controller_V1_Base implements Collaborativ
     Controller_V1_Post::create_token($uri=Uri::string(), $login_flag=1);
     $jwt = self::get_jwt();
     @$user_id = session::get('user_id');
+    Model_User::checkUserId($user_id);
     $lat = Input::get('lat');
     $lon = Input::get('lon');
     $this->startRecommend($user_id, $jwt, $lat, $lon);
