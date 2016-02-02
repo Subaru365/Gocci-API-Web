@@ -185,17 +185,12 @@ class Model_Cognito extends Model
      */
     public static function get_identity_id($provider, $token)
     {
-        error_log('Cognito Model内1');
         $IdentityPoolId = Config::get('_cognito.IdentityPoolId');
-        error_log('IdentityPoolId: ');
-        error_log($IdentityPoolId);
-        error_log('Cognito Model内2');
+
         $client = new CognitoIdentityClient([
             'region'  => 'us-east-1',
             'version' => 'latest'
         ]);
-
-        error_log('Cognito Model内3');
 
         try {
 
@@ -205,8 +200,6 @@ class Model_Cognito extends Model
                     "$provider" => "$token",
                 ],
             ]);
-
-            error_log('identity_idを返します');
             return $result['IdentityId'];
         } catch (Exception $e) {
             error_log('例外が発生しました...');
