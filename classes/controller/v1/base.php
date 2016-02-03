@@ -1019,8 +1019,9 @@ class Controller_V1_Base extends Controller
                             // すでに登録してある。
                             error_log('既にそのtwitterアカウントは登録されていましたので、twitter_sign_inします in base');
                             $token = $judge;
+                            error_log($token);
                             // header("Location: " .Controller_V1_Base::TWITTER_SIGN_IN_URL.$token); // Error Undefined class constant TWITTER_SIGN_IN_URL
-                            header("Location https://web.api.gocci.me/v1/auth/twitter_sign_in/?token=".$token);
+                            header("Location: https://web.api.gocci.me/v1/auth/twitter_sign_in/?token=".$token);
                             exit;
                         }
                     }
