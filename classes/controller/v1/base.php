@@ -632,18 +632,6 @@ class Controller_V1_Base extends Controller
 
         Controller_V1_Check::check_user_id_exists($target_user_id);
         $user_id = session::get('user_id');
-        /*
-        if (empty($loginUserId)) {
-            error_log('user_idにsessionを保持します');
-            $user_id = session::get('user_id');
-        } else {
-            error_log('user_idにloginUserIdを入れます');
-            $user_id = $loginUserId;
-            error_log($user_id);
-        }
-        */
-        // error_log('user_id in user_template:');
-        // error_log($user_id);
         $user_data      = Model_User::get_data($user_id, $target_user_id);
 
         $option   = [
@@ -1030,10 +1018,10 @@ class Controller_V1_Base extends Controller
                             error_log('insert done');
                         } else {
                             // すでに登録してある。
-                            error_log('既にそのtwitterアカウントは登録されていましたので、処理を終了します');
+                            error_log('既にそのtwitterアカウントは登録されていましたので、twitter_sign_inします in base');
                             $token = $judge;
-                            // header('Location: http://test.web.api.gocci.me/v1/auth/twitter_sign_in/?token=' .$token);
-                            header("Location: " .self::TWITTER_SIGN_IN_URL.$token);
+                            // header("Location: " .Controller_V1_Base::TWITTER_SIGN_IN_URL.$token); // Error Undefined class constant TWITTER_SIGN_IN_URL
+                            header("Location https://web.api.gocci.me/v1/auth/twitter_sign_in/?token=".$token);
                             exit;
                         }
                     }
