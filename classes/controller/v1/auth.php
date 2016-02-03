@@ -103,10 +103,11 @@ class Controller_V1_Auth extends Controller_V1_Base
         error_log('twitter_sign_inが叩かれました');
         $provider = "api.twitter.com";
         $token = input::get('token');
+        error_log($token);
 
         // jwt
-        if (empty($provider) && empty($token) || empty($provider) or empty($token) ) {
-            error_log('paramがありません');
+        if (empty($token)) {
+            error_log('param(token)がありません');
             self::error_json("UnAuthorized");
         }
         $identity_id = Model_Cognito::get_identity_id($provider, $token);
@@ -123,6 +124,7 @@ class Controller_V1_Auth extends Controller_V1_Base
         $badge_num   = $user_data['badge_num'];
         $jwt = self::encode($user_id, $username);
 
+        error_log('1');
         Model_Login::post_login($user_id);
         $user_hash_id = Hash_Id::create_user_hash($user_id);
         $data = [
@@ -133,7 +135,7 @@ class Controller_V1_Auth extends Controller_V1_Base
             "identity_id" => $identity_id,
             "badge_num"   => $badge_num,
         ];
-
+        error_log('2');
         $base_data = self::base_template($api_code = "SUCCESS",
             $api_message = "Successful API request",
             $login_flag  =  1,
@@ -141,6 +143,7 @@ class Controller_V1_Auth extends Controller_V1_Base
         );
 
         $json = self::assignment_json($base_data);
+        error_log('リダイレクトします');
         header('Location: ' . self::CALLBACK_REG_NAME_URL . '/?json=' . $json);
     }
 
