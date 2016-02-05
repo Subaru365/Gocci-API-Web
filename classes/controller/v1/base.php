@@ -13,6 +13,14 @@ header('Access-Control-Allow-Methods:POST, GET, OPTIONS, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization, X-Requested-With');
 header('X-Content-Type-Options: nosniff');
 
+define('CALLBACK_GOCCI_URL', 'http://127.0.0.1:3000/#/reg/name');
+define('CALLBACK_GOCCI_HOME_URL', 'http://127.0.0.1:3000/#/');
+define('CALLBACK_GOCCI_REG_NAME_URL', 'http://127.0.0.1:3000/#/reg/name');
+define('CALLBACK_SETTING_GOCCI_URL', 'http://127.0.0.1:3000/#/setting/cooperation/?json=');
+define('CALLBACK_TWITTER_SIGN_IN_URL' , 'http://test.web.api.gocci.me/v1/auth/twitter_sign_in/?token=');
+define('GOCCI_SNS_LINK', 'http://test.web.api.gocci.me/v1/post/sns_link/?provider=');
+define('GOCCI_SNS_UNLINK', 'http://test.web.api.gocci.me/v1/post/unlink/?provider=');
+
 class Controller_V1_Base extends Controller
 {
     /**
@@ -63,13 +71,13 @@ class Controller_V1_Base extends Controller
     const API_SECRET                      = 'oOCDmf29DyJyfxOPAaj8tSASzSPAHNepvbxcfVLkA9dJw7inYa';
 
     # API URL
-    const CALLBACK_URL_TEST               = 'http://gocci.me/#/reg/name'; # 'http://127.0.0.1:3000/#/reg/name';
-    const CALLBACK_HOME_URL               = 'http://gocci.me/#/reg/name'; # 'http://127.0.0.1:3000/#/';
-    const CALLBACK_REG_NAME_URL           = 'http://gocci.me/#/reg/name'; # 'http://127.0.0.1:3000/#/reg/name';
-    const CALLBACK_SETTING_URL            = 'http://gocci.me/#/setting/cooperation/?json='; # 'http://127.0.0.1:3000/#/setting/cooperation/?json=';
-    const TWITTER_SIGN_IN_URL             = 'https://web.api.gocci.me/v1/auth/twitter_sign_in/?token=';# 'http://test.web.api.gocci.me/v1/auth/twitter_sign_in/?token='; # 'https://web.api.gocci.me/v1/auth/twitter_sign_in/?token='; // 'https://web.api.gocci.me/v1/auth/twitter_sign_in/?token=';
-    const SNS_LINK                        = 'https://web.api.gocci.me/v1/post/sns_link/?provider='; # 'http://test.web.api.gocci.me/v1/post/sns_link/?provider=';
-    const SNS_UNLINK                      = 'https://web.api.gocci.me/v1/post/unlink/?provider='; #'http://test.web.api.gocci.me/v1/post/unlink/?provider=';
+    const CALLBACK_URL_TEST               = 'http://127.0.0.1:3000/#/reg/name'; #'http://gocci.me/#/reg/name'; # 
+    const CALLBACK_HOME_URL               = 'http://127.0.0.1:3000/#/'; # 'http://gocci.me/#/reg/name';
+    const CALLBACK_REG_NAME_URL           = 'http://127.0.0.1:3000/#/reg/name'; # 'http://gocci.me/#/reg/name';
+    const CALLBACK_SETTING_URL            = 'http://127.0.0.1:3000/#/setting/cooperation/?json='; # 'http://gocci.me/#/setting/cooperation/?json='; # 
+    const TWITTER_SIGN_IN_URL             = 'http://test.web.api.gocci.me/v1/auth/twitter_sign_in/?token='; # 'https://web.api.gocci.me/v1/auth/twitter_sign_in/?token=';
+    const SNS_LINK                        = 'http://test.web.api.gocci.me/v1/post/sns_link/?provider='; # 'https://web.api.gocci.me/v1/post/sns_link/?provider=';
+    const SNS_UNLINK                      = 'http://test.web.api.gocci.me/v1/post/unlink/?provider='; # 'https://web.api.gocci.me/v1/post/unlink/?provider=';
     /**
      * @param String $token
      */
