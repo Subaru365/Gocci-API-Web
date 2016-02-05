@@ -75,4 +75,20 @@ class Model_Gochi extends Model
 
         return $post_user_id[0]['post_user_id'];
     }
+
+    public static function post_ungochi($user_id, $post_id)
+    {
+        $query = DB::delete('gochis')
+        ->where('gochi_user_id', '=', $user_id)
+        ->and_where('gochi_post_id', $post_id)
+        ->execute();
+
+        $query = DB::select('post_user_id')
+        ->from ('posts')
+        ->where('post_id', "$post_id");
+
+        $post_user_id = $query->execute()->as_array();
+
+        return $post_user_id[0]['post_user_id'];
+    }
 }

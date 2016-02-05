@@ -361,6 +361,36 @@ class Controller_V1_Post extends Controller_V1_Base
         }
     }
 
+    public function action_ungochi()
+    {
+        self::create_token($uri=Uri::string(), $login_flag=0);
+        $keyword = 'gochi';
+        $user_id = session::get('user_id');
+        $post_id = Input::post('post_id');
+
+        try {
+            $target_user_id = Model_Gochi::post_ungochi(
+                $user_id, $post_id
+            );
+            if ((int)$user_id !== (int)$target_user_id) {
+                $record = Model_Notice::notice_insert(
+                    $keyword, $user_id, $target_user_id, $post_id
+                );
+            }
+            $data = [
+                "message" => "gochiを取り消しました。"
+            ];
+            $base_data = self::base_template($api_code = "SUCCESS", 
+                $api_message = "Successful API request", 
+                $login_flag = 1, $data, $jwt = ""
+            );
+            $status = $this->output_json($base_data);
+        } catch (\Database_Exception $e) {
+            self::failed($keyword);
+            error_log($e);
+        }
+    }
+
     /**
      * comment
      */
