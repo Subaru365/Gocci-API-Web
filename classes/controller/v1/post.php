@@ -604,6 +604,45 @@ class Controller_V1_Post extends Controller_V1_Base
     }
 
     /**
+     * ネットワーク環境の問題などにより投稿失敗してしまった場合に使用するAPI
+     */
+    public function action_uploadmovie()
+    {
+      self::create_token($uri=Uri::string(), $login_flag=0);
+      $keyword        = '動画をアップロード';
+      $user_id        = session::get('user_id');
+      // $user_id = 1000;
+      $movie = @$_FILES["movie"]["tmp_name"];
+      // $movie = @$_FILES["movie"];
+      error_log("movie: ");
+      error_log($movie);
+      error_log(print_r($movie, true));
+      exit;
+      try {
+        if (empty($movie)) {
+            if (isset($_FILES["movie"]['error']) === false) {
+                error_log('false');
+                throw new \RuntimeException('アップロードするファイルが指定されていないか、アップロード時にエラーが発生しています。');
+            }
+            Controller_V1_Base::error_json('Movie is empty.');
+        } else {
+            Model_S3::post_movie($user_id, $movie);
+        }
+      } catch (Exception $e) {
+        error_log($e);
+        exit;
+      }
+      $data = [
+          "message" => "動画をアップロードしました"
+      ];
+      $base_data = self::base_template($api_code = "SUCCESS",
+                $api_message = "Successful API request",
+                $login_flag  = 1, $data, $jwt = ""
+            );
+      $status = $this->output_json($base_data);
+    }
+
+    /**
      * Profile Edit
      */
     public function action_update_profile()

@@ -655,8 +655,6 @@ class Controller_V1_Base extends Controller
             $target_user_id, $option, $limit
         );
         $cnt = count($post_data);
-        error_log($cnt);
-
         for ($i = 0; $i<count($post_data); $i++) {
             $post_id = $post_data[$i]['post_id'];
             $Comment_data  = Model_Comment::get_data($post_id);
